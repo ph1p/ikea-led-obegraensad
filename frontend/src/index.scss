@@ -1,0 +1,41 @@
+* {
+  box-sizing: border-box;
+}
+:root {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+
+  color-scheme: light dark;
+  background-color: #9b8d82;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  height: 100%;
+  width: 100%;
+
+  --multiplier: 1.5;
+}
+body,
+#app {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  padding: 25px;
+}
+
+@media (max-width: 470px) {
+  body,
+  #app {
+    padding: 0;
+    margin: 0;
+  }
+}

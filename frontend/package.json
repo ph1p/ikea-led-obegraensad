@@ -1,0 +1,23 @@
+{
+  "name": "frontend2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && node compress.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "preact": "^10.11.2"
+  },
+  "devDependencies": {
+    "@gfx/zopfli": "^1.0.15",
+    "@preact/preset-vite": "^2.4.0",
+    "sass": "^1.56.0",
+    "terser": "^5.15.1",
+    "typescript": "^4.8.4",
+    "vite": "^3.2.2",
+    "vite-plugin-singlefile": "^0.12.3"
+  }
+}
