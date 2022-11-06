@@ -16,10 +16,11 @@ enum MODE
   GAMEOFLIFE,
 };
 
-extern MODE current_mode;
+extern MODE currentMode;
 extern Thread modeThread;
 
 void setMode(MODE mode);
+void setModeByString(String mode);
 void initModes();
 
 #endif

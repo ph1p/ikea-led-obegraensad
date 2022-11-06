@@ -9,6 +9,33 @@
 
 AsyncWebSocket ws("/ws");
 
+void sendStateAndInfo(AsyncWebSocketClient *client)
+{
+  DynamicJsonDocument jsonDocument(6144);
+  for (int j = 0; j < sizeof(render_buffer); j++)
+  {
+    jsonDocument["data"][j] = render_buffer[j];
+  }
+  jsonDocument["mode"] = currentMode;
+  jsonDocument["event"] = "info";
+
+  String output;
+  serializeJson(jsonDocument, output);
+  client->text(output);
+}
+
+void sendModeToAllClients()
+{
+  DynamicJsonDocument jsonDocument(6144);
+
+  jsonDocument["event"] = "mode";
+  jsonDocument["mode"] = currentMode;
+
+  String output;
+  serializeJson(jsonDocument, output);
+  ws.textAll(output);
+}
+
 void onWsEvent(
     AsyncWebSocket *server,
     AsyncWebSocketClient *client,
@@ -17,6 +44,11 @@ void onWsEvent(
     uint8_t *data,
     size_t len)
 {
+  if (type == WS_EVT_CONNECT)
+  {
+    sendStateAndInfo(client);
+  }
+
   if (type == WS_EVT_DATA)
   {
     AwsFrameInfo *info = (AwsFrameInfo *)arg;
@@ -24,8 +56,8 @@ void onWsEvent(
     {
       data[len] = 0;
 
-      StaticJsonDocument<4132> ws_request;
-      DeserializationError error = deserializeJson(ws_request, data);
+      StaticJsonDocument<6144> wsRequest;
+      DeserializationError error = deserializeJson(wsRequest, data);
 
       if (error)
       {
@@ -35,63 +67,36 @@ void onWsEvent(
       }
       else
       {
-        const char *event = ws_request["event"];
+        const char *event = wsRequest["event"];
 
         if (!strcmp(event, "mode"))
         {
-          if (ws_request["m"] == "stars")
-          {
-            setMode(STARS);
-          }
-          else if (ws_request["m"] == "lines")
-          {
-            setMode(LINES);
-          }
-          else if (ws_request["m"] == "breakout")
-          {
-            setMode(BREAKOUT);
-          }
-          else if (ws_request["m"] == "gameoflife")
-          {
-            setMode(GAMEOFLIFE);
-          }
-          else
-          {
-            setMode(NONE);
-          }
+          setModeByString(wsRequest["mode"]);
+          sendModeToAllClients();
         }
-        if (current_mode == NONE)
-        {
-          if (!strcmp(event, "init"))
-          {
-            DynamicJsonDocument doc(4132);
-            JsonObject root = doc.to<JsonObject>();
-            JsonArray d = root.createNestedArray("data");
-            for (int j = 0; j < sizeof(render_buffer); j++)
-            {
-              d.add(render_buffer[j]);
-            }
-            root["event"] = "init";
 
-            char buffer[4132];
-            size_t len = serializeJson(root, buffer);
-            client->text(buffer);
-          }
-          else if (!strcmp(event, "clear"))
+        if (!strcmp(event, "info"))
+        {
+          sendStateAndInfo(client);
+        }
+
+        if (currentMode == NONE)
+        {
+          if (!strcmp(event, "clear"))
           {
             memset(render_buffer, 0, sizeof(render_buffer));
             renderScreen(render_buffer);
           }
           else if (!strcmp(event, "led"))
           {
-            setPixelAtIndex(render_buffer, ws_request["i"], ws_request["s"]);
+            setPixelAtIndex(render_buffer, wsRequest["index"], wsRequest["status"]);
             renderScreen(render_buffer);
           }
           else if (!strcmp(event, "screen"))
           {
             for (int i = 0; i < ROWS * COLS; i++)
             {
-              render_buffer[i] = ws_request["d"][i];
+              render_buffer[i] = wsRequest["data"][i];
             }
             renderScreen(render_buffer);
           }

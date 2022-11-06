@@ -1,15 +1,17 @@
 #include "mode/mode.h"
 #include "mode/breakout.h"
 #include "mode/gameoflife.h"
+#include "mode/stars.h"
+#include "mode/lines.h"
 #include "led.h"
 
-MODE current_mode;
+MODE currentMode;
 Thread modeThread = Thread();
 uint8_t mode_buffer[ROWS * COLS];
 
 void setMode(MODE mode)
 {
-  current_mode = mode;
+  currentMode = mode;
   if (mode == NONE)
   {
     delay(20);
@@ -18,67 +20,27 @@ void setMode(MODE mode)
   memset(mode_buffer, 0, sizeof(mode_buffer));
 }
 
-void drawLine(uint8_t line, bool isHorizontal)
+void setModeByString(String mode)
 {
-  for (uint8_t i = 0; i < 16; i++)
+  if (mode == "stars")
   {
-    mode_buffer[!isHorizontal ? line * 16 + i : i * 16 + line] = 1;
+    setMode(STARS);
   }
-};
-
-void stars()
-{
-  while (current_mode == STARS)
+  else if (mode == "lines")
   {
-    for (int row = 0; row < ROWS; row++)
-    {
-      for (int col = 0; col < COLS; col++)
-      {
-        int ra = random(20);
-
-        if (ra > 1)
-        {
-          ra = 0;
-        }
-        mode_buffer[row * 16 + col] = ra;
-      }
-    }
-    renderScreen(mode_buffer);
-
-    delay(400);
+    setMode(LINES);
   }
-}
-
-void lines()
-{
-  int count = 0;
-  bool forwards = true;
-  while (current_mode == LINES)
+  else if (mode == "breakout")
   {
-    drawLine(count, true);
-    drawLine(count, false);
-    renderScreen(mode_buffer);
-    memset(mode_buffer, 0, sizeof(mode_buffer));
-
-    if (count == 15 && forwards)
-    {
-      forwards = false;
-    }
-    if (count == 0 && !forwards)
-    {
-      forwards = true;
-      count = 0;
-    }
-
-    if (forwards)
-    {
-      count++;
-    }
-    else
-    {
-      count--;
-    }
-    delay(60);
+    setMode(BREAKOUT);
+  }
+  else if (mode == "gameoflife")
+  {
+    setMode(GAMEOFLIFE);
+  }
+  else
+  {
+    setMode(NONE);
   }
 }
 
@@ -86,7 +48,7 @@ void breakout()
 {
   bool init = false;
 
-  while (current_mode == BREAKOUT)
+  while (currentMode == BREAKOUT)
   {
     if (!init)
     {
@@ -101,7 +63,7 @@ void gameoflife()
 {
   bool init = false;
 
-  while (current_mode == GAMEOFLIFE)
+  while (currentMode == GAMEOFLIFE)
   {
     if (!init)
     {
@@ -114,7 +76,7 @@ void gameoflife()
 
 void modes()
 {
-  if (current_mode != UPDATE)
+  if (currentMode != UPDATE)
   {
     stars();
     lines();

@@ -3,6 +3,8 @@
 
 #include <ESPAsyncWebServer.h>
 
+void sendStateAndInfo(AsyncWebSocketClient *client);
+void sendModeToAllClients();
 void initWebsocketServer(AsyncWebServer &server);
 void cleanUpClients();
 

@@ -7,8 +7,10 @@
 extern uint8_t render_buffer[ROWS * COLS];
 
 void clearScreenAndBuffer(uint8_t buffer[ROWS * COLS]);
+void drawLine(uint8_t buffer[ROWS * COLS], uint8_t line, bool isHorizontal);
 void setPixel(uint8_t buffer[ROWS * COLS], uint8_t x, uint8_t y, uint8_t value);
 void setPixelAtIndex(uint8_t buffer[ROWS * COLS], uint8_t index, uint8_t value);
+int findPosition(uint8_t count);
 void renderScreen(uint8_t data[ROWS * COLS]);
 
 #endif

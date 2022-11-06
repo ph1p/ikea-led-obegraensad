@@ -59,6 +59,14 @@ int findPosition(uint8_t count)
   return wantedpos;
 }
 
+void drawLine(uint8_t buffer[ROWS * COLS], uint8_t line, bool isHorizontal)
+{
+  for (uint8_t i = 0; i < 16; i++)
+  {
+    buffer[!isHorizontal ? line * 16 + i : i * 16 + line] = 1;
+  }
+};
+
 void renderScreen(uint8_t data[ROWS * COLS])
 {
   for (int row = 0; row < ROWS; row++)
@@ -66,14 +74,11 @@ void renderScreen(uint8_t data[ROWS * COLS])
     for (int col = 0; col < COLS; col++)
     {
       digitalWrite(PIN_DATA, data[findPosition(row * 16 + col)]);
-      delayMicroseconds(1);
       digitalWrite(PIN_CLOCK, HIGH);
-      delayMicroseconds(1);
       digitalWrite(PIN_CLOCK, LOW);
     }
   }
 
   digitalWrite(PIN_LATCH, HIGH);
-  delayMicroseconds(1);
   digitalWrite(PIN_LATCH, LOW);
 }

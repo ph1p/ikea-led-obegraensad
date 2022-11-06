@@ -2,11 +2,12 @@ import { useEffect, useState } from 'preact/hooks';
 import './app.scss';
 
 enum MODE {
-  BREAKOUT = 'breakout',
-  STARS = 'stars',
-  LINES = 'lines',
-  GAME_OF_LIFE = 'gameoflife',
   NONE = '',
+  STARS = 'stars',
+  UPDATE = 'update',
+  LINES = 'lines',
+  BREAKOUT = 'breakout',
+  GAMEOFLIFE = 'gameoflife',
 }
 
 export function App() {
@@ -18,16 +19,16 @@ export function App() {
   const [mode, setMode] = useState<MODE>(MODE.NONE);
 
   const setLed = (index: number) => {
+    const status = removeLed ? 0 : 1;
     setActiveLeds((state: any) => ({
       ...state,
-      [index]: removeLed ? 0 : 1,
+      [index]: status,
     }));
-
     socket?.send(
       JSON.stringify({
         event: 'led',
-        i: index,
-        s: removeLed ? 0 : 1,
+        index: index,
+        status: status,
       })
     );
   };
@@ -58,7 +59,7 @@ export function App() {
           const imgData = pxctx?.getImageData(0, 0, wh, wh);
           if (imgData) {
             let index = 0;
-            const arr = [];
+            const data = [];
             const active: Record<number, number> = {};
             for (var i = 0; i < imgData.data.length; i += 4) {
               const isActive =
@@ -66,7 +67,7 @@ export function App() {
                 383
                   ? 1
                   : 0;
-              arr.push(isActive);
+              data.push(isActive);
               active[index] = isActive;
 
               index++;
@@ -77,7 +78,7 @@ export function App() {
             socket?.send(
               JSON.stringify({
                 event: 'screen',
-                d: arr,
+                data,
               })
             );
           }
@@ -98,11 +99,10 @@ export function App() {
   };
 
   const sendMode = (mode: MODE) => {
-    setMode(mode);
     socket?.send(
       JSON.stringify({
         event: 'mode',
-        m: mode,
+        mode,
       })
     );
   };
@@ -114,16 +114,6 @@ export function App() {
       })
     );
   };
-
-  useEffect(() => {
-    if (socket) {
-      socket.send(
-        JSON.stringify({
-          event: 'init',
-        })
-      );
-    }
-  }, [socket]);
 
   useEffect(() => {
     function connect() {
@@ -139,21 +129,23 @@ export function App() {
         setSocket(ws);
 
         ws.onmessage = (event) => {
-          if (event.data instanceof Blob) {
-            // is blob
-          } else {
-            try {
-              const json = JSON.parse(event.data);
+          try {
+            const json = JSON.parse(event.data);
 
-              if (json.event === 'init') {
-                json.data.forEach((v: number, i: number) => {
-                  if (v) {
-                    setLed(i);
-                  }
-                });
-              }
-            } catch {}
-          }
+            switch (json.event) {
+              case 'mode':
+                setMode(Object.values(MODE)[json.mode as number]);
+                break;
+              case 'info':
+                setMode(Object.values(MODE)[json.mode as number]);
+
+                const active: Record<number, number> = {};
+                json.data.forEach((v: number, i: number) => (active[i] = v));
+                setActiveLeds(active);
+
+                break;
+            }
+          } catch {}
         };
 
         ws.onclose = () => {
@@ -172,6 +164,7 @@ export function App() {
     connect();
 
     () => {
+      socket?.close();
       setSocket(undefined);
     };
   }, []);
@@ -227,7 +220,7 @@ export function App() {
             <button onClick={() => sendMode(MODE.STARS)}>stars</button>
             <button onClick={() => sendMode(MODE.LINES)}>lines</button>
             <button onClick={() => sendMode(MODE.BREAKOUT)}>breakout</button>
-            <button onClick={() => sendMode(MODE.GAME_OF_LIFE)}>
+            <button onClick={() => sendMode(MODE.GAMEOFLIFE)}>
               game of life
             </button>
           </div>
