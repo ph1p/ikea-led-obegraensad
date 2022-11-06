@@ -1,7 +1,6 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <cstdlib>
-#include <AsyncElegantOTA.h>
 
 #include "ws.h"
 #include "webgui.h"
@@ -10,65 +9,12 @@
 #include "storage.h"
 #include "mode/mode.h"
 #include "secrets.h"
+#include "ota.h"
 
 const char *ssid = WIFI_SSID;
 const char *password = WIFI_PASSWORD;
-const char *hostName = LED_HOSTNAME;
-
-const char *otaUser = OTA_USERNAME;
-const char *otaPassword = OTA_PASSWORD;
 
 AsyncWebServer server(80);
-
-void onOTAStart()
-{
-  setMode(UPDATE);
-
-  uint8_t up[ROWS * COLS] PROGMEM = {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-  renderScreen(up);
-}
-
-void onOTAEnd()
-{
-  uint8_t ready[ROWS * COLS] PROGMEM = {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-  renderScreen(ready);
-  delay(1000);
-  renderScreen(render_buffer);
-}
 
 void initWebServer()
 {
@@ -76,14 +22,9 @@ void initWebServer()
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Credentials", "true");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 
-  initWebsocketServer(server);
   server.on("/", HTTP_GET, startGui);
   server.onNotFound([](AsyncWebServerRequest *request)
                     { request->send(404, "text/plain", "Page not found!"); });
-
-  AsyncElegantOTA.begin(&server, otaUser, otaPassword);
-  AsyncElegantOTA.onOTAStart(onOTAStart);
-  AsyncElegantOTA.onOTAEnd(onOTAEnd);
 
   server.begin();
 }
@@ -104,9 +45,8 @@ void setup()
   renderScreen(render_buffer);
   initModes();
 
-  Serial.setDebugOutput(true);
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.softAP(hostName);
+  // wifi
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   if (WiFi.waitForConnectResult() != WL_CONNECTED)
   {
@@ -116,6 +56,9 @@ void setup()
     WiFi.begin(ssid, password);
   }
 
+  // server
+  initOTA(server);
+  initWebsocketServer(server);
   initWebServer();
 }
 

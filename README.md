@@ -15,6 +15,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Wifi Control
 - Web-GUI
 - Live Drawing
+- Load an image
 - Modes
   - Game of life
   - Breakout
@@ -49,7 +50,6 @@ Above is a microcontroller. You have to remove it, because it contains the stand
 - Set all variables
   - Wifi
   - Upload
-  - Hostname
   - Your Pins
 
 ### Create `include/secrets.h`
@@ -57,7 +57,6 @@ Above is a microcontroller. You have to remove it, because it contains the stand
 ```cpp
 #define WIFI_SSID "";
 #define WIFI_PASSWORD "";
-#define LED_HOSTNAME "led-wall";
 
 #define OTA_USERNAME "admin";
 #define OTA_PASSWORD "";

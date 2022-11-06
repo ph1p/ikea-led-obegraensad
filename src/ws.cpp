@@ -17,13 +17,7 @@ void onWsEvent(
     uint8_t *data,
     size_t len)
 {
-  if (type == WS_EVT_CONNECT)
-  {
-  }
-  else if (type == WS_EVT_DISCONNECT)
-  {
-  }
-  else if (type == WS_EVT_DATA)
+  if (type == WS_EVT_DATA)
   {
     AwsFrameInfo *info = (AwsFrameInfo *)arg;
     if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
@@ -66,7 +60,6 @@ void onWsEvent(
             setMode(NONE);
           }
         }
-
         if (current_mode == NONE)
         {
           if (!strcmp(event, "init"))
@@ -92,6 +85,14 @@ void onWsEvent(
           else if (!strcmp(event, "led"))
           {
             setPixelAtIndex(render_buffer, ws_request["i"], ws_request["s"]);
+            renderScreen(render_buffer);
+          }
+          else if (!strcmp(event, "screen"))
+          {
+            for (int i = 0; i < ROWS * COLS; i++)
+            {
+              render_buffer[i] = ws_request["d"][i];
+            }
             renderScreen(render_buffer);
           }
           else if (!strcmp(event, "persist"))

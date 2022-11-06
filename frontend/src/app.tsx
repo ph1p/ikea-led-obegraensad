@@ -32,6 +32,60 @@ export function App() {
     );
   };
 
+  const loadImage = () => {
+    const wh = 16;
+    const fp = document.createElement('input');
+    fp.type = 'file';
+    fp.click();
+    fp.onchange = (e: Event) => {
+      if (!e.target) return;
+      const file = (e.target as HTMLInputElement).files?.[0];
+      const reader = new FileReader();
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+      reader.onload = () => {
+        const uimg = new Image() as any;
+        uimg.src = reader.result;
+        uimg.width = wh;
+        uimg.height = wh;
+        uimg.onload = () => {
+          const pxc = document.createElement('canvas');
+          const pxctx = pxc.getContext('2d');
+          pxc.width = wh;
+          pxc.height = wh;
+          pxctx?.drawImage(uimg, 0, 0, wh, wh);
+          const imgData = pxctx?.getImageData(0, 0, wh, wh);
+          if (imgData) {
+            let index = 0;
+            const arr = [];
+            const active: Record<number, number> = {};
+            for (var i = 0; i < imgData.data.length; i += 4) {
+              const isActive =
+                imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2] <=
+                383
+                  ? 1
+                  : 0;
+              arr.push(isActive);
+              active[index] = isActive;
+
+              index++;
+            }
+
+            setActiveLeds(active);
+
+            socket?.send(
+              JSON.stringify({
+                event: 'screen',
+                d: arr,
+              })
+            );
+          }
+        };
+      };
+    };
+  };
+
   const clear = () => {
     setActiveLeds({});
     setRemoveLed(false);
@@ -181,6 +235,7 @@ export function App() {
           <div>
             {mode === MODE.NONE ? (
               <>
+                <button onClick={() => loadImage()}>load image</button>
                 <button onClick={clear}>clear</button>
                 <button onClick={persist}>persist</button>
                 <button onClick={() => setRemoveLed(!removeLed)}>
