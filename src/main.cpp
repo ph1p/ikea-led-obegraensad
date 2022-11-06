@@ -38,6 +38,8 @@ void setup()
   pinMode(PIN_DATA, OUTPUT);
   pinMode(PIN_ENABLE, OUTPUT);
 
+  clearScreenAndBuffer(render_buffer);
+
   // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
   storage.begin("led-wall", false);
   storage.getBytes("data", render_buffer, sizeof(render_buffer));
