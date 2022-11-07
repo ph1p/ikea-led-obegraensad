@@ -4,18 +4,19 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
 > 👉 This software is in an early stage and is my first of its kind. If you have anything to improve, I would be very happy about a PR or an issue :)
 
-> ⚠ Use it at your own risk! The device yould be damaged! ⚠
+> ⚠ Use this code and instrctions at your own risk! The device could be damaged! ⚠
 
 ![ezgif-3-2019fca7a4](https://user-images.githubusercontent.com/15351728/200184222-a590575d-983d-4ab8-a322-c6bcf433d364.gif)
 
 ## Features
 
-- Persist drawing
+- Persist your drawing
+- Live Drawing
 - OTA Update
 - Wifi Control
 - Web-GUI
-- Live Drawing
 - Load an image
+- Switch mode by pressing the button
 - Modes
   - Game of life
   - Breakout
