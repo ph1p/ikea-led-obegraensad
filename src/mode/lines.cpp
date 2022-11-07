@@ -28,5 +28,5 @@ void lines()
   {
     count--;
   }
-  delay(60);
+  delay(120);
 }

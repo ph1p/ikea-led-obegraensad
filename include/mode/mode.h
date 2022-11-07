@@ -10,7 +10,6 @@
 #include "led.h"
 #include "signs.h"
 
-
 extern uint8_t mode_buffer[ROWS * COLS];
 
 enum MODE
@@ -20,6 +19,7 @@ enum MODE
   LINES,
   BREAKOUT,
   GAMEOFLIFE,
+  // SYSTEM
   UPDATE,
   LOADING,
 };
