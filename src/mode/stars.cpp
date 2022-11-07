@@ -2,11 +2,11 @@
 
 void stars()
 {
-  for (int row = 0; row < ROWS; row++)
+  for (uint8_t row = 0; row < ROWS; row++)
   {
-    for (int col = 0; col < COLS; col++)
+    for (uint8_t col = 0; col < COLS; col++)
     {
-      int ra = random(20);
+      uint8_t ra = random(20);
 
       if (ra > 1)
       {

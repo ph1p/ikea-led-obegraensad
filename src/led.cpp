@@ -45,7 +45,7 @@ void setPixel(uint8_t buffer[ROWS * COLS], uint8_t x, uint8_t y, uint8_t value)
 int findPosition(uint8_t count)
 {
   uint8_t wantedpos = 0;
-  for (int i = 0; i < sizeof(positions); i++)
+  for (uint8_t i = 0; i < sizeof(positions); i++)
   {
     if (count == positions[i])
     {
@@ -67,9 +67,9 @@ void drawLine(uint8_t buffer[ROWS * COLS], uint8_t line, bool isHorizontal)
 
 void renderScreen(uint8_t data[ROWS * COLS])
 {
-  for (int row = 0; row < ROWS; row++)
+  for (uint8_t row = 0; row < ROWS; row++)
   {
-    for (int col = 0; col < COLS; col++)
+    for (uint8_t col = 0; col < COLS; col++)
     {
       digitalWrite(PIN_DATA, data[findPosition(row * 16 + col)]);
       delayMicroseconds(10);
