@@ -1,6 +1,4 @@
-#include <Arduino.h>
 #include "led.h"
-#include "constants.h"
 
 uint8_t render_buffer[ROWS * COLS];
 
@@ -74,11 +72,14 @@ void renderScreen(uint8_t data[ROWS * COLS])
     for (int col = 0; col < COLS; col++)
     {
       digitalWrite(PIN_DATA, data[findPosition(row * 16 + col)]);
+      delayMicroseconds(10);
       digitalWrite(PIN_CLOCK, HIGH);
+      delayMicroseconds(10);
       digitalWrite(PIN_CLOCK, LOW);
     }
   }
 
   digitalWrite(PIN_LATCH, HIGH);
+  delayMicroseconds(10);
   digitalWrite(PIN_LATCH, LOW);
 }

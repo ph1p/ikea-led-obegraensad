@@ -1,6 +1,10 @@
 #ifndef BREAKOUT_HEADER_H
 #define BREAKOUT_HEADER_H
 
+#include <Arduino.h>
+#include "mode/mode.h"
+#include "led.h"
+
 #define DEBOUNCE_TIME 100 // in ms
 #define X_MAX 16
 #define Y_MAX 16

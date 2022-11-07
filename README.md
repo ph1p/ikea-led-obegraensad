@@ -55,11 +55,11 @@ Above is a microcontroller. You have to remove it, because it contains the stand
 ### Create `include/secrets.h`
 
 ```cpp
-#define WIFI_SSID "";
-#define WIFI_PASSWORD "";
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
 
-#define OTA_USERNAME "admin";
-#define OTA_PASSWORD "";
+#define OTA_USERNAME "admin"
+#define OTA_PASSWORD ""
 ```
 
 also set username and password inside `upload.py`, if you want to use OTA Updates.
@@ -77,6 +77,9 @@ EN -> GPIO26
 IN -> GPIO27
 CLK -> GPIO14
 CLA -> GPIO12
+
+BUTTON ONE END -> GPIO16
+BUTTON OTHER END -> GND
 ```
 
 <img src="https://user-images.githubusercontent.com/15351728/200183467-e304677f-8fee-4130-a3ad-c4942ed3a4bd.JPG" width="60%" />

@@ -5,6 +5,7 @@
 #define PIN_DATA 27
 #define PIN_CLOCK 14
 #define PIN_LATCH 12
+#define PIN_BUTTON 16
 
 #define DISABLE_SERVER false
 

@@ -1,8 +1,5 @@
 // copyright https://elektro.turanis.de/html/prj104/index.html
-#include <Arduino.h>
 #include "mode/breakout.h"
-#include "mode/mode.h"
-#include "led.h"
 
 struct Coords
 {
@@ -37,12 +34,15 @@ void initBricks()
   destroyedBricks = 0;
   for (byte i = 0; i < BRICK_AMOUNT; i++)
   {
-    bricks[i].x = i % X_MAX;
-    bricks[i].y = i / X_MAX;
-    setPixelAtIndex(mode_buffer, bricks[i].y * X_MAX + bricks[i].x, LED_TYPE_ON);
-    delay(25);
+    if (currentMode == BREAKOUT)
+    {
+      bricks[i].x = i % X_MAX;
+      bricks[i].y = i / X_MAX;
+      setPixelAtIndex(mode_buffer, bricks[i].y * X_MAX + bricks[i].x, LED_TYPE_ON);
 
-    renderScreen(mode_buffer);
+      delay(25);
+      renderScreen(mode_buffer);
+    }
   }
 }
 
@@ -117,7 +117,6 @@ void updateBall()
   ball.y += ballMovement[1];
 
   setPixelAtIndex(mode_buffer, ball.y * X_MAX + ball.x, LED_TYPE_ON);
-
   renderScreen(mode_buffer);
 }
 
@@ -209,7 +208,6 @@ void updatePaddle()
     }
   }
   renderScreen(mode_buffer);
-  delay(300);
 }
 
 void endGame()
@@ -230,6 +228,8 @@ void breakoutSetup()
 
 void breakoutLoop()
 {
+  Serial.println("round");
+
   switch (gameState)
   {
   case GAME_STATE_LEVEL:
@@ -238,6 +238,7 @@ void breakoutLoop()
   case GAME_STATE_RUNNING:
     updateBall();
     updatePaddle();
+    delay(300);
     break;
   case GAME_STATE_END:
     initGame();

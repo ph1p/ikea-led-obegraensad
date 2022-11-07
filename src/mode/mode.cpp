@@ -1,23 +1,61 @@
 #include "mode/mode.h"
-#include "mode/breakout.h"
-#include "mode/gameoflife.h"
-#include "mode/stars.h"
-#include "mode/lines.h"
-#include "led.h"
 
 MODE currentMode;
-Thread modeThread = Thread();
+
 uint8_t mode_buffer[ROWS * COLS];
+
+int buttonModeCount = -1;
+
+int modeButtonState = 0;
+int lastModeButtonState = 0;
 
 void setMode(MODE mode)
 {
-  currentMode = mode;
+  if (mode == currentMode || currentMode == LOADING)
+    return;
+
+  currentMode = LOADING;
+
+  clearScreenAndBuffer(mode_buffer);
+  memset(mode_buffer, 0, sizeof(mode_buffer));
+  delay(10);
+
+  if (mode == STARS)
+  {
+    renderScreen(digitOne);
+    buttonModeCount = 0;
+  }
+  else if (mode == LINES)
+  {
+    renderScreen(digitTwo);
+    buttonModeCount = 1;
+  }
+  else if (mode == BREAKOUT)
+  {
+    breakoutSetup();
+    renderScreen(digitThree);
+    buttonModeCount = 2;
+  }
+  else if (mode == GAMEOFLIFE)
+  {
+    gameOfLifeSetup();
+    renderScreen(digitFour);
+    buttonModeCount = 3;
+  }
+
   if (mode == NONE)
   {
-    delay(20);
+    renderScreen(digitZero);
+    delay(1000);
     renderScreen(render_buffer);
+    buttonModeCount = 4;
   }
-  memset(mode_buffer, 0, sizeof(mode_buffer));
+  else
+  {
+    delay(1000);
+  }
+
+  currentMode = mode;
 }
 
 void setModeByString(String mode)
@@ -44,49 +82,76 @@ void setModeByString(String mode)
   }
 }
 
-void breakout()
+void listenOnButtonToChangeMode()
 {
-  bool init = false;
-
-  while (currentMode == BREAKOUT)
+  modeButtonState = digitalRead(PIN_BUTTON);
+  if (modeButtonState != lastModeButtonState && modeButtonState == HIGH)
   {
-    if (!init)
+    if (buttonModeCount < 0)
     {
-      init = true;
-      breakoutSetup();
+      buttonModeCount++;
     }
-    breakoutLoop();
-  }
-}
-
-void gameoflife()
-{
-  bool init = false;
-
-  while (currentMode == GAMEOFLIFE)
-  {
-    if (!init)
+    else
     {
-      init = true;
-      gameOfLifeSetup();
+      if (buttonModeCount == 0)
+      {
+        setMode(STARS);
+      }
+      else if (buttonModeCount == 1)
+      {
+        setMode(LINES);
+      }
+      else if (buttonModeCount == 2)
+      {
+        setMode(BREAKOUT);
+      }
+      else if (buttonModeCount == 3)
+      {
+        setMode(GAMEOFLIFE);
+      }
+      else if (buttonModeCount == 4)
+      {
+        setMode(NONE);
+      }
+
+      buttonModeCount++;
+
+      if (buttonModeCount >= 5)
+      {
+        buttonModeCount = 0;
+      }
     }
-    gameOfLifeLoop();
+    delay(10);
   }
+  lastModeButtonState = modeButtonState;
 }
 
-void modes()
+void loopOfAllModes()
 {
-  if (currentMode != UPDATE)
+  if (currentMode != UPDATE && currentMode != LOADING)
   {
-    stars();
-    lines();
-    breakout();
-    gameoflife();
+    if (currentMode == STARS)
+    {
+      stars();
+    }
+    if (currentMode == LINES)
+    {
+      lines();
+    }
+    if (currentMode == BREAKOUT)
+    {
+      breakoutLoop();
+    }
+    if (currentMode == GAMEOFLIFE)
+    {
+      gameOfLifeLoop();
+    }
   }
+  delay(20);
 }
 
-void initModes()
+void modeLoop()
 {
-  modeThread.onRun(modes);
-  modeThread.setInterval(100);
+  listenOnButtonToChangeMode();
+  loopOfAllModes();
 }

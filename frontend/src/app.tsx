@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 import './app.scss';
 
 enum MODE {
   NONE = '',
   STARS = 'stars',
-  UPDATE = 'update',
   LINES = 'lines',
   BREAKOUT = 'breakout',
   GAMEOFLIFE = 'gameoflife',
+  UPDATE = 'update',
+  LOADING = 'loading',
 }
 
 export function App() {
@@ -15,8 +17,48 @@ export function App() {
   const [isMouseDown, setMouseIsDown] = useState(false);
   const [removeLed, setRemoveLed] = useState(false);
   const [activeLeds, setActiveLeds] = useState<Record<number, number>>({});
-  const [socket, setSocket] = useState<WebSocket>();
   const [mode, setMode] = useState<MODE>(MODE.NONE);
+  const { sendMessage, readyState } = useWebSocket(
+    `${
+      (import.meta as any).PROD
+        ? location.href.replace('http', 'ws')
+        : import.meta.env.VITE_WS_URL
+    }ws`,
+    {
+      shouldReconnect: () => true,
+      onMessage: (event) => {
+        try {
+          const json = JSON.parse(event.data);
+
+          switch (json.event) {
+            case 'mode':
+              setMode(Object.values(MODE)[json.mode as number]);
+              break;
+            case 'info':
+              setMode(Object.values(MODE)[json.mode as number]);
+
+              const active: Record<number, number> = {};
+              json.data.forEach((v: number, i: number) => (active[i] = v));
+              setActiveLeds(active);
+
+              break;
+          }
+        } catch {}
+      },
+    }
+  );
+
+  const connectionStatus = useMemo(
+    () =>
+      ({
+        [ReadyState.CONNECTING]: 'Connecting',
+        [ReadyState.OPEN]: 'Open',
+        [ReadyState.CLOSING]: 'Closing',
+        [ReadyState.CLOSED]: 'Closed',
+        [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+      }[readyState]),
+    [readyState]
+  );
 
   const setLed = (index: number) => {
     const status = removeLed ? 0 : 1;
@@ -24,7 +66,7 @@ export function App() {
       ...state,
       [index]: status,
     }));
-    socket?.send(
+    sendMessage(
       JSON.stringify({
         event: 'led',
         index: index,
@@ -75,7 +117,7 @@ export function App() {
 
             setActiveLeds(active);
 
-            socket?.send(
+            sendMessage(
               JSON.stringify({
                 event: 'screen',
                 data,
@@ -91,7 +133,7 @@ export function App() {
     setActiveLeds({});
     setRemoveLed(false);
     setTriggerClear(!triggerClear);
-    socket?.send(
+    sendMessage(
       JSON.stringify({
         event: 'clear',
       })
@@ -99,7 +141,7 @@ export function App() {
   };
 
   const sendMode = (mode: MODE) => {
-    socket?.send(
+    sendMessage(
       JSON.stringify({
         event: 'mode',
         mode,
@@ -108,71 +150,17 @@ export function App() {
   };
 
   const persist = () => {
-    socket?.send(
+    sendMessage(
       JSON.stringify({
         event: 'persist',
       })
     );
   };
 
-  useEffect(() => {
-    function connect() {
-      const ws = new WebSocket(
-        `${
-          (import.meta as any).PROD
-            ? location.href.replace('http', 'ws')
-            : import.meta.env.VITE_WS_URL
-        }ws`
-      );
-
-      ws.onopen = () => {
-        setSocket(ws);
-
-        ws.onmessage = (event) => {
-          try {
-            const json = JSON.parse(event.data);
-
-            switch (json.event) {
-              case 'mode':
-                setMode(Object.values(MODE)[json.mode as number]);
-                break;
-              case 'info':
-                setMode(Object.values(MODE)[json.mode as number]);
-
-                const active: Record<number, number> = {};
-                json.data.forEach((v: number, i: number) => (active[i] = v));
-                setActiveLeds(active);
-
-                break;
-            }
-          } catch {}
-        };
-
-        ws.onclose = () => {
-          setSocket(undefined);
-          setTimeout(connect, 1000);
-        };
-      };
-
-      ws.onerror = () => {
-        setSocket(undefined);
-        ws.close();
-        ws.onopen = null;
-      };
-    }
-
-    connect();
-
-    () => {
-      socket?.close();
-      setSocket(undefined);
-    };
-  }, []);
-
-  if (!socket?.OPEN) {
+  if (readyState !== ReadyState.OPEN) {
     return (
       <div className="wrapper">
-        <div className="connection-information">connecting...</div>
+        <div className="connection-information">{connectionStatus}...</div>
       </div>
     );
   }

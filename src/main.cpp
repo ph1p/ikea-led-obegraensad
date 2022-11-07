@@ -1,18 +1,13 @@
+#include <Arduino.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
-#include <cstdlib>
 
 #include "ws.h"
 #include "webgui.h"
-#include "led.h"
-#include "constants.h"
 #include "storage.h"
 #include "mode/mode.h"
 #include "secrets.h"
 #include "ota.h"
-
-const char *ssid = WIFI_SSID;
-const char *password = WIFI_PASSWORD;
 
 AsyncWebServer server(80);
 
@@ -37,6 +32,7 @@ void setup()
   pinMode(PIN_CLOCK, OUTPUT);
   pinMode(PIN_DATA, OUTPUT);
   pinMode(PIN_ENABLE, OUTPUT);
+  pinMode(PIN_BUTTON, INPUT_PULLUP);
 
   clearScreenAndBuffer(render_buffer);
 
@@ -45,17 +41,16 @@ void setup()
   storage.getBytes("data", render_buffer, sizeof(render_buffer));
   storage.end();
   renderScreen(render_buffer);
-  initModes();
 
   // wifi
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   if (WiFi.waitForConnectResult() != WL_CONNECTED)
   {
     Serial.printf("STA: Failed!\n");
     WiFi.disconnect(false);
     delay(1000);
-    WiFi.begin(ssid, password);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   }
 
   // server
@@ -66,8 +61,6 @@ void setup()
 
 void loop()
 {
-  if (modeThread.shouldRun())
-    modeThread.run();
-
+  modeLoop();
   cleanUpClients();
 }

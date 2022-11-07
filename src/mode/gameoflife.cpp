@@ -1,9 +1,4 @@
-#include <Arduino.h>
 #include "mode/gameoflife.h"
-#include "mode/mode.h"
-#include "constants.h"
-
-#include "led.h"
 
 uint8_t previous[256];
 
@@ -70,7 +65,7 @@ void gameOfLifeLoop()
   if (memcmp(previous, mode_buffer, sizeof(previous)) == 0)
   {
     gameOfLifeSetup();
-    delay(1200);
+    delay(1000);
   }
 
   for (int i = 0; i < ROWS * COLS; i++)

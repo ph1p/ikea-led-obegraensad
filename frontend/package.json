@@ -9,7 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "preact": "^10.11.2"
+    "preact": "^10.11.2",
+    "react-use-websocket": "^3.0.0"
   },
   "devDependencies": {
     "@gfx/zopfli": "^1.0.15",
