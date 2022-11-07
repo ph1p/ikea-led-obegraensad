@@ -26,6 +26,9 @@ export function App() {
     }ws`,
     {
       shouldReconnect: () => true,
+      reconnectAttempts: 10,
+      reconnectInterval: 3000,
+      retryOnError: true,
       onMessage: (event) => {
         try {
           const json = JSON.parse(event.data);
@@ -54,7 +57,7 @@ export function App() {
         [ReadyState.CONNECTING]: 'Connecting',
         [ReadyState.OPEN]: 'Open',
         [ReadyState.CLOSING]: 'Closing',
-        [ReadyState.CLOSED]: 'Closed',
+        [ReadyState.CLOSED]: 'Try to reconnect',
         [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
       }[readyState]),
     [readyState]
