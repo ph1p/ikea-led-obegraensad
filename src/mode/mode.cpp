@@ -58,28 +58,30 @@ void setMode(MODE mode)
   currentMode = mode;
 }
 
-void setModeByString(String mode)
+void setModeByString(String mode, void (*callback)(MODE mode))
 {
+  MODE modeAsEnum = NONE;
   if (mode == "stars")
   {
-    setMode(STARS);
+    modeAsEnum = STARS;
   }
   else if (mode == "lines")
   {
-    setMode(LINES);
+    modeAsEnum = LINES;
   }
   else if (mode == "breakout")
   {
-    setMode(BREAKOUT);
+    modeAsEnum = BREAKOUT;
   }
   else if (mode == "gameoflife")
   {
-    setMode(GAMEOFLIFE);
+    modeAsEnum = GAMEOFLIFE;
   }
-  else
+  if (callback)
   {
-    setMode(NONE);
+    callback(modeAsEnum);
   }
+  setMode(modeAsEnum);
 }
 
 void listenOnButtonToChangeMode()

@@ -17,12 +17,12 @@ void sendStateAndInfo(AsyncWebSocketClient *client)
   client->text(output);
 }
 
-void sendModeToAllClients()
+void sendModeToAllClients(MODE mode)
 {
   DynamicJsonDocument jsonDocument(6144);
 
   jsonDocument["event"] = "mode";
-  jsonDocument["mode"] = currentMode;
+  jsonDocument["mode"] = mode;
 
   String output;
   serializeJson(jsonDocument, output);
@@ -64,8 +64,7 @@ void onWsEvent(
 
         if (!strcmp(event, "mode"))
         {
-          setModeByString(wsRequest["mode"]);
-          sendModeToAllClients();
+          setModeByString(wsRequest["mode"], sendModeToAllClients);
         }
 
         if (!strcmp(event, "info"))
