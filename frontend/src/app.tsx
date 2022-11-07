@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'preact/hooks';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { useState } from 'preact/hooks';
+import { ReadyState } from 'react-use-websocket/dist/lib/constants';
+import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
 import './app.scss';
 
 enum MODE {
@@ -15,7 +16,6 @@ enum MODE {
 export function App() {
   const [triggerClear, setTriggerClear] = useState(false);
   const [isMouseDown, setMouseIsDown] = useState(false);
-  const [removeLed, setRemoveLed] = useState(false);
   const [activeLeds, setActiveLeds] = useState<Record<number, number>>({});
   const [mode, setMode] = useState<MODE>(MODE.NONE);
   const { sendMessage, readyState } = useWebSocket(
@@ -51,31 +51,29 @@ export function App() {
     }
   );
 
-  const connectionStatus = useMemo(
-    () =>
-      ({
-        [ReadyState.CONNECTING]: 'Connecting',
-        [ReadyState.OPEN]: 'Open',
-        [ReadyState.CLOSING]: 'Closing',
-        [ReadyState.CLOSED]: 'Try to reconnect',
-        [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-      }[readyState]),
-    [readyState]
-  );
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: 'Connecting',
+    [ReadyState.OPEN]: 'Open',
+    [ReadyState.CLOSING]: 'Closing',
+    [ReadyState.CLOSED]: 'Try to reconnect',
+    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+  }[readyState];
 
   const setLed = (index: number) => {
-    const status = removeLed ? 0 : 1;
-    setActiveLeds((state: any) => ({
-      ...state,
-      [index]: status,
-    }));
-    sendMessage(
-      JSON.stringify({
-        event: 'led',
-        index: index,
-        status: status,
-      })
-    );
+    setActiveLeds((state: any) => {
+      const status = !state[index];
+      sendMessage(
+        JSON.stringify({
+          event: 'led',
+          index: index,
+          status,
+        })
+      );
+      return {
+        ...state,
+        [index]: !state[index],
+      };
+    });
   };
 
   const loadImage = () => {
@@ -117,9 +115,7 @@ export function App() {
 
               index++;
             }
-
             setActiveLeds(active);
-
             sendMessage(
               JSON.stringify({
                 event: 'screen',
@@ -134,7 +130,6 @@ export function App() {
 
   const clear = () => {
     setActiveLeds({});
-    setRemoveLed(false);
     setTriggerClear(!triggerClear);
     sendMessage(
       JSON.stringify({
@@ -185,10 +180,7 @@ export function App() {
               <div
                 key={k}
                 className="led"
-                onPointerDown={() => {
-                  setLed(k);
-                  setMouseIsDown(true);
-                }}
+                onPointerDown={() => setMouseIsDown(true)}
                 onClick={() => setLed(k)}
                 onPointerOver={() => {
                   if (isMouseDown) {
@@ -222,9 +214,6 @@ export function App() {
                 <button onClick={() => loadImage()}>load image</button>
                 <button onClick={clear}>clear</button>
                 <button onClick={persist}>persist</button>
-                <button onClick={() => setRemoveLed(!removeLed)}>
-                  {removeLed ? 'pencil' : 'eraser'}
-                </button>
               </>
             ) : (
               <button onClick={() => sendMode(MODE.NONE)}>draw mode</button>
