@@ -91,7 +91,7 @@ export function App() {
   const loadImage = () => {
     loadImageAndGetDataArray((data) => {
       setLeds(() => indexMatrix.map((index) => data[index]));
-      wsMessage('screen', data);
+      wsMessage('screen', { data });
     });
   };
 
