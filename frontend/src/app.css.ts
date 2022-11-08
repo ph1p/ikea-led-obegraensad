@@ -2,14 +2,11 @@ import { style } from '@vanilla-extract/css';
 import { multiplier } from './main.css';
 
 export const wrapper = style({
-  display: 'flex',
-  height: '100%',
-  width: '100%',
-  flexDirection: 'column',
-  justifyContent: 'center',
+  overflow: 'hidden',
+  padding: '35px 20px',
   '@media': {
     '(max-width: 470px)': {
-      padding: 0,
+      padding: '15px 0',
       margin: 0,
     },
   },

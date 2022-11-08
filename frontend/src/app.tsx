@@ -175,11 +175,7 @@ export function App() {
               </div>
             ))}
           </div>
-          <div className={cable}>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+          <div className={cable}></div>
         </div>
         <div className={controls}>
           <div className={controlRow}>
