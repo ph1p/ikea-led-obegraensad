@@ -1,22 +1,33 @@
 import { useState } from 'preact/hooks';
 import { ReadyState } from 'react-use-websocket/dist/lib/constants';
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
-import './app.scss';
-
-enum MODE {
-  NONE = '',
-  STARS = 'stars',
-  LINES = 'lines',
-  BREAKOUT = 'breakout',
-  GAMEOFLIFE = 'gameoflife',
-  UPDATE = 'update',
-  LOADING = 'loading',
-}
+import {
+  loadImageAndGetDataArray,
+  rotateArray,
+  rotateArrayByDegree,
+} from './helpers';
+import { MODE } from './types';
+import {
+  button,
+  cable,
+  connectionInformation,
+  controlRow,
+  controls,
+  grid,
+  ledInner,
+  ledScreen,
+  ledWrapper,
+  wrapper,
+} from './app.css';
 
 export function App() {
+  const [rotation, setRotation] = useState<number>(0);
   const [triggerClear, setTriggerClear] = useState(false);
   const [isMouseDown, setMouseIsDown] = useState(false);
-  const [activeLeds, setActiveLeds] = useState<Record<number, number>>({});
+  const [indexMatrix, setIndexMatrix] = useState<number[]>(
+    [...new Array(256)].map((_, i) => i)
+  );
+  const [leds, setLeds] = useState<number[]>([...new Array(256)].fill(0));
   const [mode, setMode] = useState<MODE>(MODE.NONE);
   const { sendMessage, readyState } = useWebSocket(
     `${
@@ -39,10 +50,15 @@ export function App() {
               break;
             case 'info':
               setMode(Object.values(MODE)[json.mode as number]);
+              setRotation(json.rotation);
 
-              const active: Record<number, number> = {};
-              json.data.forEach((v: number, i: number) => (active[i] = v));
-              setActiveLeds(active);
+              setIndexMatrix(
+                rotateArrayByDegree(
+                  [...new Array(256)].map((_, i) => i),
+                  json.rotation
+                )
+              );
+              setLeds(rotateArrayByDegree(json.data, json.rotation));
 
               break;
           }
@@ -60,115 +76,80 @@ export function App() {
   }[readyState];
 
   const setLed = (index: number) => {
-    setActiveLeds((state: any) => {
-      const status = !state[index];
-      sendMessage(
-        JSON.stringify({
-          event: 'led',
-          index: index,
-          status,
-        })
-      );
-      return {
-        ...state,
-        [index]: !state[index],
-      };
+    const rotatedIndex = indexMatrix[index];
+
+    setLeds((state: number[]) => {
+      const status = !state[rotatedIndex];
+      wsMessage('led', {
+        index: rotatedIndex,
+        status,
+      });
+      return state.map((led, i) => (i === index ? Number(status) : led));
     });
   };
 
   const loadImage = () => {
-    const wh = 16;
-    const fp = document.createElement('input');
-    fp.type = 'file';
-    fp.click();
-    fp.onchange = (e: Event) => {
-      if (!e.target) return;
-      const file = (e.target as HTMLInputElement).files?.[0];
-      const reader = new FileReader();
-      if (file) {
-        reader.readAsDataURL(file);
-      }
-      reader.onload = () => {
-        const uimg = new Image() as any;
-        uimg.src = reader.result;
-        uimg.width = wh;
-        uimg.height = wh;
-        uimg.onload = () => {
-          const pxc = document.createElement('canvas');
-          const pxctx = pxc.getContext('2d');
-          pxc.width = wh;
-          pxc.height = wh;
-          pxctx?.drawImage(uimg, 0, 0, wh, wh);
-          const imgData = pxctx?.getImageData(0, 0, wh, wh);
-          if (imgData) {
-            let index = 0;
-            const data = [];
-            const active: Record<number, number> = {};
-            for (var i = 0; i < imgData.data.length; i += 4) {
-              const isActive =
-                imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2] <=
-                383
-                  ? 1
-                  : 0;
-              data.push(isActive);
-              active[index] = isActive;
-
-              index++;
-            }
-            setActiveLeds(active);
-            sendMessage(
-              JSON.stringify({
-                event: 'screen',
-                data,
-              })
-            );
-          }
-        };
-      };
-    };
+    loadImageAndGetDataArray((data) => {
+      setLeds(() => indexMatrix.map((index) => data[index]));
+      wsMessage('screen', data);
+    });
   };
 
   const clear = () => {
-    setActiveLeds({});
+    setLeds([...new Array(256).fill(0)]);
     setTriggerClear(!triggerClear);
+    wsMessage('clear');
+  };
+
+  const rotate = (turnRight = false) => {
+    if (turnRight) {
+      setRotation(rotation + 90);
+    } else {
+      setRotation(rotation - 90);
+    }
+
+    if (rotation <= -360 || rotation >= 360) {
+      setRotation(0);
+    }
+
+    setLeds((state: number[]) => rotateArray(state, turnRight));
+    setIndexMatrix((state: number[]) => rotateArray(state, turnRight));
+
     sendMessage(
       JSON.stringify({
-        event: 'clear',
+        event: 'rotate',
+        direction: turnRight ? 'right' : 'left',
       })
     );
   };
 
-  const sendMode = (mode: MODE) => {
+  const wsMessage = (
+    event: 'persist' | 'load' | 'clear' | 'mode' | 'screen' | 'led',
+    data?: any
+  ) =>
     sendMessage(
       JSON.stringify({
-        event: 'mode',
-        mode,
+        event,
+        ...data,
       })
     );
-  };
 
-  const persist = () => {
-    sendMessage(
-      JSON.stringify({
-        event: 'persist',
-      })
-    );
-  };
+  const sendMode = (mode: MODE) => wsMessage('mode', { mode });
 
   if (readyState !== ReadyState.OPEN) {
     return (
-      <div className="wrapper">
-        <div className="connection-information">{connectionStatus}...</div>
+      <div className={wrapper}>
+        <div className={connectionInformation}>{connectionStatus}...</div>
       </div>
     );
   }
 
   return (
-    <div className="wrapper">
+    <div className={wrapper}>
       <div>
-        <div className={`box ${mode !== MODE.NONE ? 'disabled' : ''}`}>
+        <div className={`${ledScreen} ${mode !== MODE.NONE ? 'disabled' : ''}`}>
           <div
-            className="grid"
+            className={grid}
             onPointerUp={() => {
               setMouseIsDown(false);
             }}
@@ -176,47 +157,78 @@ export function App() {
               setMouseIsDown(false);
             }}
           >
-            {[...new Array(256)].map((_, k) => (
+            {leds.map((led, ledIndex) => (
               <div
-                key={k}
-                className="led"
-                onPointerDown={() => setMouseIsDown(true)}
-                onClick={() => setLed(k)}
-                onPointerOver={() => {
+                key={ledIndex}
+                className={ledWrapper}
+                onPointerDown={() => {
+                  setLed(ledIndex);
+                  setMouseIsDown(true);
+                }}
+                onPointerEnter={() => {
                   if (isMouseDown) {
-                    setLed(k);
+                    setLed(ledIndex);
                   }
                 }}
               >
-                <div className={`inner ${activeLeds[k] ? 'active' : ''}`}></div>
+                <div className={`${ledInner} ${led ? 'active' : ''}`}></div>
               </div>
             ))}
           </div>
-          <div className="cable">
+          <div className={cable}>
             <span></span>
             <span></span>
             <span></span>
           </div>
         </div>
-        <div className="controls">
-          <div>
-            <button onClick={() => sendMode(MODE.STARS)}>stars</button>
-            <button onClick={() => sendMode(MODE.LINES)}>lines</button>
-            <button onClick={() => sendMode(MODE.BREAKOUT)}>breakout</button>
-            <button onClick={() => sendMode(MODE.GAMEOFLIFE)}>
+        <div className={controls}>
+          <div className={controlRow}>
+            <button className={button} onClick={() => sendMode(MODE.STARS)}>
+              stars
+            </button>
+            <button className={button} onClick={() => sendMode(MODE.LINES)}>
+              lines
+            </button>
+            <button className={button} onClick={() => sendMode(MODE.BREAKOUT)}>
+              breakout
+            </button>
+            <button
+              className={button}
+              onClick={() => sendMode(MODE.GAMEOFLIFE)}
+            >
               game of life
             </button>
           </div>
 
-          <div>
+          <div className={controlRow}>
+            <button className={button} onClick={() => rotate(false)}>
+              rotate left
+            </button>
+            <button className={button} onClick={() => rotate(true)}>
+              rotate right
+            </button>
+          </div>
+
+          <div className={controlRow}>
             {mode === MODE.NONE ? (
               <>
-                <button onClick={() => loadImage()}>load image</button>
-                <button onClick={clear}>clear</button>
-                <button onClick={persist}>persist</button>
+                <button className={button} onClick={() => loadImage()}>
+                  load image
+                </button>
+                <button className={button} onClick={clear}>
+                  clear
+                </button>
+                <button className={button} onClick={() => wsMessage('persist')}>
+                  persist
+                </button>
+                <button className={button} onClick={() => wsMessage('load')}>
+                  load
+                </button>
               </>
             ) : (
-              <button onClick={() => sendMode(MODE.NONE)}>draw mode</button>
+              <button className={button} onClick={() => sendMode(MODE.NONE)}>
+                draw mode
+              </button>
             )}
           </div>
         </div>

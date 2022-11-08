@@ -228,8 +228,6 @@ void breakoutSetup()
 
 void breakoutLoop()
 {
-  Serial.println("round");
-
   switch (gameState)
   {
   case GAME_STATE_LEVEL:

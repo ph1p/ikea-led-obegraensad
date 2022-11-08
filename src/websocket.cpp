@@ -4,13 +4,14 @@ AsyncWebSocket ws("/ws");
 
 void sendStateAndInfo(AsyncWebSocketClient *client)
 {
-  DynamicJsonDocument jsonDocument(6144);
+  StaticJsonDocument<6144> jsonDocument;
   for (int j = 0; j < sizeof(render_buffer); j++)
   {
     jsonDocument["data"][j] = render_buffer[j];
   }
   jsonDocument["mode"] = currentMode;
   jsonDocument["event"] = "info";
+  jsonDocument["rotation"] = currentRotation;
 
   String output;
   serializeJson(jsonDocument, output);
@@ -19,10 +20,11 @@ void sendStateAndInfo(AsyncWebSocketClient *client)
 
 void sendModeToAllClients(MODE mode)
 {
-  DynamicJsonDocument jsonDocument(6144);
+  StaticJsonDocument<6144> jsonDocument;
 
   jsonDocument["event"] = "mode";
   jsonDocument["mode"] = mode;
+  jsonDocument["rotation"] = currentRotation;
 
   String output;
   serializeJson(jsonDocument, output);
@@ -66,8 +68,16 @@ void onWsEvent(
         {
           setModeByString(wsRequest["mode"], sendModeToAllClients);
         }
+        else if (!strcmp(event, "rotate"))
+        {
+          rotate(positions, !strcmp(wsRequest["direction"], "right"));
 
-        if (!strcmp(event, "info"))
+          if (currentMode == NONE)
+          {
+            renderScreen(render_buffer);
+          }
+        }
+        else if (!strcmp(event, "info"))
         {
           sendStateAndInfo(client);
         }
@@ -97,6 +107,15 @@ void onWsEvent(
             storage.begin("led-wall", false);
             storage.putBytes("data", render_buffer, sizeof(render_buffer));
             storage.end();
+          }
+          else if (!strcmp(event, "load"))
+          {
+            clearScreenAndBuffer(render_buffer);
+            storage.begin("led-wall", false);
+            storage.getBytes("data", render_buffer, sizeof(render_buffer));
+            storage.end();
+            renderScreen(render_buffer);
+            sendStateAndInfo(client);
           }
         }
       }

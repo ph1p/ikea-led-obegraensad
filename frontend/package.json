@@ -9,12 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/offscreencanvas": "^2019.7.0",
     "preact": "^10.11.2",
     "react-use-websocket": "^3.0.0"
   },
   "devDependencies": {
+    "@vanilla-extract/css": "^1.9.1",
     "@gfx/zopfli": "^1.0.15",
     "@preact/preset-vite": "^2.4.0",
+    "@vanilla-extract/vite-plugin": "^3.6.1",
     "sass": "^1.56.0",
     "terser": "^5.15.1",
     "typescript": "^4.8.4",

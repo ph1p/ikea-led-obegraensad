@@ -1,8 +1,9 @@
 #include "led.h"
 
 uint8_t render_buffer[ROWS * COLS];
+int currentRotation;
 
-uint8_t positions[ROWS * COLS] PROGMEM = {
+uint8_t positions[ROWS * COLS] = {
     0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11, 0x10, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00,
     0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
     0x27, 0x26, 0x25, 0x24, 0x23, 0x22, 0x21, 0x20, 0x37, 0x36, 0x35, 0x34, 0x33, 0x32, 0x31, 0x30,
@@ -19,6 +20,117 @@ uint8_t positions[ROWS * COLS] PROGMEM = {
     0xd8, 0xd9, 0xda, 0xdb, 0xdc, 0xdd, 0xde, 0xdf, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf,
     0xe7, 0xe6, 0xe5, 0xe4, 0xe3, 0xe2, 0xe1, 0xe0, 0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0,
     0xe8, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee, 0xef, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+
+
+void rotate(uint8_t matrix[ROWS * COLS], bool turnRight) {
+  uint8_t SIZE = 16;
+  if (turnRight) {
+    currentRotation += 90;
+  } else {
+    currentRotation -= 90;
+  }
+
+  if (currentRotation <= -360 || currentRotation >= 360) {
+    currentRotation = 0;
+  }
+
+  for (uint8_t i = 0; i < SIZE; i++) {
+    for (uint8_t j = i; j < SIZE; j++) {
+      uint8_t temp = matrix[i * SIZE + j];
+      matrix[i * SIZE + j] = matrix[j * SIZE + i];
+      matrix[j * SIZE + i] = temp;
+    }
+  }
+
+  for (uint8_t i = 0; i < SIZE; i++) {
+    uint8_t col1 = 0;
+    uint8_t col2 = SIZE - 1;
+    while (col1 < col2) {
+      uint8_t index1 = i * SIZE + col1;
+      uint8_t index2 = i * SIZE + col2;
+      if (turnRight) {
+        index1 = col1 * SIZE + i;
+        index2 = col2 * SIZE + i;
+      }
+
+      uint8_t temp = matrix[index1];
+      matrix[index1] = matrix[index2];
+      matrix[index2] = temp;
+      col1++;
+      col2--;
+    }
+  }
+};
+
+// void rotateRight(uint8_t matrix[ROWS * COLS])
+// {
+//   currentRotation += 90;
+
+//   if (currentRotation >= 360)
+//   {
+//     currentRotation = 0;
+//   }
+
+//   int size = ROWS;
+//   for (int i = 0; i < size; i++)
+//   {
+//     for (int j = i; j < size; j++)
+//     {
+//       int temp = matrix[i * size + j];
+//       matrix[i * size + j] = matrix[j * size + i];
+//       matrix[j * size + i] = temp;
+//     }
+//   }
+
+//   for (int i = 0; i < size; i++)
+//   {
+//     int col1 = 0;
+//     int col2 = size - 1;
+//     while (col1 < col2)
+//     {
+//       int temp = matrix[col1 * size + i];
+//       matrix[col1 * size + i] = matrix[col2 * size + i];
+//       matrix[col2 * size + i] = temp;
+//       col1++;
+//       col2--;
+//     }
+//   }
+// }
+
+// void rotateLeft(uint8_t matrix[ROWS * COLS])
+// {
+//   currentRotation -= 90;
+
+//   if (currentRotation <= -360)
+//   {
+//     currentRotation = 0;
+//   }
+
+//   int size = ROWS;
+//   for (int i = 0; i < size; i++)
+//   {
+//     for (int j = i; j < size; j++)
+//     {
+//       int temp = matrix[i * size + j];
+//       matrix[i * size + j] = matrix[j * size + i];
+//       matrix[j * size + i] = temp;
+//     }
+//   }
+
+//   for (int i = 0; i < size; i++)
+//   {
+//     int col1 = 0;
+//     int col2 = size - 1;
+//     while (col1 < col2)
+//     {
+//       int temp = matrix[i * size + col1];
+//       matrix[i * size + col1] = matrix[i * size + col2];
+//       matrix[i * size + col2] = temp;
+//       col1++;
+//       col2--;
+//     }
+//   }
+// }
 
 void clearScreenAndBuffer(uint8_t buffer[ROWS * COLS])
 {
