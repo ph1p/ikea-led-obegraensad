@@ -2,12 +2,12 @@
 
 AsyncWebSocket ws("/ws");
 
-void sendStateAndInfo(AsyncWebSocketClient *client)
+void sendStateAndInfo()
 {
-  StaticJsonDocument<6144> jsonDocument;
-  for (int j = 0; j < sizeof(render_buffer); j++)
+  DynamicJsonDocument jsonDocument(6144);
+  for (int j = 0; j < sizeof(renderBuffer); j++)
   {
-    jsonDocument["data"][j] = render_buffer[j];
+    jsonDocument["data"][j] = renderBuffer[j];
   }
   jsonDocument["mode"] = currentMode;
   jsonDocument["event"] = "info";
@@ -15,12 +15,12 @@ void sendStateAndInfo(AsyncWebSocketClient *client)
 
   String output;
   serializeJson(jsonDocument, output);
-  client->text(output);
+  ws.textAll(output);
 }
 
 void sendModeToAllClients(MODE mode)
 {
-  StaticJsonDocument<6144> jsonDocument;
+  DynamicJsonDocument jsonDocument(6144);
 
   jsonDocument["event"] = "mode";
   jsonDocument["mode"] = mode;
@@ -41,7 +41,7 @@ void onWsEvent(
 {
   if (type == WS_EVT_CONNECT)
   {
-    sendStateAndInfo(client);
+    sendStateAndInfo();
   }
 
   if (type == WS_EVT_DATA)
@@ -51,7 +51,7 @@ void onWsEvent(
     {
       data[len] = 0;
 
-      StaticJsonDocument<6144> wsRequest;
+      DynamicJsonDocument wsRequest(6144);
       DeserializationError error = deserializeJson(wsRequest, data);
 
       if (error)
@@ -70,52 +70,56 @@ void onWsEvent(
         }
         else if (!strcmp(event, "rotate"))
         {
-          rotate(positions, !strcmp(wsRequest["direction"], "right"));
+          bool isRight = (bool)!strcmp(wsRequest["direction"], "right");
+          rotate(
+              positions, currentRotation + (90 * (isRight ? 1 : -1)));
 
           if (currentMode == NONE)
           {
-            renderScreen(render_buffer);
+            delay(10);
+            renderScreen(renderBuffer);
           }
         }
         else if (!strcmp(event, "info"))
         {
-          sendStateAndInfo(client);
+          sendStateAndInfo();
         }
 
         if (currentMode == NONE)
         {
           if (!strcmp(event, "clear"))
           {
-            memset(render_buffer, 0, sizeof(render_buffer));
-            renderScreen(render_buffer);
+            clearScreenAndBuffer(renderBuffer);
           }
           else if (!strcmp(event, "led"))
           {
-            setPixelAtIndex(render_buffer, wsRequest["index"], wsRequest["status"]);
-            renderScreen(render_buffer);
+            setPixelAtIndex(renderBuffer, wsRequest["index"], wsRequest["status"]);
+            renderScreen(renderBuffer);
           }
           else if (!strcmp(event, "screen"))
           {
             for (int i = 0; i < ROWS * COLS; i++)
             {
-              render_buffer[i] = wsRequest["data"][i];
+              renderBuffer[i] = wsRequest["data"][i];
             }
-            renderScreen(render_buffer);
+            delay(10);
+            renderScreen(renderBuffer);
           }
           else if (!strcmp(event, "persist"))
           {
             storage.begin("led-wall", false);
-            storage.putBytes("data", render_buffer, sizeof(render_buffer));
+            storage.putBytes("data", renderBuffer, sizeof(renderBuffer));
             storage.end();
           }
           else if (!strcmp(event, "load"))
           {
-            clearScreenAndBuffer(render_buffer);
+            clearScreenAndBuffer(renderBuffer);
             storage.begin("led-wall", false);
-            storage.getBytes("data", render_buffer, sizeof(render_buffer));
+            storage.getBytes("data", renderBuffer, sizeof(renderBuffer));
             storage.end();
-            renderScreen(render_buffer);
-            sendStateAndInfo(client);
+            delay(10);
+            renderScreen(renderBuffer);
+            sendStateAndInfo();
           }
         }
       }

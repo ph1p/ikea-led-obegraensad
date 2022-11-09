@@ -9,7 +9,7 @@
 #include "mode/mode.h"
 #include "constants.h"
 
-void sendStateAndInfo(AsyncWebSocketClient *client);
+void sendStateAndInfo();
 void sendModeToAllClients();
 void initWebsocketServer(AsyncWebServer &server);
 void cleanUpClients();

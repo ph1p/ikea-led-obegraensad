@@ -47,7 +47,7 @@ void setMode(MODE mode)
   {
     renderScreen(digitZero);
     delay(1000);
-    renderScreen(render_buffer);
+    renderScreen(renderBuffer);
     buttonModeCount = 4;
   }
   else

@@ -10,7 +10,6 @@
 #include "signs.h"
 
 void onOTAStart();
-
 void onOTAEnd();
 void initOTA(AsyncWebServer &server);
 

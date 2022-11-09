@@ -9,7 +9,6 @@ import {
 import { MODE } from './types';
 import {
   button,
-  cable,
   connectionInformation,
   controlRow,
   controls,
@@ -175,7 +174,6 @@ export function App() {
               </div>
             ))}
           </div>
-          <div className={cable}></div>
         </div>
         <div className={controls}>
           <div className={controlRow}>

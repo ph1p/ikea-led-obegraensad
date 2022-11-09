@@ -13,7 +13,7 @@ void onOTAEnd()
 {
   renderScreen(letterR);
   delay(1000);
-  renderScreen(render_buffer);
+  renderScreen(renderBuffer);
 }
 
 void initOTA(AsyncWebServer &server)

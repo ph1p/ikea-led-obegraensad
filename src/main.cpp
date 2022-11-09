@@ -8,6 +8,12 @@
 #include "ota.h"
 #include "webserver.h"
 
+#include "accelerometer.h"
+
+#ifdef Accelerometer
+Accelerometer accelerometer;
+#endif
+
 void setup()
 {
   Serial.begin(115200);
@@ -18,33 +24,53 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
-  clearScreenAndBuffer(render_buffer);
+  clearScreenAndBuffer(renderBuffer);
 
   // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
   storage.begin("led-wall", false);
-  storage.getBytes("data", render_buffer, sizeof(render_buffer));
+  storage.getBytes("data", renderBuffer, sizeof(renderBuffer));
   storage.end();
-  renderScreen(render_buffer);
+  renderScreen(renderBuffer);
 
   // wifi
-  WiFi.mode(WIFI_STA);
+  int attempts = 0;
+  WiFi.setHostname(WIFI_HOSTNAME);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED)
+  while (WiFi.status() != WL_CONNECTED && attempts < 7)
   {
-    Serial.printf("STA: Failed!\n");
-    WiFi.disconnect(false);
-    delay(1000);
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    delay(500);
+    Serial.print(".");
+    attempts++;
+  }
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("Resetting");
+    ESP.restart();
+  }
+  else
+  {
+    Serial.println("");
+    Serial.print("Connected to WiFi network with IP Address: ");
+    Serial.println(WiFi.localIP());
   }
 
   // server
   initOTA(server);
   initWebsocketServer(server);
   initWebServer();
+
+  // uncomment to figure out the initial parameters
+  #ifdef Accelerometer
+    // accelerometer.startCalibration();
+    accelerometer.setup();
+  #endif
 }
 
 void loop()
 {
+  #ifdef Accelerometer
+    accelerometer.loop();
+  #endif
   modeLoop();
   cleanUpClients();
 }

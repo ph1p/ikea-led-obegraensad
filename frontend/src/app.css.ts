@@ -2,8 +2,11 @@ import { style } from '@vanilla-extract/css';
 import { multiplier } from './main.css';
 
 export const wrapper = style({
-  overflow: 'hidden',
+  display: 'grid',
   padding: '35px 20px',
+  height: '100%',
+  justifyContent: 'center',
+  alignItems: 'center',
   '@media': {
     '(max-width: 470px)': {
       padding: '15px 0',
@@ -39,24 +42,6 @@ export const ledScreen = style({
       border: `calc(14px * ${multiplier}) solid #000`,
       boxSizing: 'border-box',
       aspectRatio: 3 / 4,
-    },
-  },
-});
-
-export const cable = style({
-  position: 'absolute',
-  bottom: '-47vh',
-  left: -60,
-  width: '40px',
-  height: '50vh',
-  borderWidth: ' 6px 0 0 6px',
-  borderRadius: '30px 0 0 0',
-  borderStyle: 'solid',
-  borderColor: '#000',
-  boxSizing: 'border-box',
-  '@media': {
-    '(max-width: 470px)': {
-      display: 'none',
     },
   },
 });
@@ -132,4 +117,5 @@ export const button = style({
 export const connectionInformation = style({
   textAlign: 'center',
   fontSize: '2em',
+  color: '#fff',
 });
