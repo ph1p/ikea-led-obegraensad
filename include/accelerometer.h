@@ -1,11 +1,10 @@
 #pragma once
 
-#if ENABLE_ACCELEROMETER == true
+#include "constants.h"
 
-#include "ADXL335.h"
-#include "screen.h"
+#ifdef ENABLE_ACCELEROMETER
 #include "websocket.h"
-#include "mode/mode.h"
+#include "ADXL335.h"
 
 class Accelerometer
 {

@@ -1,6 +1,6 @@
 #include "accelerometer.h"
 
-#if ENABLE_ACCELEROMETER == true
+#ifdef ENABLE_ACCELEROMETER
 
 void Accelerometer::setup()
 {
@@ -33,25 +33,25 @@ void Accelerometer::loop()
   {
     if (this->direction == "portrait")
     {
-      rotate(positions, 0);
+      Screen.rotate(Screen.positions, 0);
     }
     else if (this->direction == "landscape")
     {
-      rotate(positions, -90);
+      Screen.rotate(Screen.positions, -90);
     }
     else if (this->direction == "landscape-opposite")
     {
-      rotate(positions, 90);
+      Screen.rotate(Screen.positions, 90);
     }
     else if (this->direction == "portrait-opposite")
     {
-      rotate(positions, 180);
+      Screen.rotate(Screen.positions, 180);
     }
 
     if (currentMode == NONE)
     {
       delay(10);
-      renderScreen(Screen.renderBuffer);
+      Screen.renderScreen(Screen.renderBuffer);
     }
     sendStateAndInfo();
   }

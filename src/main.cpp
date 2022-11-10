@@ -8,10 +8,9 @@
 #include "ota.h"
 #include "webserver.h"
 #include "screen.h"
-
 #include "accelerometer.h"
 
-#ifdef Accelerometer
+#ifdef ENABLE_ACCELEROMETER
 Accelerometer accelerometer;
 #endif
 
@@ -60,18 +59,18 @@ void setup()
   initWebsocketServer(server);
   initWebServer();
 
-  // uncomment to figure out the initial parameters
-  #ifdef Accelerometer
-    // accelerometer.startCalibration();
-    accelerometer.setup();
-  #endif
+// uncomment to figure out the initial parameters
+#ifdef ENABLE_ACCELEROMETER
+  // accelerometer.startCalibration();
+  accelerometer.setup();
+#endif
 }
 
 void loop()
 {
-  #ifdef Accelerometer
-    accelerometer.loop();
-  #endif
+#ifdef ENABLE_ACCELEROMETER
+  accelerometer.loop();
+#endif
   modeLoop();
   cleanUpClients();
 }
