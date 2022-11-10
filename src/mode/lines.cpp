@@ -5,10 +5,10 @@ bool forwards = true;
 
 void lines()
 {
-  drawLine(mode_buffer, count, true);
-  drawLine(mode_buffer, count, false);
-  renderScreen(mode_buffer);
-  memset(mode_buffer, 0, sizeof(mode_buffer));
+  Screen.drawLine(modeBuffer, count, true);
+  Screen.drawLine(modeBuffer, count, false);
+  Screen.renderScreen(modeBuffer);
+  memset(modeBuffer, 0, sizeof(modeBuffer));
 
   if (count == 15 && forwards)
   {

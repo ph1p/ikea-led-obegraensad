@@ -3,7 +3,7 @@
 #if ENABLE_ACCELEROMETER == true
 
 #include "ADXL335.h"
-#include "led.h"
+#include "screen.h"
 #include "websocket.h"
 #include "mode/mode.h"
 

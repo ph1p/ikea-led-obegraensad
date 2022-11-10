@@ -2,7 +2,7 @@
 
 MODE currentMode;
 
-uint8_t mode_buffer[ROWS * COLS];
+uint8_t modeBuffer[ROWS * COLS];
 
 int buttonModeCount = -1;
 
@@ -20,43 +20,43 @@ void setMode(MODE mode)
 
   currentMode = LOADING;
 
-  clearScreenAndBuffer(mode_buffer);
-  memset(mode_buffer, 0, sizeof(mode_buffer));
+  Screen.clearScreenAndBuffer(modeBuffer);
+  memset(modeBuffer, 0, sizeof(modeBuffer));
   delay(10);
 
   if (mode == STARS)
   {
-    renderScreen(digitOne);
+    Screen.renderScreen(digitOne);
     buttonModeCount = 0;
   }
   else if (mode == LINES)
   {
-    renderScreen(digitTwo);
+    Screen.renderScreen(digitTwo);
     buttonModeCount = 1;
   }
   else if (mode == BREAKOUT)
   {
     breakout.setup();
-    renderScreen(digitThree);
+    Screen.renderScreen(digitThree);
     buttonModeCount = 2;
   }
   else if (mode == GAMEOFLIFE)
   {
     gameOfLife.setup();
-    renderScreen(digitFour);
+    Screen.renderScreen(digitFour);
     buttonModeCount = 3;
   }
   else if (mode == CIRCLE)
   {
-    renderScreen(digitFive);
+    Screen.renderScreen(digitFive);
     buttonModeCount = 4;
   }
 
   if (mode == NONE)
   {
-    renderScreen(digitZero);
+    Screen.renderScreen(digitZero);
     delay(1000);
-    renderScreen(renderBuffer);
+    Screen.renderScreen(Screen.renderBuffer);
     buttonModeCount = 5;
   }
   else

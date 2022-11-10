@@ -6,11 +6,11 @@
 #include "mode/gameoflife.h"
 #include "mode/stars.h"
 #include "mode/lines.h"
-#include "led.h"
+#include "screen.h"
 #include "circle.h"
 #include "signs.h"
 
-extern uint8_t mode_buffer[ROWS * COLS];
+extern uint8_t modeBuffer[ROWS * COLS];
 
 enum MODE
 {

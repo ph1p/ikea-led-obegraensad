@@ -7,7 +7,7 @@ void Circle::drawCircle(int x, int y, int radius, int onOff)
         double radians = i * PI / 180;
         double px = x + radius * cos(radians);
         double py = y + radius * sin(radians);
-        setPixel(mode_buffer, px, py, onOff);
+        Screen.setPixel(modeBuffer, px, py, onOff);
     }
 }
 
@@ -50,11 +50,11 @@ void Circle::loop()
     {
         if (!memoExists)
         {
-            std::copy(mode_buffer, mode_buffer + (COLS * ROWS), this->memo[key]);
+            std::copy(modeBuffer, modeBuffer + (COLS * ROWS), this->memo[key]);
         }
         else
         {
-            renderScreen(this->memo[key]);
+            Screen.renderScreen(this->memo[key]);
             delay(200);
         }
     }

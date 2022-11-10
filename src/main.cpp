@@ -7,6 +7,7 @@
 #include "secrets.h"
 #include "ota.h"
 #include "webserver.h"
+#include "screen.h"
 
 #include "accelerometer.h"
 
@@ -24,13 +25,13 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
-  clearScreenAndBuffer(renderBuffer);
+  Screen.clearScreenAndBuffer(Screen.renderBuffer);
 
   // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
   storage.begin("led-wall", false);
-  storage.getBytes("data", renderBuffer, sizeof(renderBuffer));
+  storage.getBytes("data", Screen.renderBuffer, sizeof(Screen.renderBuffer));
   storage.end();
-  renderScreen(renderBuffer);
+  Screen.renderScreen(Screen.renderBuffer);
 
   // wifi
   int attempts = 0;

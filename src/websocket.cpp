@@ -5,13 +5,13 @@ AsyncWebSocket ws("/ws");
 void sendStateAndInfo()
 {
   DynamicJsonDocument jsonDocument(6144);
-  for (int j = 0; j < sizeof(renderBuffer); j++)
+  for (int j = 0; j < sizeof(Screen.renderBuffer); j++)
   {
-    jsonDocument["data"][j] = renderBuffer[j];
+    jsonDocument["data"][j] = Screen.renderBuffer[j];
   }
   jsonDocument["mode"] = currentMode;
   jsonDocument["event"] = "info";
-  jsonDocument["rotation"] = currentRotation;
+  jsonDocument["rotation"] = Screen.currentRotation;
 
   String output;
   serializeJson(jsonDocument, output);
@@ -24,7 +24,7 @@ void sendModeToAllClients(MODE mode)
 
   jsonDocument["event"] = "mode";
   jsonDocument["mode"] = mode;
-  jsonDocument["rotation"] = currentRotation;
+  jsonDocument["rotation"] = Screen.currentRotation;
 
   String output;
   serializeJson(jsonDocument, output);
@@ -71,13 +71,13 @@ void onWsEvent(
         else if (!strcmp(event, "rotate"))
         {
           bool isRight = (bool)!strcmp(wsRequest["direction"], "right");
-          rotate(
-              positions, currentRotation + (90 * (isRight ? 1 : -1)));
+          Screen.rotate(
+              Screen.positions, Screen.currentRotation + (90 * (isRight ? 1 : -1)));
 
           if (currentMode == NONE)
           {
             delay(10);
-            renderScreen(renderBuffer);
+            Screen.renderScreen(Screen.renderBuffer);
           }
         }
         else if (!strcmp(event, "info"))
@@ -89,36 +89,36 @@ void onWsEvent(
         {
           if (!strcmp(event, "clear"))
           {
-            clearScreenAndBuffer(renderBuffer);
+            Screen.clearScreenAndBuffer(Screen.renderBuffer);
           }
           else if (!strcmp(event, "led"))
           {
-            setPixelAtIndex(renderBuffer, wsRequest["index"], wsRequest["status"]);
-            renderScreen(renderBuffer);
+            Screen.setPixelAtIndex(Screen.renderBuffer, wsRequest["index"], wsRequest["status"]);
+            Screen.renderScreen(Screen.renderBuffer);
           }
           else if (!strcmp(event, "screen"))
           {
             for (int i = 0; i < ROWS * COLS; i++)
             {
-              renderBuffer[i] = wsRequest["data"][i];
+              Screen.renderBuffer[i] = wsRequest["data"][i];
             }
             delay(10);
-            renderScreen(renderBuffer);
+            Screen.renderScreen(Screen.renderBuffer);
           }
           else if (!strcmp(event, "persist"))
           {
             storage.begin("led-wall", false);
-            storage.putBytes("data", renderBuffer, sizeof(renderBuffer));
+            storage.putBytes("data", Screen.renderBuffer, sizeof(Screen.renderBuffer));
             storage.end();
           }
           else if (!strcmp(event, "load"))
           {
-            clearScreenAndBuffer(renderBuffer);
+            Screen.clearScreenAndBuffer(Screen.renderBuffer);
             storage.begin("led-wall", false);
-            storage.getBytes("data", renderBuffer, sizeof(renderBuffer));
+            storage.getBytes("data", Screen.renderBuffer, sizeof(Screen.renderBuffer));
             storage.end();
             delay(10);
-            renderScreen(renderBuffer);
+            Screen.renderScreen(Screen.renderBuffer);
             sendStateAndInfo();
           }
         }

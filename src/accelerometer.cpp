@@ -51,7 +51,7 @@ void Accelerometer::loop()
     if (currentMode == NONE)
     {
       delay(10);
-      renderScreen(renderBuffer);
+      renderScreen(Screen.renderBuffer);
     }
     sendStateAndInfo();
   }
