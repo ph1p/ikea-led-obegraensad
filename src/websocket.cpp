@@ -1,5 +1,7 @@
 #include "websocket.h"
 
+#ifdef ENABLE_SERVER
+
 AsyncWebSocket ws("/ws");
 
 void sendStateAndInfo()
@@ -137,3 +139,5 @@ void cleanUpClients()
 {
   ws.cleanupClients();
 }
+
+#endif

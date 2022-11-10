@@ -1,5 +1,8 @@
-#ifndef OTA_HEADER_H
-#define OTA_HEADER_H
+#pragma once
+
+#include "constants.h"
+
+#ifdef ENABLE_SERVER
 
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>

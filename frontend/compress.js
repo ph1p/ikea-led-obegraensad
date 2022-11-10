@@ -40,7 +40,11 @@ gzip(
       return console.error(err);
     }
 
-    const FILE = `#include <ESPAsyncWebServer.h>
+    const FILE = `#include "constants.h"
+
+#ifdef ENABLE_SERVER
+
+#include <ESPAsyncWebServer.h>
 
 const uint32_t GUI_HTML_SIZE = ${output.length};
 const uint8_t GUI_HTML[] PROGMEM = {${addLineBreaks(output)}};
@@ -51,6 +55,8 @@ void startGui(AsyncWebServerRequest *request)
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
+
+#endif
 `;
 
     fs.writeFileSync(path.resolve(__dirname, '../src/webgui.cpp'), FILE);

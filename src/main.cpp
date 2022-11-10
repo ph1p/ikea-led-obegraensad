@@ -32,6 +32,8 @@ void setup()
   storage.end();
   Screen.renderScreen(Screen.renderBuffer);
 
+// server
+#ifdef ENABLE_SERVER
   // wifi
   int attempts = 0;
   WiFi.setHostname(WIFI_HOSTNAME);
@@ -54,10 +56,10 @@ void setup()
     Serial.println(WiFi.localIP());
   }
 
-  // server
   initOTA(server);
   initWebsocketServer(server);
   initWebServer();
+#endif
 
 // uncomment to figure out the initial parameters
 #ifdef ENABLE_ACCELEROMETER
@@ -72,5 +74,8 @@ void loop()
   accelerometer.loop();
 #endif
   modeLoop();
+
+#ifdef ENABLE_SERVER
   cleanUpClients();
+#endif
 }

@@ -1,5 +1,7 @@
 #include "ota.h"
 
+#ifdef ENABLE_SERVER
+
 const char *otaUser = OTA_USERNAME;
 const char *otaPassword = OTA_PASSWORD;
 
@@ -22,3 +24,5 @@ void initOTA(AsyncWebServer &server)
   AsyncElegantOTA.onOTAStart(onOTAStart);
   AsyncElegantOTA.onOTAEnd(onOTAEnd);
 }
+
+#endif

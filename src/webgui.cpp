@@ -1,3 +1,7 @@
+#include "constants.h"
+
+#ifdef ENABLE_SERVER
+
 #include <ESPAsyncWebServer.h>
 
 const uint32_t GUI_HTML_SIZE = 14814;
@@ -502,3 +506,5 @@ void startGui(AsyncWebServerRequest *request)
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
+
+#endif

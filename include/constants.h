@@ -7,7 +7,6 @@
 #define PIN_BUTTON 16
 
 #define ENABLE_SERVER
-
 // #define ENABLE_ACCELEROMETER
 
 // define your own

@@ -1,5 +1,7 @@
 #include "webserver.h"
 
+#ifdef ENABLE_SERVER
+
 AsyncWebServer server(80);
 
 void initWebServer()
@@ -14,3 +16,5 @@ void initWebServer()
 
   server.begin();
 }
+
+#endif
