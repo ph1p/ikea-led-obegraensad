@@ -1,5 +1,4 @@
-#ifndef LED_HEADER_H
-#define LED_HEADER_H
+#pragma once
 
 #include <Arduino.h>
 #include "constants.h"
@@ -16,5 +15,3 @@ void setPixelAtIndex(uint8_t buffer[ROWS * COLS], uint8_t index, uint8_t value);
 int findPosition(uint8_t count);
 void renderScreen(uint8_t data[ROWS * COLS]);
 void rotate(uint8_t matrix[ROWS * COLS], int degree = 90);
-
-#endif

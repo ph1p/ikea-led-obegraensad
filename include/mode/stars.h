@@ -1,9 +1,6 @@
-#ifndef STARS_HEADER_H
-#define STARS_HEADER_H
+#pragma once
 
 #include "mode/mode.h"
 #include "led.h"
 
 void stars();
-
-#endif

@@ -1,8 +1,5 @@
-#ifndef STORAGE_HEADER_H
-#define STORAGE_HEADER_H
+#pragma once
 
 #include <Preferences.h>
 
 extern Preferences storage;
-
-#endif

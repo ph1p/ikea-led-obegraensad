@@ -1,6 +1,6 @@
+#pragma once
+
 #if ENABLE_ACCELEROMETER == true
-#ifndef ACCELEROMETER_HEADER_H
-#define ACCELEROMETER_HEADER_H
 
 #include "ADXL335.h"
 #include "led.h"
@@ -24,5 +24,4 @@ public:
   void loop();
 };
 
-#endif
 #endif

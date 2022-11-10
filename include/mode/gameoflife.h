@@ -1,15 +1,19 @@
-#ifndef GOL_HEADER_H
-#define GOL_HEADER_H
+#pragma once
 
 #include <Arduino.h>
 #include "mode/mode.h"
 #include "led.h"
 #include "constants.h"
 
-uint8_t updateCell(int row, int col);
-uint8_t countNeighbours(int row, int col);
-void next();
-void gameOfLifeSetup();
-void gameOfLifeLoop();
+class GameOfLife
+{
+private:
+  uint8_t previous[256];
+  uint8_t updateCell(int row, int col);
+  uint8_t countNeighbours(int row, int col);
+  void next();
 
-#endif
+public:
+  void setup();
+  void loop();
+};

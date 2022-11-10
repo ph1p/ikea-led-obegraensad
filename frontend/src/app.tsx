@@ -186,6 +186,9 @@ export function App() {
             <button className={button} onClick={() => sendMode(MODE.BREAKOUT)}>
               breakout
             </button>
+            <button className={button} onClick={() => sendMode(MODE.CIRCLE)}>
+              circle
+            </button>
             <button
               className={button}
               onClick={() => sendMode(MODE.GAMEOFLIFE)}

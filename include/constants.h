@@ -1,5 +1,4 @@
-#ifndef CONSTANTS_HEADER_H
-#define CONSTANTS_HEADER_H
+#pragma once
 
 #define PIN_ENABLE 26
 #define PIN_DATA 27
@@ -27,5 +26,3 @@
 
 #define COLS 16
 #define ROWS 16
-
-#endif

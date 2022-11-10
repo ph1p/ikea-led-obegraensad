@@ -1,44 +1,26 @@
 // copyright https://elektro.turanis.de/html/prj104/index.html
 #include "mode/breakout.h"
 
-struct Coords
-{
-  byte x;
-  byte y;
-};
-
-byte gameState;
-byte level;
-byte destroyedBricks;
-Coords paddle[PADDLE_WIDTH];
-Coords bricks[BRICK_AMOUNT];
-Coords ball;
-
-int ballMovement[2];
-unsigned int ballDelay;
-unsigned int score;
-unsigned long lastBallUpdate = 0;
-
-void initGame()
+void Breakout::initGame()
 {
   clearScreenAndBuffer(mode_buffer);
 
-  ballDelay = BALL_DELAY_MAX;
-  score = 0;
-  level = 0;
+  this->ballDelay = Breakout::BALL_DELAY_MAX;
+  this->score = 0;
+  this->level = 0;
   newLevel();
 }
 
-void initBricks()
+void Breakout::initBricks()
 {
-  destroyedBricks = 0;
-  for (byte i = 0; i < BRICK_AMOUNT; i++)
+  this->destroyedBricks = 0;
+  for (byte i = 0; i < Breakout::Breakout::BRICK_AMOUNT; i++)
   {
     if (currentMode == BREAKOUT)
     {
-      bricks[i].x = i % X_MAX;
-      bricks[i].y = i / X_MAX;
-      setPixelAtIndex(mode_buffer, bricks[i].y * X_MAX + bricks[i].x, LED_TYPE_ON);
+      this->bricks[i].x = i % Breakout::X_MAX;
+      this->bricks[i].y = i / Breakout::X_MAX;
+      setPixelAtIndex(mode_buffer, this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_ON);
 
       delay(25);
       renderScreen(mode_buffer);
@@ -46,130 +28,130 @@ void initBricks()
   }
 }
 
-void newLevel()
+void Breakout::newLevel()
 {
-  initBricks();
-  for (byte i = 0; i < PADDLE_WIDTH; i++)
+  this->initBricks();
+  for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
   {
-    paddle[i].x = (X_MAX / 2) - (PADDLE_WIDTH / 2) + i;
-    paddle[i].y = Y_MAX - 1;
-    setPixelAtIndex(mode_buffer, paddle[i].y * X_MAX + paddle[i].x, LED_TYPE_ON);
+    this->paddle[i].x = (Breakout::X_MAX / 2) - (Breakout::PADDLE_WIDTH / 2) + i;
+    this->paddle[i].y = Breakout::Y_MAX - 1;
+    setPixelAtIndex(mode_buffer, this->paddle[i].y * Breakout::X_MAX + paddle[i].x, Breakout::LED_TYPE_ON);
   }
-  ball.x = paddle[1].x;
-  ball.y = paddle[1].y - 1;
+  this->ball.x = this->paddle[1].x;
+  this->ball.y = this->paddle[1].y - 1;
 
-  setPixelAtIndex(mode_buffer, ball.y * X_MAX + ball.x, LED_TYPE_ON);
-  ballMovement[0] = 1;
-  ballMovement[1] = -1;
-  lastBallUpdate = 0;
+  setPixelAtIndex(mode_buffer, ball.y * Breakout::X_MAX + ball.x, Breakout::LED_TYPE_ON);
+  this->ballMovement[0] = 1;
+  this->ballMovement[1] = -1;
+  this->lastBallUpdate = 0;
 
   renderScreen(mode_buffer);
-  level++;
-  gameState = GAME_STATE_RUNNING;
+  this->level++;
+  this->gameState = Breakout::GAME_STATE_RUNNING;
 }
 
-void updateBall()
+void Breakout::updateBall()
 {
-  if ((millis() - lastBallUpdate) < ballDelay)
+  if ((millis() - this->lastBallUpdate) < this->ballDelay)
   {
     return;
   }
-  lastBallUpdate = millis();
-  setPixelAtIndex(mode_buffer, ball.y * X_MAX + ball.x, LED_TYPE_OFF);
+  this->lastBallUpdate = millis();
+  setPixelAtIndex(mode_buffer, this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_OFF);
 
-  if (ballMovement[1] == 1)
+  if (this->ballMovement[1] == 1)
   {
     // collision with bottom
-    if (ball.y == (Y_MAX - 1))
+    if (this->ball.y == (Breakout::Y_MAX - 1))
     {
-      endGame();
+      this->end();
       return;
     }
-    checkPaddleCollision();
+    this->checkPaddleCollision();
   }
 
   // collision detection with bricks
-  for (byte i = 0; i < BRICK_AMOUNT; i++)
+  for (byte i = 0; i < Breakout::BRICK_AMOUNT; i++)
   {
-    if (bricks[i].x == ball.x && bricks[i].y == ball.y)
+    if (this->bricks[i].x == this->ball.x && this->bricks[i].y == this->ball.y)
     {
-      hitBrick(i);
+      this->hitBrick(i);
       break;
     }
   }
-  if (destroyedBricks >= BRICK_AMOUNT)
+  if (this->destroyedBricks >= Breakout::BRICK_AMOUNT)
   {
-    gameState = GAME_STATE_LEVEL;
+    this->gameState = Breakout::GAME_STATE_LEVEL;
     return;
   }
 
   // collision detection with wall
-  if (ball.x <= 0 || ball.x >= (X_MAX - 1))
+  if (this->ball.x <= 0 || this->ball.x >= (Breakout::X_MAX - 1))
   {
-    ballMovement[0] *= -1;
+    this->ballMovement[0] *= -1;
   }
-  if (ball.y <= 0)
+  if (this->ball.y <= 0)
   {
-    ballMovement[1] *= -1;
+    this->ballMovement[1] *= -1;
   }
 
-  ball.x += ballMovement[0];
-  ball.y += ballMovement[1];
+  this->ball.x += this->ballMovement[0];
+  this->ball.y += this->ballMovement[1];
 
-  setPixelAtIndex(mode_buffer, ball.y * X_MAX + ball.x, LED_TYPE_ON);
+  setPixelAtIndex(mode_buffer, this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
   renderScreen(mode_buffer);
 }
 
-void hitBrick(byte i)
+void Breakout::hitBrick(byte i)
 {
-  bricks[i].x = -1;
-  bricks[i].y = -1;
+  this->bricks[i].x = -1;
+  this->bricks[i].y = -1;
   // ballMovement[1] *= -1;
-  score++;
-  destroyedBricks++;
-  if (ballDelay > BALL_DELAY_MIN)
+  this->score++;
+  this->destroyedBricks++;
+  if (this->ballDelay > Breakout::BALL_DELAY_MIN)
   {
-    ballDelay -= BALL_DELAY_STEP;
+    this->ballDelay -= Breakout::BALL_DELAY_STEP;
   }
-  setPixelAtIndex(mode_buffer, bricks[i].y * X_MAX + bricks[i].x, LED_TYPE_OFF);
+  setPixelAtIndex(mode_buffer, this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_OFF);
 }
 
-void checkPaddleCollision()
+void Breakout::checkPaddleCollision()
 {
-  if ((paddle[0].y - 1) != ball.y)
+  if ((this->paddle[0].y - 1) != this->ball.y)
   {
     return;
   }
 
   // reverse movement direction on the edges
-  if (ballMovement[0] == 1 && (paddle[0].x - 1) == ball.x ||
-      ballMovement[0] == -1 && (paddle[PADDLE_WIDTH - 1].x + 1) == ball.x)
+  if (this->ballMovement[0] == 1 && (this->paddle[0].x - 1) == this->ball.x ||
+      this->ballMovement[0] == -1 && (this->paddle[Breakout::PADDLE_WIDTH - 1].x + 1) == this->ball.x)
   {
-    ballMovement[0] *= -1;
-    ballMovement[1] *= -1;
+    this->ballMovement[0] *= -1;
+    this->ballMovement[1] *= -1;
 
     return;
   }
-  if (paddle[PADDLE_WIDTH / 2].x == ball.x)
+  if (paddle[Breakout::PADDLE_WIDTH / 2].x == this->ball.x)
   {
-    ballMovement[0] = 0;
-    ballMovement[1] *= -1;
+    this->ballMovement[0] = 0;
+    this->ballMovement[1] *= -1;
 
     return;
   }
 
-  for (byte i = 0; i < PADDLE_WIDTH; i++)
+  for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
   {
-    if (paddle[i].x == ball.x)
+    if (this->paddle[i].x == this->ball.x)
     {
-      ballMovement[1] *= -1;
+      this->ballMovement[1] *= -1;
       if (random(2) == 0)
       {
-        ballMovement[0] = 1;
+        this->ballMovement[0] = 1;
       }
       else
       {
-        ballMovement[0] = -1;
+        this->ballMovement[0] = -1;
       }
 
       break;
@@ -177,16 +159,16 @@ void checkPaddleCollision()
   }
 }
 
-void updatePaddle()
+void Breakout::updatePaddle()
 {
   byte direction = random(0, 2) > 0 ? 1 : 2;
 
   unsigned int moveDirection = 0;
-  if (direction == DIRECTION_LEFT && paddle[0].x > 0)
+  if (direction == Breakout::DIRECTION_LEFT && this->paddle[0].x > 0)
   {
     moveDirection = -1;
   }
-  if (direction == DIRECTION_RIGHT && paddle[PADDLE_WIDTH - 1].x < (X_MAX - 1))
+  if (direction == Breakout::DIRECTION_RIGHT && this->paddle[Breakout::PADDLE_WIDTH - 1].x < (Breakout::X_MAX - 1))
   {
     moveDirection = 1;
   }
@@ -194,52 +176,52 @@ void updatePaddle()
   if (moveDirection != 0)
   {
     // turn off paddle LEDs
-    for (byte i = 0; i < PADDLE_WIDTH; i++)
+    for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
-      setPixelAtIndex(mode_buffer, paddle[i].y * X_MAX + paddle[i].x, LED_TYPE_OFF);
+      setPixelAtIndex(mode_buffer, this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_OFF);
     }
-    for (byte i = 0; i < PADDLE_WIDTH; i++)
+    for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
-      paddle[i].x += moveDirection;
+      this->paddle[i].x += moveDirection;
     }
-    for (byte i = 0; i < PADDLE_WIDTH; i++)
+    for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
-      setPixelAtIndex(mode_buffer, paddle[i].y * X_MAX + paddle[i].x, LED_TYPE_ON);
+      setPixelAtIndex(mode_buffer, this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_ON);
     }
   }
   renderScreen(mode_buffer);
 }
 
-void endGame()
+void Breakout::end()
 {
   // Serial.println("GAME OVER!");
-  gameState = GAME_STATE_END;
-  setPixelAtIndex(mode_buffer, ball.y * X_MAX + ball.x, LED_TYPE_ON);
+  this->gameState = Breakout::GAME_STATE_END;
+  setPixelAtIndex(mode_buffer, this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
 
   renderScreen(mode_buffer);
   // Serial.println("Final score: " + String(score) + " in level " + String(level));
 }
 
-void breakoutSetup()
+void Breakout::setup()
 {
   clearScreenAndBuffer(mode_buffer);
-  gameState = GAME_STATE_END;
+  this->gameState = Breakout::GAME_STATE_END;
 }
 
-void breakoutLoop()
+void Breakout::loop()
 {
-  switch (gameState)
+  switch (this->gameState)
   {
-  case GAME_STATE_LEVEL:
-    newLevel();
+  case Breakout::GAME_STATE_LEVEL:
+    this->newLevel();
     break;
-  case GAME_STATE_RUNNING:
-    updateBall();
-    updatePaddle();
+  case Breakout::GAME_STATE_RUNNING:
+    this->updateBall();
+    this->updatePaddle();
     delay(300);
     break;
-  case GAME_STATE_END:
-    initGame();
+  case Breakout::GAME_STATE_END:
+    this->initGame();
     break;
   }
 }

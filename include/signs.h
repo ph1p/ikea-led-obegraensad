@@ -1,16 +1,14 @@
-#ifndef SIGNS_HEADER_H
-#define SIGNS_HEADER_H
+#pragma once
 
 #include <Arduino.h>
-#include <constants.h>
+#include "constants.h"
 
-extern uint8_t digitZero[ROWS * COLS];
-extern uint8_t digitOne[ROWS * COLS];
-extern uint8_t digitTwo[ROWS * COLS];
-extern uint8_t digitThree[ROWS * COLS];
-extern uint8_t digitFour[ROWS * COLS];
+extern uint8_t digitZero[ROWS * COLS] PROGMEM;
+extern uint8_t digitOne[ROWS * COLS] PROGMEM;
+extern uint8_t digitTwo[ROWS * COLS] PROGMEM;
+extern uint8_t digitThree[ROWS * COLS] PROGMEM;
+extern uint8_t digitFour[ROWS * COLS] PROGMEM;
+extern uint8_t digitFive[ROWS * COLS] PROGMEM;
 
-extern uint8_t letterU[ROWS * COLS];
-extern uint8_t letterR[ROWS * COLS];
-
-#endif
+extern uint8_t letterU[ROWS * COLS] PROGMEM;
+extern uint8_t letterR[ROWS * COLS] PROGMEM;

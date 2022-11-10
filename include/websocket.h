@@ -1,5 +1,4 @@
-#ifndef WS_HEADER_H
-#define WS_HEADER_H
+#pragma once
 
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
@@ -17,6 +16,4 @@ void cleanUpClients();
 #ifdef WS_MAX_QUEUED_MESSAGES
 #undef WS_MAX_QUEUED_MESSAGES
 #define WS_MAX_QUEUED_MESSAGES 64
-#endif
-
 #endif

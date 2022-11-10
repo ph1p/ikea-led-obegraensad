@@ -124,10 +124,18 @@ void setPixelAtIndex(uint8_t buffer[ROWS * COLS], uint8_t index, uint8_t value)
 
 void setPixel(uint8_t buffer[ROWS * COLS], uint8_t x, uint8_t y, uint8_t value)
 {
-  if (x >= 0 && y >= 0 && x <= ROWS && y <= COLS)
+  int max_x = x;
+  if (x >= ROWS)
   {
-    buffer[y * 16 + x] = value;
+    max_x = 15;
   }
+  int max_y = y;
+  if (y >= COLS)
+  {
+    max_y = 15;
+  }
+
+  buffer[max_y * 16 + max_x] = value;
 }
 
 int findPosition(uint8_t count)

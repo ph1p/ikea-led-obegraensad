@@ -1,5 +1,4 @@
-#ifndef MODE_HEADER_H
-#define MODE_HEADER_H
+#pragma once
 
 #include <Arduino.h>
 #include "constants.h"
@@ -8,6 +7,7 @@
 #include "mode/stars.h"
 #include "mode/lines.h"
 #include "led.h"
+#include "circle.h"
 #include "signs.h"
 
 extern uint8_t mode_buffer[ROWS * COLS];
@@ -19,6 +19,7 @@ enum MODE
   LINES,
   BREAKOUT,
   GAMEOFLIFE,
+  CIRCLE,
   // SYSTEM
   UPDATE,
   LOADING,
@@ -30,5 +31,3 @@ void setMode(MODE mode);
 void setModeByString(String mode);
 void setModeByString(String mode, void (*callback)(MODE mode));
 void modeLoop();
-
-#endif

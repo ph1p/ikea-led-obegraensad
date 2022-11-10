@@ -9,6 +9,10 @@ int buttonModeCount = -1;
 int modeButtonState = 0;
 int lastModeButtonState = 0;
 
+GameOfLife gameOfLife;
+Breakout breakout;
+Circle circle;
+
 void setMode(MODE mode)
 {
   if (mode == currentMode || currentMode == LOADING)
@@ -32,15 +36,20 @@ void setMode(MODE mode)
   }
   else if (mode == BREAKOUT)
   {
-    breakoutSetup();
+    breakout.setup();
     renderScreen(digitThree);
     buttonModeCount = 2;
   }
   else if (mode == GAMEOFLIFE)
   {
-    gameOfLifeSetup();
+    gameOfLife.setup();
     renderScreen(digitFour);
     buttonModeCount = 3;
+  }
+  else if (mode == CIRCLE)
+  {
+    renderScreen(digitFive);
+    buttonModeCount = 4;
   }
 
   if (mode == NONE)
@@ -48,7 +57,7 @@ void setMode(MODE mode)
     renderScreen(digitZero);
     delay(1000);
     renderScreen(renderBuffer);
-    buttonModeCount = 4;
+    buttonModeCount = 5;
   }
   else
   {
@@ -76,6 +85,10 @@ void setModeByString(String mode, void (*callback)(MODE mode))
   else if (mode == "gameoflife")
   {
     modeAsEnum = GAMEOFLIFE;
+  }
+  else if (mode == "circle")
+  {
+    modeAsEnum = CIRCLE;
   }
   if (callback)
   {
@@ -113,12 +126,16 @@ void listenOnButtonToChangeMode()
       }
       else if (buttonModeCount == 4)
       {
+        setMode(CIRCLE);
+      }
+      else if (buttonModeCount == 5)
+      {
         setMode(NONE);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount >= 5)
+      if (buttonModeCount >= 6)
       {
         buttonModeCount = 0;
       }
@@ -142,11 +159,15 @@ void loopOfAllModes()
     }
     if (currentMode == BREAKOUT)
     {
-      breakoutLoop();
+      breakout.loop();
     }
     if (currentMode == GAMEOFLIFE)
     {
-      gameOfLifeLoop();
+      gameOfLife.loop();
+    }
+    if (currentMode == CIRCLE)
+    {
+      circle.loop();
     }
   }
   delay(20);

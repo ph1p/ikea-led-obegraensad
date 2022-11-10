@@ -4,6 +4,7 @@ export enum MODE {
   LINES = 'lines',
   BREAKOUT = 'breakout',
   GAMEOFLIFE = 'gameoflife',
+  CIRCLE = 'circle',
   UPDATE = 'update',
   LOADING = 'loading',
 }

@@ -1,5 +1,4 @@
-#ifndef WEBSERVER_HEADER_H
-#define WEBSERVER_HEADER_H
+#pragma once
 
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
@@ -8,5 +7,3 @@
 
 extern AsyncWebServer server;
 void initWebServer();
-
-#endif
