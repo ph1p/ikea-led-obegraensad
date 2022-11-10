@@ -6,7 +6,10 @@
 #define PIN_LATCH 12
 #define PIN_BUTTON 16
 
+// disable if you do not want to have online functionality
 #define ENABLE_SERVER
+
+// comment in if you have connected an accelerometer
 // #define ENABLE_ACCELEROMETER
 
 // define your own

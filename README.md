@@ -11,6 +11,8 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 ## Features
 
 - Persist your drawing
+- Rotate image
+  - optional with accelerometer
 - Live Drawing
 - OTA Update
 - Wifi Control
@@ -22,6 +24,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Breakout
   - Stars
   - Lines
+  - Circle
 
 # How to
 
@@ -53,11 +56,12 @@ Above is a microcontroller. You have to remove it, because it contains the stand
   - Upload
   - Your Pins
 
+Variables can be found inside `include/constants.h`.
+
 ### Create `include/secrets.h`
 
 ```cpp
-#ifndef SECRETS_HEADER_H
-#define SECRETS_HEADER_H
+#pragma once
 
 #define WIFI_SSID ""
 #define WIFI_PASSWORD ""
@@ -65,8 +69,6 @@ Above is a microcontroller. You have to remove it, because it contains the stand
 
 #define OTA_USERNAME ""
 #define OTA_PASSWORD ""
-
-#endif
 ```
 
 also set username and password inside `upload.py`, if you want to use OTA Updates.
