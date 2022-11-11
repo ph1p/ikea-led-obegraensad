@@ -12,6 +12,10 @@
 
 extern uint8_t modeBuffer[ROWS * COLS];
 
+extern int buttonModeCount;
+extern int modeButtonState;
+extern int lastModeButtonState;
+
 enum MODE
 {
   NONE,
@@ -31,3 +35,5 @@ void setMode(MODE mode);
 void setModeByString(String mode);
 void setModeByString(String mode, void (*callback)(MODE mode));
 void modeLoop();
+void listenOnButtonToChangeMode();
+void loopOfAllModes();

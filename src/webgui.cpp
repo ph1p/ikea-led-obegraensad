@@ -1,4 +1,4 @@
-#include "constants.h"
+#include "webgui.h"
 
 #ifdef ENABLE_SERVER
 

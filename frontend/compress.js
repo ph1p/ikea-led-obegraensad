@@ -40,7 +40,7 @@ gzip(
       return console.error(err);
     }
 
-    const FILE = `#include "constants.h"
+    const FILE = `#include "webgui.h"
 
 #ifdef ENABLE_SERVER
 
