@@ -18,45 +18,54 @@ void setMode(MODE mode)
   if (mode == currentMode || currentMode == LOADING)
     return;
 
+  if (currentMode == NONE)
+  {
+    // save current drawing in cache
+    Screen.cacheCurrent();
+  }
+
   currentMode = LOADING;
 
-  Screen.clear(modeBuffer);
-  memset(modeBuffer, 0, sizeof(modeBuffer));
-  delay(10);
+  Screen.clear();
+  memset(modeBuffer, 0, ROWS * COLS);
 
   if (mode == STARS)
   {
-    Screen.render(digitOne);
+    Screen.setRenderBuffer(digitOne);
     buttonModeCount = 0;
   }
   else if (mode == LINES)
   {
-    Screen.render(digitTwo);
+    Screen.setRenderBuffer(digitTwo);
     buttonModeCount = 1;
   }
   else if (mode == BREAKOUT)
   {
     breakout.setup();
-    Screen.render(digitThree);
+    Screen.setRenderBuffer(digitThree);
     buttonModeCount = 2;
   }
   else if (mode == GAMEOFLIFE)
   {
     gameOfLife.setup();
-    Screen.render(digitFour);
+    Screen.setRenderBuffer(digitFour);
     buttonModeCount = 3;
   }
   else if (mode == CIRCLE)
   {
-    Screen.render(digitFive);
+    Screen.setRenderBuffer(digitFive);
     buttonModeCount = 4;
   }
+  Screen.render();
 
   if (mode == NONE)
   {
-    Screen.render(digitZero);
+    Screen.setRenderBuffer(digitZero);
+    Screen.render();
     delay(1000);
-    Screen.render(Screen.renderBuffer);
+    // save current drawing in cache
+    Screen.restoreCache();
+    Screen.render();
     buttonModeCount = 5;
   }
   else

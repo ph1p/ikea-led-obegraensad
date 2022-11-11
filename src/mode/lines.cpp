@@ -5,10 +5,11 @@ bool forwards = true;
 
 void lines()
 {
-  Screen.drawLine(modeBuffer, count, true);
-  Screen.drawLine(modeBuffer, count, false);
-  Screen.render(modeBuffer);
-  memset(modeBuffer, 0, sizeof(modeBuffer));
+  Screen.setRenderBuffer(modeBuffer);
+  Screen.drawLine(count, true);
+  Screen.drawLine(count, false);
+  Screen.render();
+  memset(modeBuffer, 0, ROWS * COLS);
 
   if (count == 15 && forwards)
   {
@@ -28,5 +29,5 @@ void lines()
   {
     count--;
   }
-  delay(120);
+  delay(60);
 }

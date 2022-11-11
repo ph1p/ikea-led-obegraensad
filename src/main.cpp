@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-#include "websocket.h"
-#include "storage.h"
+#include "constants.h"
 #include "mode/mode.h"
+#include "websocket.h"
 #include "secrets.h"
 #include "ota.h"
 #include "webserver.h"
@@ -24,13 +24,7 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
-  Screen.clear(Screen.renderBuffer);
-
-  // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
-  storage.begin("led-wall", false);
-  storage.getBytes("data", Screen.renderBuffer, sizeof(Screen.renderBuffer));
-  storage.end();
-  Screen.render(Screen.renderBuffer);
+  Screen.loadFromStorage();
 
 // server
 #ifdef ENABLE_SERVER

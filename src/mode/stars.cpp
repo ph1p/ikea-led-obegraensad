@@ -15,6 +15,7 @@ void stars()
       modeBuffer[row * 16 + col] = ra;
     }
   }
-  Screen.render(modeBuffer);
+  Screen.setRenderBuffer(modeBuffer);
+  Screen.render();
   delay(400);
 }

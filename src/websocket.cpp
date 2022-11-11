@@ -7,9 +7,9 @@ AsyncWebSocket ws("/ws");
 void sendStateAndInfo()
 {
   DynamicJsonDocument jsonDocument(6144);
-  for (int j = 0; j < sizeof(Screen.renderBuffer); j++)
+  for (int j = 0; j < ROWS * COLS; j++)
   {
-    jsonDocument["data"][j] = Screen.renderBuffer[j];
+    jsonDocument["data"][j] = Screen.getRenderBuffer()[j];
   }
   jsonDocument["mode"] = currentMode;
   jsonDocument["event"] = "info";
@@ -73,13 +73,12 @@ void onWsEvent(
         else if (!strcmp(event, "rotate"))
         {
           bool isRight = (bool)!strcmp(wsRequest["direction"], "right");
-          Screen.rotate(
-              Screen.positions, Screen.currentRotation + (90 * (isRight ? 1 : -1)));
+          Screen.rotate(Screen.currentRotation + (90 * (isRight ? 1 : -1)));
 
           if (currentMode == NONE)
           {
             delay(10);
-            Screen.render(Screen.renderBuffer);
+            Screen.render();
           }
         }
         else if (!strcmp(event, "info"))
@@ -91,36 +90,33 @@ void onWsEvent(
         {
           if (!strcmp(event, "clear"))
           {
-            Screen.clear(Screen.renderBuffer);
+            Screen.clear();
           }
           else if (!strcmp(event, "led"))
           {
-            Screen.setPixelAtIndex(Screen.renderBuffer, wsRequest["index"], wsRequest["status"]);
-            Screen.render(Screen.renderBuffer);
+            Screen.setPixelAtIndex(wsRequest["index"], wsRequest["status"]);
+            Screen.render();
           }
           else if (!strcmp(event, "screen"))
           {
+            uint8_t buffer[ROWS * COLS];
             for (int i = 0; i < ROWS * COLS; i++)
             {
-              Screen.renderBuffer[i] = wsRequest["data"][i];
+              buffer[i] = wsRequest["data"][i];
             }
+            Screen.setRenderBuffer(buffer);
             delay(10);
-            Screen.render(Screen.renderBuffer);
+            Screen.render();
           }
           else if (!strcmp(event, "persist"))
           {
-            storage.begin("led-wall", false);
-            storage.putBytes("data", Screen.renderBuffer, sizeof(Screen.renderBuffer));
-            storage.end();
+            Screen.persist();
           }
           else if (!strcmp(event, "load"))
           {
-            Screen.clear(Screen.renderBuffer);
-            storage.begin("led-wall", false);
-            storage.getBytes("data", Screen.renderBuffer, sizeof(Screen.renderBuffer));
-            storage.end();
+            Screen.loadFromStorage();
             delay(10);
-            Screen.render(Screen.renderBuffer);
+            Screen.render();
             sendStateAndInfo();
           }
         }

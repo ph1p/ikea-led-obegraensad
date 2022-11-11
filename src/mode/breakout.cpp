@@ -3,7 +3,7 @@
 
 void Breakout::initGame()
 {
-  Screen.clear(modeBuffer);
+  Screen.clear();
 
   this->ballDelay = Breakout::BALL_DELAY_MAX;
   this->score = 0;
@@ -20,10 +20,10 @@ void Breakout::initBricks()
     {
       this->bricks[i].x = i % Breakout::X_MAX;
       this->bricks[i].y = i / Breakout::X_MAX;
-      Screen.setPixelAtIndex(modeBuffer, this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_ON);
+      Screen.setPixelAtIndex(this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_ON);
 
       delay(25);
-      Screen.render(modeBuffer);
+      Screen.render();
     }
   }
 }
@@ -35,17 +35,17 @@ void Breakout::newLevel()
   {
     this->paddle[i].x = (Breakout::X_MAX / 2) - (Breakout::PADDLE_WIDTH / 2) + i;
     this->paddle[i].y = Breakout::Y_MAX - 1;
-    Screen.setPixelAtIndex(modeBuffer, this->paddle[i].y * Breakout::X_MAX + paddle[i].x, Breakout::LED_TYPE_ON);
+    Screen.setPixelAtIndex(this->paddle[i].y * Breakout::X_MAX + paddle[i].x, Breakout::LED_TYPE_ON);
   }
   this->ball.x = this->paddle[1].x;
   this->ball.y = this->paddle[1].y - 1;
 
-  Screen.setPixelAtIndex(modeBuffer, ball.y * Breakout::X_MAX + ball.x, Breakout::LED_TYPE_ON);
+  Screen.setPixelAtIndex(ball.y * Breakout::X_MAX + ball.x, Breakout::LED_TYPE_ON);
   this->ballMovement[0] = 1;
   this->ballMovement[1] = -1;
   this->lastBallUpdate = 0;
 
-  Screen.render(modeBuffer);
+  Screen.render();
   this->level++;
   this->gameState = Breakout::GAME_STATE_RUNNING;
 }
@@ -57,7 +57,7 @@ void Breakout::updateBall()
     return;
   }
   this->lastBallUpdate = millis();
-  Screen.setPixelAtIndex(modeBuffer, this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_OFF);
+  Screen.setPixelAtIndex(this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_OFF);
 
   if (this->ballMovement[1] == 1)
   {
@@ -98,8 +98,8 @@ void Breakout::updateBall()
   this->ball.x += this->ballMovement[0];
   this->ball.y += this->ballMovement[1];
 
-  Screen.setPixelAtIndex(modeBuffer, this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
-  Screen.render(modeBuffer);
+  Screen.setPixelAtIndex(this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
+  Screen.render();
 }
 
 void Breakout::hitBrick(byte i)
@@ -113,7 +113,7 @@ void Breakout::hitBrick(byte i)
   {
     this->ballDelay -= Breakout::BALL_DELAY_STEP;
   }
-  Screen.setPixelAtIndex(modeBuffer, this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_OFF);
+  Screen.setPixelAtIndex(this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_OFF);
 }
 
 void Breakout::checkPaddleCollision()
@@ -178,7 +178,7 @@ void Breakout::updatePaddle()
     // turn off paddle LEDs
     for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
-      Screen.setPixelAtIndex(modeBuffer, this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_OFF);
+      Screen.setPixelAtIndex( this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_OFF);
     }
     for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
@@ -186,25 +186,25 @@ void Breakout::updatePaddle()
     }
     for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
-      Screen.setPixelAtIndex(modeBuffer, this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_ON);
+      Screen.setPixelAtIndex( this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_ON);
     }
   }
-  Screen.render(modeBuffer);
+  Screen.render();
 }
 
 void Breakout::end()
 {
   // Serial.println("GAME OVER!");
   this->gameState = Breakout::GAME_STATE_END;
-  Screen.setPixelAtIndex(modeBuffer, this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
+  Screen.setPixelAtIndex(this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
 
-  Screen.render(modeBuffer);
+  Screen.render();
   // Serial.println("Final score: " + String(score) + " in level " + String(level));
 }
 
 void Breakout::setup()
 {
-  Screen.clear(modeBuffer);
+  Screen.clear();
   this->gameState = Breakout::GAME_STATE_END;
 }
 

@@ -35,7 +35,8 @@ uint8_t GameOfLife::updateCell(int row, int col)
 void GameOfLife::setup()
 {
   memset(previous, 0, ROWS * COLS);
-  Screen.clear(modeBuffer);
+  Screen.setRenderBuffer(modeBuffer);
+  Screen.clear();
   for (int i = 0; i < ROWS * COLS; i++)
   {
     modeBuffer[i] = (random(20)) ? 1 : 0;
@@ -50,7 +51,7 @@ void GameOfLife::next()
     for (int j = 0; j < COLS; j++)
     {
       modeBuffer[i * 16 + j] = this->updateCell(i, j);
-      Screen.setPixelAtIndex(modeBuffer, i * 16 + j, modeBuffer[i * 16 + j]);
+      Screen.setPixelAtIndex(i * 16 + j, modeBuffer[i * 16 + j]);
     }
   }
 }
@@ -58,7 +59,7 @@ void GameOfLife::next()
 void GameOfLife::loop()
 {
   this->next();
-  Screen.render(modeBuffer);
+  Screen.render();
 
   if (memcmp(this->previous, modeBuffer, sizeof(this->previous)) == 0)
   {

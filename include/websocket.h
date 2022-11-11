@@ -3,7 +3,6 @@
 #include "constants.h"
 
 #ifdef ENABLE_SERVER
-
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 

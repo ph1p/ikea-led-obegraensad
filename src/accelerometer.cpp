@@ -33,25 +33,25 @@ void Accelerometer::loop()
   {
     if (this->direction == "portrait")
     {
-      Screen.rotate(Screen.positions, 0);
+      Screen.rotate(0);
     }
     else if (this->direction == "landscape")
     {
-      Screen.rotate(Screen.positions, -90);
+      Screen.rotate(-90);
     }
     else if (this->direction == "landscape-opposite")
     {
-      Screen.rotate(Screen.positions, 90);
+      Screen.rotate(90);
     }
     else if (this->direction == "portrait-opposite")
     {
-      Screen.rotate(Screen.positions, 180);
+      Screen.rotate(180);
     }
 
     if (currentMode == NONE)
     {
       delay(10);
-      Screen.render(Screen.renderBuffer);
+      Screen.render();
     }
     sendStateAndInfo();
   }
