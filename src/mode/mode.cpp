@@ -20,43 +20,43 @@ void setMode(MODE mode)
 
   currentMode = LOADING;
 
-  Screen.clearScreenAndBuffer(modeBuffer);
+  Screen.clear(modeBuffer);
   memset(modeBuffer, 0, sizeof(modeBuffer));
   delay(10);
 
   if (mode == STARS)
   {
-    Screen.renderScreen(digitOne);
+    Screen.render(digitOne);
     buttonModeCount = 0;
   }
   else if (mode == LINES)
   {
-    Screen.renderScreen(digitTwo);
+    Screen.render(digitTwo);
     buttonModeCount = 1;
   }
   else if (mode == BREAKOUT)
   {
     breakout.setup();
-    Screen.renderScreen(digitThree);
+    Screen.render(digitThree);
     buttonModeCount = 2;
   }
   else if (mode == GAMEOFLIFE)
   {
     gameOfLife.setup();
-    Screen.renderScreen(digitFour);
+    Screen.render(digitFour);
     buttonModeCount = 3;
   }
   else if (mode == CIRCLE)
   {
-    Screen.renderScreen(digitFive);
+    Screen.render(digitFive);
     buttonModeCount = 4;
   }
 
   if (mode == NONE)
   {
-    Screen.renderScreen(digitZero);
+    Screen.render(digitZero);
     delay(1000);
-    Screen.renderScreen(Screen.renderBuffer);
+    Screen.render(Screen.renderBuffer);
     buttonModeCount = 5;
   }
   else

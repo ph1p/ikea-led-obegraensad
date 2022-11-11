@@ -71,10 +71,10 @@ void Screen_::rotate(uint8_t matrix[ROWS * COLS], int degree)
   }
 };
 
-void Screen_::clearScreenAndBuffer(uint8_t buffer[ROWS * COLS])
+void Screen_::clear(uint8_t buffer[ROWS * COLS])
 {
   memset(buffer, 0, ROWS * COLS);
-  this->renderScreen(buffer);
+  this->render(buffer);
 }
 
 void Screen_::setPixelAtIndex(uint8_t buffer[ROWS * COLS], uint8_t index, uint8_t value)
@@ -124,7 +124,7 @@ void Screen_::drawLine(uint8_t buffer[ROWS * COLS], uint8_t line, bool isHorizon
   }
 };
 
-void Screen_::renderScreen(uint8_t data[ROWS * COLS])
+void Screen_::render(uint8_t data[ROWS * COLS])
 {
   for (uint8_t row = 0; row < ROWS; row++)
   {

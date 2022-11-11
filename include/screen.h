@@ -55,11 +55,11 @@ public:
   uint8_t rotatedPositions[ROWS * COLS];
   int currentRotation;
 
-  void clearScreenAndBuffer(uint8_t buffer[ROWS * COLS]);
+  void clear(uint8_t buffer[ROWS * COLS]);
   void drawLine(uint8_t buffer[ROWS * COLS], uint8_t line, bool isHorizontal);
   void setPixel(uint8_t buffer[ROWS * COLS], uint8_t x, uint8_t y, uint8_t value);
   void setPixelAtIndex(uint8_t buffer[ROWS * COLS], uint8_t index, uint8_t value);
-  void renderScreen(uint8_t data[ROWS * COLS]);
+  void render(uint8_t data[ROWS * COLS]);
   void rotate(uint8_t matrix[ROWS * COLS], int degree = 90);
 };
 

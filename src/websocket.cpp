@@ -79,7 +79,7 @@ void onWsEvent(
           if (currentMode == NONE)
           {
             delay(10);
-            Screen.renderScreen(Screen.renderBuffer);
+            Screen.render(Screen.renderBuffer);
           }
         }
         else if (!strcmp(event, "info"))
@@ -91,12 +91,12 @@ void onWsEvent(
         {
           if (!strcmp(event, "clear"))
           {
-            Screen.clearScreenAndBuffer(Screen.renderBuffer);
+            Screen.clear(Screen.renderBuffer);
           }
           else if (!strcmp(event, "led"))
           {
             Screen.setPixelAtIndex(Screen.renderBuffer, wsRequest["index"], wsRequest["status"]);
-            Screen.renderScreen(Screen.renderBuffer);
+            Screen.render(Screen.renderBuffer);
           }
           else if (!strcmp(event, "screen"))
           {
@@ -105,7 +105,7 @@ void onWsEvent(
               Screen.renderBuffer[i] = wsRequest["data"][i];
             }
             delay(10);
-            Screen.renderScreen(Screen.renderBuffer);
+            Screen.render(Screen.renderBuffer);
           }
           else if (!strcmp(event, "persist"))
           {
@@ -115,12 +115,12 @@ void onWsEvent(
           }
           else if (!strcmp(event, "load"))
           {
-            Screen.clearScreenAndBuffer(Screen.renderBuffer);
+            Screen.clear(Screen.renderBuffer);
             storage.begin("led-wall", false);
             storage.getBytes("data", Screen.renderBuffer, sizeof(Screen.renderBuffer));
             storage.end();
             delay(10);
-            Screen.renderScreen(Screen.renderBuffer);
+            Screen.render(Screen.renderBuffer);
             sendStateAndInfo();
           }
         }

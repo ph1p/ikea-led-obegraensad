@@ -8,14 +8,14 @@ const char *otaPassword = OTA_PASSWORD;
 void onOTAStart()
 {
   setMode(UPDATE);
-  Screen.renderScreen(letterU);
+  Screen.render(letterU);
 }
 
 void onOTAEnd()
 {
-  Screen.renderScreen(letterR);
+  Screen.render(letterR);
   delay(1000);
-  Screen.renderScreen(Screen.renderBuffer);
+  Screen.render(Screen.renderBuffer);
 }
 
 void initOTA(AsyncWebServer &server)

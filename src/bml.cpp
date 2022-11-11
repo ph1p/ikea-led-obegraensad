@@ -53,7 +53,7 @@
 //     if (count == frameCount-1)
 //       count = 0;
 
-//     renderScreen(framesArray[count]);
+//     render(framesArray[count]);
 //     delay(durationArray[count]);
 //     count++;
 //   }

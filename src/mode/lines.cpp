@@ -7,7 +7,7 @@ void lines()
 {
   Screen.drawLine(modeBuffer, count, true);
   Screen.drawLine(modeBuffer, count, false);
-  Screen.renderScreen(modeBuffer);
+  Screen.render(modeBuffer);
   memset(modeBuffer, 0, sizeof(modeBuffer));
 
   if (count == 15 && forwards)

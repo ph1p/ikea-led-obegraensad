@@ -3,7 +3,7 @@
 
 void Breakout::initGame()
 {
-  Screen.clearScreenAndBuffer(modeBuffer);
+  Screen.clear(modeBuffer);
 
   this->ballDelay = Breakout::BALL_DELAY_MAX;
   this->score = 0;
@@ -23,7 +23,7 @@ void Breakout::initBricks()
       Screen.setPixelAtIndex(modeBuffer, this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_ON);
 
       delay(25);
-      Screen.renderScreen(modeBuffer);
+      Screen.render(modeBuffer);
     }
   }
 }
@@ -45,7 +45,7 @@ void Breakout::newLevel()
   this->ballMovement[1] = -1;
   this->lastBallUpdate = 0;
 
-  Screen.renderScreen(modeBuffer);
+  Screen.render(modeBuffer);
   this->level++;
   this->gameState = Breakout::GAME_STATE_RUNNING;
 }
@@ -99,7 +99,7 @@ void Breakout::updateBall()
   this->ball.y += this->ballMovement[1];
 
   Screen.setPixelAtIndex(modeBuffer, this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
-  Screen.renderScreen(modeBuffer);
+  Screen.render(modeBuffer);
 }
 
 void Breakout::hitBrick(byte i)
@@ -189,7 +189,7 @@ void Breakout::updatePaddle()
       Screen.setPixelAtIndex(modeBuffer, this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_ON);
     }
   }
-  Screen.renderScreen(modeBuffer);
+  Screen.render(modeBuffer);
 }
 
 void Breakout::end()
@@ -198,13 +198,13 @@ void Breakout::end()
   this->gameState = Breakout::GAME_STATE_END;
   Screen.setPixelAtIndex(modeBuffer, this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
 
-  Screen.renderScreen(modeBuffer);
+  Screen.render(modeBuffer);
   // Serial.println("Final score: " + String(score) + " in level " + String(level));
 }
 
 void Breakout::setup()
 {
-  Screen.clearScreenAndBuffer(modeBuffer);
+  Screen.clear(modeBuffer);
   this->gameState = Breakout::GAME_STATE_END;
 }
 

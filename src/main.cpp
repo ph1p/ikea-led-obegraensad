@@ -24,13 +24,13 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
-  Screen.clearScreenAndBuffer(Screen.renderBuffer);
+  Screen.clear(Screen.renderBuffer);
 
   // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
   storage.begin("led-wall", false);
   storage.getBytes("data", Screen.renderBuffer, sizeof(Screen.renderBuffer));
   storage.end();
-  Screen.renderScreen(Screen.renderBuffer);
+  Screen.render(Screen.renderBuffer);
 
 // server
 #ifdef ENABLE_SERVER

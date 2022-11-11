@@ -54,7 +54,7 @@ void Circle::loop()
         }
         else
         {
-            Screen.renderScreen(this->memo[key]);
+            Screen.render(this->memo[key]);
             delay(200);
         }
     }
