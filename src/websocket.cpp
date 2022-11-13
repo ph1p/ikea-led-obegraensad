@@ -70,6 +70,10 @@ void onWsEvent(
         {
           setModeByString(wsRequest["mode"], sendModeToAllClients);
         }
+        else if (!strcmp(event, "persist-mode"))
+        {
+          persistMode();
+        }
         else if (!strcmp(event, "rotate"))
         {
           bool isRight = (bool)!strcmp(wsRequest["direction"], "right");

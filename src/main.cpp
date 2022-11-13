@@ -9,7 +9,7 @@
 #include "webserver.h"
 #include "screen.h"
 #include "accelerometer.h"
-#include "mode/clock.h"
+#include "mode/mode.h"
 
 #ifdef ENABLE_ACCELEROMETER
 Accelerometer accelerometer;
@@ -25,7 +25,12 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
-  Screen.loadFromStorage();
+  loadMode();
+
+  if (currentMode == NONE)
+  {
+    Screen.loadFromStorage();
+  }
 
 // server
 #ifdef ENABLE_SERVER

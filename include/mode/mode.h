@@ -37,3 +37,5 @@ void setModeByString(String mode, void (*callback)(MODE mode));
 void modeLoop();
 void listenOnButtonToChangeMode();
 void loopOfAllModes();
+void persistMode();
+void loadMode();

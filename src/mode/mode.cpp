@@ -188,3 +188,17 @@ void loopOfAllModes()
   }
   delay(10);
 }
+
+void persistMode()
+{
+  storage.begin("led-wall", false);
+  storage.putInt("mode", currentMode);
+  storage.end();
+}
+
+void loadMode()
+{
+  storage.begin("led-wall", false);
+  setMode((MODE) storage.getInt("mode"));
+  storage.end();
+}

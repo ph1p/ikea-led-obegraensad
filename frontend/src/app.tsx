@@ -123,7 +123,14 @@ export function App() {
   };
 
   const wsMessage = (
-    event: 'persist' | 'load' | 'clear' | 'mode' | 'screen' | 'led',
+    event:
+      | 'persist'
+      | 'load'
+      | 'clear'
+      | 'mode'
+      | 'screen'
+      | 'led'
+      | 'persist-mode',
     data?: any
   ) =>
     sendMessage(
@@ -185,7 +192,7 @@ export function App() {
             </button>
             <button className={button} onClick={() => sendMode(MODE.BREAKOUT)}>
               breakout
-              </button>
+            </button>
             <button
               className={button}
               onClick={() => sendMode(MODE.GAMEOFLIFE)}
@@ -197,6 +204,13 @@ export function App() {
             </button>
             <button className={button} onClick={() => sendMode(MODE.CLOCK)}>
               clock
+            </button>
+
+            <button
+              className={button}
+              onClick={() => wsMessage('persist-mode')}
+            >
+              set mode as default
             </button>
           </div>
 
