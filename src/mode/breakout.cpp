@@ -210,6 +210,7 @@ void Breakout::setup()
 
 void Breakout::loop()
 {
+  listenOnButtonToChangeMode();
   switch (this->gameState)
   {
   case Breakout::GAME_STATE_LEVEL:

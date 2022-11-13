@@ -2,8 +2,6 @@
 
 MODE currentMode;
 
-uint8_t modeBuffer[ROWS * COLS];
-
 int buttonModeCount = -1;
 
 int modeButtonState = 0;
@@ -24,53 +22,44 @@ void setMode(MODE mode)
     Screen.cacheCurrent();
   }
 
-  currentMode = LOADING;
-
   Screen.clear();
-  memset(modeBuffer, 0, ROWS * COLS);
+  currentMode = LOADING;
+  delay(100);
 
-  if (mode == STARS)
+  if (mode == NONE)
   {
-    Screen.setRenderBuffer(digitOne);
     buttonModeCount = 0;
+    Screen.restoreCache();
+    Screen.render();
+  }
+  else if (mode == STARS)
+  {
+    buttonModeCount = 1;
   }
   else if (mode == LINES)
   {
-    Screen.setRenderBuffer(digitTwo);
-    buttonModeCount = 1;
+    buttonModeCount = 2;
   }
   else if (mode == BREAKOUT)
   {
     breakout.setup();
-    Screen.setRenderBuffer(digitThree);
-    buttonModeCount = 2;
+    buttonModeCount = 3;
   }
   else if (mode == GAMEOFLIFE)
   {
     gameOfLife.setup();
-    Screen.setRenderBuffer(digitFour);
-    buttonModeCount = 3;
+    buttonModeCount = 4;
   }
   else if (mode == CIRCLE)
   {
-    Screen.setRenderBuffer(digitFive);
-    buttonModeCount = 4;
-  }
-  Screen.render();
-
-  if (mode == NONE)
-  {
-    Screen.setRenderBuffer(digitZero);
-    Screen.render();
-    delay(1000);
-    // save current drawing in cache
-    Screen.restoreCache();
-    Screen.render();
     buttonModeCount = 5;
   }
-  else
+  else if (mode == CLOCK)
   {
-    delay(1000);
+#ifdef ENABLE_SERVER
+    clockSetup();
+#endif
+    buttonModeCount = 6;
   }
 
   currentMode = mode;
@@ -99,6 +88,10 @@ void setModeByString(String mode, void (*callback)(MODE mode))
   {
     modeAsEnum = CIRCLE;
   }
+  else if (mode == "clock")
+  {
+    modeAsEnum = CLOCK;
+  }
   if (callback)
   {
     callback(modeAsEnum);
@@ -113,51 +106,59 @@ void listenOnButtonToChangeMode()
   {
     if (buttonModeCount < 0)
     {
-      buttonModeCount++;
+      buttonModeCount = 1;
     }
     else
     {
       if (buttonModeCount == 0)
       {
-        setMode(STARS);
+        setMode(NONE);
       }
       else if (buttonModeCount == 1)
       {
-        setMode(LINES);
+        setMode(STARS);
       }
       else if (buttonModeCount == 2)
       {
-        setMode(BREAKOUT);
+        setMode(LINES);
       }
       else if (buttonModeCount == 3)
       {
-        setMode(GAMEOFLIFE);
+        setMode(BREAKOUT);
       }
       else if (buttonModeCount == 4)
       {
-        setMode(CIRCLE);
+        setMode(GAMEOFLIFE);
       }
       else if (buttonModeCount == 5)
       {
-        setMode(NONE);
+        setMode(CIRCLE);
+      }
+      else if (buttonModeCount == 6)
+      {
+        setMode(CLOCK);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount >= 6)
+      if (buttonModeCount > 6)
       {
         buttonModeCount = 0;
       }
     }
-    delay(10);
   }
   lastModeButtonState = modeButtonState;
+  delay(10);
 }
 
 void loopOfAllModes()
 {
   if (currentMode != UPDATE && currentMode != LOADING)
   {
+    if (currentMode == NONE)
+    {
+      listenOnButtonToChangeMode();
+    }
     if (currentMode == STARS)
     {
       stars();
@@ -178,12 +179,12 @@ void loopOfAllModes()
     {
       circle.loop();
     }
+    while (currentMode == CLOCK)
+    {
+#ifdef ENABLE_SERVER
+      clockLoop();
+#endif
+    }
   }
-  delay(20);
-}
-
-void modeLoop()
-{
-  listenOnButtonToChangeMode();
-  loopOfAllModes();
+  delay(10);
 }

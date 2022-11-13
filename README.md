@@ -25,6 +25,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Stars
   - Lines
   - Circle
+  - Clock
 
 # How to
 

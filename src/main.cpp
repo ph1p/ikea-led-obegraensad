@@ -9,6 +9,7 @@
 #include "webserver.h"
 #include "screen.h"
 #include "accelerometer.h"
+#include "mode/clock.h"
 
 #ifdef ENABLE_ACCELEROMETER
 Accelerometer accelerometer;
@@ -50,6 +51,9 @@ void setup()
     Serial.println(WiFi.localIP());
   }
 
+  // set time server
+  configTzTime(TZ_INFO, NTP_SERVER);
+
   initOTA(server);
   initWebsocketServer(server);
   initWebServer();
@@ -67,7 +71,7 @@ void loop()
 #ifdef ENABLE_ACCELEROMETER
   accelerometer.loop();
 #endif
-  modeLoop();
+  loopOfAllModes();
 
 #ifdef ENABLE_SERVER
   cleanUpClients();

@@ -13,6 +13,7 @@ void Circle::drawCircle(int x, int y, int radius, int onOff)
 
 void Circle::loop()
 {
+    listenOnButtonToChangeMode();
     String key = String(this->circleStep) + "-" + String(this->innerCircleStep) + "-" + String(this->innerStarted);
     bool memoExists = this->memo.count(key) > 0;
 

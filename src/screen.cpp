@@ -1,5 +1,7 @@
 #include "screen.h"
 
+using namespace std;
+
 void Screen_::setRenderBuffer(const uint8_t *renderBuffer)
 {
   for (int i = 0; i < ROWS * COLS; i++)
@@ -11,6 +13,11 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer)
 const uint8_t *Screen_::getRenderBuffer() const
 {
   return this->renderBuffer_;
+}
+
+uint8_t Screen_::getBufferIndex(int index)
+{
+  return this->renderBuffer_[index];
 }
 
 void Screen_::loadFromStorage()
@@ -146,14 +153,6 @@ int Screen_::findPosition(uint8_t count)
   return wantedpos;
 }
 
-void Screen_::drawLine(uint8_t line, bool isHorizontal)
-{
-  for (uint8_t i = 0; i < 16; i++)
-  {
-    this->renderBuffer_[!isHorizontal ? line * 16 + i : i * 16 + line] = 1;
-  }
-};
-
 void Screen_::render()
 {
   for (uint8_t row = 0; row < ROWS; row++)
@@ -181,6 +180,89 @@ void Screen_::cacheCurrent()
 void Screen_::restoreCache()
 {
   std::copy(this->cache, this->cache + (COLS * ROWS), this->renderBuffer_);
+}
+
+void Screen_::drawLine(int x1, int y1, int x2, int y2, int ledStatus)
+{
+  int dx = abs(x2 - x1);
+  int sx = x1 < x2 ? 1 : -1;
+  int dy = abs(y2 - y1);
+  int sy = y1 < y2 ? 1 : -1;
+  int error = (dx > dy ? dx : -dy) / 2;
+
+  while (x1 != x2 || y1 != y2)
+  {
+    this->setPixel(x1, y1, ledStatus);
+
+    int error2 = error;
+    if (error2 > -dx)
+    {
+      error -= dy;
+      x1 += sx;
+      setPixel(x1, y1, ledStatus);
+    }
+
+    else if (error2 < dy)
+    {
+      error += dx;
+      y1 += sy;
+      setPixel(x1, y1, ledStatus);
+    }
+  };
+};
+
+void Screen_::drawRectangle(int x, int y, int width, int height, bool fill, int ledStatus)
+{
+  if (!fill)
+  {
+    this->drawLine(x, y, x + width, y, ledStatus);
+    this->drawLine(x, y + 1, x, y + height - 1, ledStatus);
+    this->drawLine(x + width, y + 1, x + width, y + height - 1, ledStatus);
+    this->drawLine(x, y + height - 1, x + width, y + height - 1, ledStatus);
+  }
+  else
+  {
+    for (int i = x; i < x + width; i++)
+    {
+      this->drawLine(i, y, i, y + height - 1, ledStatus);
+    }
+  }
+};
+
+void Screen_::drawCharacter(int x, int y, std::vector<int> bits, int width)
+{
+  for (int i = 0; i < bits.size(); i += width)
+  {
+    for (int j = 0; j < width; j++)
+    {
+      this->setPixel(x + j, (y + (i / width)), bits[i + j]);
+    }
+  }
+}
+
+std::vector<int> Screen_::readBytes(std::string bytes, int width)
+{
+  std::vector<int> bits;
+  int k = 0;
+
+  for (int i = 0; i < bytes.length(); i++)
+  {
+    for (int j = width - 1; j >= 0; j--)
+    {
+      bits.push_back((bytes[i] >> j) & 1);
+      k++;
+    }
+  }
+
+  return bits;
+};
+
+void Screen_::drawNumbers(int x, int y, std::vector<int> numbers)
+{
+  for (int i = 0; i < numbers.size(); i++)
+  {
+    this->drawCharacter(x + (i * 5), y, this->readBytes(smallNumbers[numbers.at(i)], 4), 4);
+  }
 }
 
 Screen_ &Screen_::getInstance()

@@ -5,11 +5,11 @@ bool forwards = true;
 
 void lines()
 {
-  Screen.setRenderBuffer(modeBuffer);
-  Screen.drawLine(count, true);
-  Screen.drawLine(count, false);
+  listenOnButtonToChangeMode();
+  Screen.clear();
+  Screen.drawLine(count, 0, count, 15, 1);
+  Screen.drawLine(0, count, 15, count, 1);
   Screen.render();
-  memset(modeBuffer, 0, ROWS * COLS);
 
   if (count == 15 && forwards)
   {

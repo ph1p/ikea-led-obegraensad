@@ -12,3 +12,5 @@ extern uint8_t digitFive[ROWS * COLS] PROGMEM;
 
 extern uint8_t letterU[ROWS * COLS] PROGMEM;
 extern uint8_t letterR[ROWS * COLS] PROGMEM;
+
+extern std::string smallNumbers[10];

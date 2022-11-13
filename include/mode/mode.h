@@ -8,9 +8,8 @@
 #include "mode/lines.h"
 #include "screen.h"
 #include "circle.h"
+#include "clock.h"
 #include "signs.h"
-
-extern uint8_t modeBuffer[ROWS * COLS];
 
 extern int buttonModeCount;
 extern int modeButtonState;
@@ -24,6 +23,7 @@ enum MODE
   BREAKOUT,
   GAMEOFLIFE,
   CIRCLE,
+  CLOCK,
   // SYSTEM
   UPDATE,
   LOADING,

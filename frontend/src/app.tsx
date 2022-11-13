@@ -185,15 +185,18 @@ export function App() {
             </button>
             <button className={button} onClick={() => sendMode(MODE.BREAKOUT)}>
               breakout
-            </button>
-            <button className={button} onClick={() => sendMode(MODE.CIRCLE)}>
-              circle
-            </button>
+              </button>
             <button
               className={button}
               onClick={() => sendMode(MODE.GAMEOFLIFE)}
             >
               game of life
+            </button>
+            <button className={button} onClick={() => sendMode(MODE.CIRCLE)}>
+              circle
+            </button>
+            <button className={button} onClick={() => sendMode(MODE.CLOCK)}>
+              clock
             </button>
           </div>
 

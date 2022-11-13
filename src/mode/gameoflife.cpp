@@ -8,10 +8,10 @@ uint8_t GameOfLife::countNeighbours(int row, int col)
   {
     for (j = col - 1; j <= col + 1; j++)
     {
-      count += modeBuffer[i * 16 + j];
+      count += this->buffer[i * 16 + j];
     }
   }
-  count -= modeBuffer[row * 16 + col];
+  count -= this->buffer[row * 16 + col];
   return count;
 };
 
@@ -22,24 +22,24 @@ uint8_t GameOfLife::updateCell(int row, int col)
   {
     return 0;
   }
-  else if (modeBuffer[row * 16 + col] == 0 && total == 3)
+  else if (this->buffer[row * 16 + col] == 0 && total == 3)
   {
     return 1;
   }
   else
   {
-    return modeBuffer[row * 16 + col];
+    return this->buffer[row * 16 + col];
   }
 };
 
 void GameOfLife::setup()
 {
   memset(previous, 0, ROWS * COLS);
-  Screen.setRenderBuffer(modeBuffer);
+  Screen.setRenderBuffer(this->buffer);
   Screen.clear();
   for (int i = 0; i < ROWS * COLS; i++)
   {
-    modeBuffer[i] = (random(20)) ? 1 : 0;
+    this->buffer[i] = (random(20)) ? 1 : 0;
   }
   this->next();
 };
@@ -50,18 +50,19 @@ void GameOfLife::next()
   {
     for (int j = 0; j < COLS; j++)
     {
-      modeBuffer[i * 16 + j] = this->updateCell(i, j);
-      Screen.setPixelAtIndex(i * 16 + j, modeBuffer[i * 16 + j]);
+      this->buffer[i * 16 + j] = this->updateCell(i, j);
+      Screen.setPixelAtIndex(i * 16 + j, this->buffer[i * 16 + j]);
     }
   }
 }
 
 void GameOfLife::loop()
 {
+  listenOnButtonToChangeMode();
   this->next();
   Screen.render();
 
-  if (memcmp(this->previous, modeBuffer, sizeof(this->previous)) == 0)
+  if (memcmp(this->previous, this->buffer, sizeof(this->previous)) == 0)
   {
     this->setup();
     delay(1000);
@@ -69,7 +70,7 @@ void GameOfLife::loop()
 
   for (int i = 0; i < ROWS * COLS; i++)
   {
-    this->previous[i] = modeBuffer[i];
+    this->previous[i] = this->buffer[i];
   }
   delay(300);
 };

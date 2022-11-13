@@ -2,6 +2,7 @@
 
 void stars()
 {
+  listenOnButtonToChangeMode();
   for (uint8_t row = 0; row < ROWS; row++)
   {
     for (uint8_t col = 0; col < COLS; col++)
@@ -12,10 +13,9 @@ void stars()
       {
         ra = 0;
       }
-      modeBuffer[row * 16 + col] = ra;
+      Screen.setPixel(row, col, ra);
     }
   }
-  Screen.setRenderBuffer(modeBuffer);
   Screen.render();
   delay(400);
 }

@@ -1,9 +1,11 @@
 #pragma once
 
 #include <Arduino.h>
+#include <vector>
+#include <string>
+#include "signs.h"
 #include "constants.h"
 #include "storage.h"
-
 class Screen_
 {
 private:
@@ -69,6 +71,13 @@ public:
   void persist();
   void cacheCurrent();
   void restoreCache();
+  uint8_t getBufferIndex(int index);
+
+  void drawLine(int x1, int y1, int x2, int y2, int ledStatus);
+  void drawRectangle(int x, int y, int width, int height, bool outline, int ledStatus);
+  void drawCharacter(int x, int y, std::vector<int> bits, int width);
+  void drawNumbers(int x, int y, std::vector<int> numbers);
+  std::vector<int> readBytes(std::string bytes, int width);
 };
 
 extern Screen_ &Screen;
