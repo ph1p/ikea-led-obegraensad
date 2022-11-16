@@ -7,9 +7,12 @@ AsyncWebSocket ws("/ws");
 void sendStateAndInfo()
 {
   DynamicJsonDocument jsonDocument(6144);
-  for (int j = 0; j < ROWS * COLS; j++)
+  if (currentMode == NONE)
   {
-    jsonDocument["data"][j] = Screen.getRenderBuffer()[j];
+    for (int j = 0; j < ROWS * COLS; j++)
+    {
+      jsonDocument["data"][j] = Screen.getRenderBuffer()[j];
+    }
   }
   jsonDocument["mode"] = currentMode;
   jsonDocument["event"] = "info";
@@ -68,6 +71,12 @@ void onWsEvent(
 
         if (!strcmp(event, "mode"))
         {
+          MODE mode = getModeByString(wsRequest["mode"]);
+          if (mode == NONE)
+          {
+            sendStateAndInfo();
+          }
+
           setModeByString(wsRequest["mode"], sendModeToAllClients);
         }
         else if (!strcmp(event, "persist-mode"))

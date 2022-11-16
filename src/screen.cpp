@@ -22,12 +22,19 @@ uint8_t Screen_::getBufferIndex(int index)
 
 void Screen_::loadFromStorage()
 {
-  this->clear();
   // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
   storage.begin("led-wall", false);
-  storage.getBytes("data", this->renderBuffer_, ROWS * COLS);
+  if (currentMode == NONE)
+  {
+    this->clear();
+    storage.getBytes("data", this->renderBuffer_, ROWS * COLS);
+    this->render();
+  }
+  else
+  {
+    storage.getBytes("data", this->cache, ROWS * COLS);
+  }
   storage.end();
-  this->render();
 }
 
 void Screen_::rotate(int degree)
@@ -101,10 +108,13 @@ void Screen_::rotate(int degree)
   }
 };
 
-void Screen_::clear()
+void Screen_::clear(bool rerender)
 {
   memset(this->renderBuffer_, 0, ROWS * COLS);
-  this->render();
+  if (rerender)
+  {
+    this->render();
+  }
 }
 
 void Screen_::persist()
@@ -124,18 +134,10 @@ void Screen_::setPixelAtIndex(uint8_t index, uint8_t value)
 
 void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value)
 {
-  int max_x = x;
-  if (x >= ROWS)
+  if (x >= 0 && y >= 0 && x < 16 && y < 16)
   {
-    max_x = 15;
+    this->renderBuffer_[y * 16 + x] = value;
   }
-  int max_y = y;
-  if (y >= COLS)
-  {
-    max_y = 15;
-  }
-
-  this->renderBuffer_[max_y * 16 + max_x] = value;
 }
 
 int Screen_::findPosition(uint8_t count)
@@ -161,25 +163,26 @@ void Screen_::render()
     {
       digitalWrite(PIN_DATA, this->renderBuffer_[this->findPosition(row * 16 + col)]);
       digitalWrite(PIN_CLOCK, HIGH);
-      delayMicroseconds(10);
       digitalWrite(PIN_CLOCK, LOW);
     }
   }
 
   digitalWrite(PIN_LATCH, HIGH);
-  delayMicroseconds(10);
   digitalWrite(PIN_LATCH, LOW);
   delayMicroseconds(10);
 }
 
 void Screen_::cacheCurrent()
 {
-  std::copy(this->renderBuffer_, this->renderBuffer_ + (COLS * ROWS), this->cache);
+  for (int i = 0; i < 16; i++)
+  {
+    this->cache[i] = this->renderBuffer_[i];
+  }
 }
 
 void Screen_::restoreCache()
 {
-  std::copy(this->cache, this->cache + (COLS * ROWS), this->renderBuffer_);
+  this->setRenderBuffer(this->cache);
 }
 
 void Screen_::drawLine(int x1, int y1, int x2, int y2, int ledStatus)
@@ -229,27 +232,28 @@ void Screen_::drawRectangle(int x, int y, int width, int height, bool fill, int 
   }
 };
 
-void Screen_::drawCharacter(int x, int y, std::vector<int> bits, int width)
+void Screen_::drawCharacter(int x, int y, std::vector<int> bits, int bitCount)
 {
-  for (int i = 0; i < bits.size(); i += width)
+  for (int i = 0; i < bits.size(); i += bitCount)
   {
-    for (int j = 0; j < width; j++)
+    for (int j = 0; j < bitCount; j++)
     {
-      this->setPixel(x + j, (y + (i / width)), bits[i + j]);
+      setPixel(x + j, (y + (i / bitCount)), bits[i + j]);
     }
   }
 }
 
-std::vector<int> Screen_::readBytes(std::string bytes, int width)
+std::vector<int> Screen_::readBytes(std::vector<int> bytes)
 {
-  std::vector<int> bits;
+  vector<int> bits;
   int k = 0;
 
-  for (int i = 0; i < bytes.length(); i++)
+  for (int i = 0; i < bytes.size(); i++)
   {
-    for (int j = width - 1; j >= 0; j--)
+    for (int j = 8 - 1; j >= 0; j--)
     {
-      bits.push_back((bytes[i] >> j) & 1);
+      int b = (bytes[i] >> j) & 1;
+      bits.push_back(b);
       k++;
     }
   }
@@ -261,7 +265,7 @@ void Screen_::drawNumbers(int x, int y, std::vector<int> numbers)
 {
   for (int i = 0; i < numbers.size(); i++)
   {
-    this->drawCharacter(x + (i * 5), y, this->readBytes(smallNumbers[numbers.at(i)], 4), 4);
+    this->drawCharacter(x + (i * 5), y, this->readBytes(smallNumbers[numbers.at(i)]), 4);
   }
 }
 

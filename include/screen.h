@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <vector>
-#include <string>
+#include "mode/mode.h"
 #include "signs.h"
 #include "constants.h"
 #include "storage.h"
@@ -61,7 +61,7 @@ public:
   void setRenderBuffer(const uint8_t *renderBuffer);
   const uint8_t *getRenderBuffer() const;
 
-  void clear();
+  void clear(bool rerender = true);
   void drawLine(uint8_t line, bool isHorizontal);
   void setPixel(uint8_t x, uint8_t y, uint8_t value);
   void setPixelAtIndex(uint8_t index, uint8_t value);
@@ -75,9 +75,9 @@ public:
 
   void drawLine(int x1, int y1, int x2, int y2, int ledStatus);
   void drawRectangle(int x, int y, int width, int height, bool outline, int ledStatus);
-  void drawCharacter(int x, int y, std::vector<int> bits, int width);
+  void drawCharacter(int x, int y, std::vector<int> bits, int bitCount);
   void drawNumbers(int x, int y, std::vector<int> numbers);
-  std::vector<int> readBytes(std::string bytes, int width);
+  std::vector<int> readBytes(std::vector<int> bytes);
 };
 
 extern Screen_ &Screen;

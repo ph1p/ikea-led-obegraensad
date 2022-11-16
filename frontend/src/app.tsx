@@ -57,7 +57,9 @@ export function App() {
                   json.rotation
                 )
               );
-              setLeds(rotateArrayByDegree(json.data, json.rotation));
+              if (json.data) {
+                setLeds(rotateArrayByDegree(json.data, json.rotation));
+              }
 
               break;
           }

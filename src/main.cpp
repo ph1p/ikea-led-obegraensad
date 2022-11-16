@@ -25,12 +25,9 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
+  Screen.clear();
   loadMode();
-
-  if (currentMode == NONE)
-  {
-    Screen.loadFromStorage();
-  }
+  Screen.loadFromStorage();
 
 // server
 #ifdef ENABLE_SERVER
@@ -81,4 +78,5 @@ void loop()
 #ifdef ENABLE_SERVER
   cleanUpClients();
 #endif
+  delay(20);
 }

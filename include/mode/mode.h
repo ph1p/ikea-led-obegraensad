@@ -33,6 +33,7 @@ extern MODE currentMode;
 
 void setMode(MODE mode);
 void setModeByString(String mode);
+MODE getModeByString(String mode);
 void setModeByString(String mode, void (*callback)(MODE mode));
 void modeLoop();
 void listenOnButtonToChangeMode();

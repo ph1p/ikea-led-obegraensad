@@ -24,7 +24,15 @@ void setMode(MODE mode)
 
   Screen.clear();
   currentMode = LOADING;
-  delay(100);
+
+  // loading screen
+  Screen.setPixel(4, 7, 1);
+  Screen.setPixel(5, 7, 1);
+  Screen.setPixel(7, 7, 1);
+  Screen.setPixel(8, 7, 1);
+  Screen.setPixel(10, 7, 1);
+  Screen.setPixel(11, 7, 1);
+  Screen.render();
 
   if (mode == NONE)
   {
@@ -52,6 +60,7 @@ void setMode(MODE mode)
   }
   else if (mode == CIRCLE)
   {
+    circle.setup();
     buttonModeCount = 5;
   }
   else if (mode == CLOCK)
@@ -62,36 +71,42 @@ void setMode(MODE mode)
     buttonModeCount = 6;
   }
 
+  delay(1500);
   currentMode = mode;
+}
+
+MODE getModeByString(String mode)
+{
+  if (mode == "stars")
+  {
+    return STARS;
+  }
+  else if (mode == "lines")
+  {
+    return LINES;
+  }
+  else if (mode == "breakout")
+  {
+    return BREAKOUT;
+  }
+  else if (mode == "gameoflife")
+  {
+    return GAMEOFLIFE;
+  }
+  else if (mode == "circle")
+  {
+    return CIRCLE;
+  }
+  else if (mode == "clock")
+  {
+    return CLOCK;
+  }
+  return NONE;
 }
 
 void setModeByString(String mode, void (*callback)(MODE mode))
 {
-  MODE modeAsEnum = NONE;
-  if (mode == "stars")
-  {
-    modeAsEnum = STARS;
-  }
-  else if (mode == "lines")
-  {
-    modeAsEnum = LINES;
-  }
-  else if (mode == "breakout")
-  {
-    modeAsEnum = BREAKOUT;
-  }
-  else if (mode == "gameoflife")
-  {
-    modeAsEnum = GAMEOFLIFE;
-  }
-  else if (mode == "circle")
-  {
-    modeAsEnum = CIRCLE;
-  }
-  else if (mode == "clock")
-  {
-    modeAsEnum = CLOCK;
-  }
+  MODE modeAsEnum = getModeByString(mode);
   if (callback)
   {
     callback(modeAsEnum);
@@ -186,7 +201,6 @@ void loopOfAllModes()
 #endif
     }
   }
-  delay(10);
 }
 
 void persistMode()
@@ -199,6 +213,6 @@ void persistMode()
 void loadMode()
 {
   storage.begin("led-wall", false);
-  setMode((MODE) storage.getInt("mode"));
+  setMode((MODE)storage.getInt("mode"));
   storage.end();
 }

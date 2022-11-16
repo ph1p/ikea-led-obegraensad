@@ -178,7 +178,7 @@ void Breakout::updatePaddle()
     // turn off paddle LEDs
     for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
-      Screen.setPixelAtIndex( this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_OFF);
+      Screen.setPixelAtIndex(this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_OFF);
     }
     for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
@@ -186,7 +186,7 @@ void Breakout::updatePaddle()
     }
     for (byte i = 0; i < Breakout::PADDLE_WIDTH; i++)
     {
-      Screen.setPixelAtIndex( this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_ON);
+      Screen.setPixelAtIndex(this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_ON);
     }
   }
   Screen.render();

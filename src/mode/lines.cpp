@@ -6,28 +6,21 @@ bool forwards = true;
 void lines()
 {
   listenOnButtonToChangeMode();
-  Screen.clear();
-  Screen.drawLine(count, 0, count, 15, 1);
-  Screen.drawLine(0, count, 15, count, 1);
+  std::vector<int> bits = Screen.readBytes(lineAnimation[count]);
+  for (int row = 0; row < ROWS; row++)
+  {
+    for (int col = 0; col < bits.size(); col++)
+    {
+      Screen.setPixel(col, row, bits[col]);
+    }
+  }
+
   Screen.render();
 
-  if (count == 15 && forwards)
+  count++;
+  if (count >= 4)
   {
-    forwards = false;
-  }
-  if (count == 0 && !forwards)
-  {
-    forwards = true;
     count = 0;
   }
-
-  if (forwards)
-  {
-    count++;
-  }
-  else
-  {
-    count--;
-  }
-  delay(60);
+  delay(200);
 }

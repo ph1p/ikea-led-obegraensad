@@ -1,16 +1,12 @@
 #pragma once
 
 #include <Arduino.h>
+#include <vector>
 #include "constants.h"
 
-extern uint8_t digitZero[ROWS * COLS] PROGMEM;
-extern uint8_t digitOne[ROWS * COLS] PROGMEM;
-extern uint8_t digitTwo[ROWS * COLS] PROGMEM;
-extern uint8_t digitThree[ROWS * COLS] PROGMEM;
-extern uint8_t digitFour[ROWS * COLS] PROGMEM;
-extern uint8_t digitFive[ROWS * COLS] PROGMEM;
+extern uint8_t letterU[ROWS * COLS];
+extern uint8_t letterR[ROWS * COLS];
 
-extern uint8_t letterU[ROWS * COLS] PROGMEM;
-extern uint8_t letterR[ROWS * COLS] PROGMEM;
-
-extern std::string smallNumbers[10];
+extern std::vector<std::vector<int>> circleAnimation;
+extern std::vector<std::vector<int>> smallNumbers;
+extern std::vector<std::vector<int>> lineAnimation;
