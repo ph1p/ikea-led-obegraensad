@@ -1,12 +1,14 @@
 #include "mode/lines.h"
 
-int count = 0;
-bool forwards = true;
+void Lines::setup()
+{
+  this->count = 0;
+}
 
-void lines()
+void Lines::loop()
 {
   listenOnButtonToChangeMode();
-  std::vector<int> bits = Screen.readBytes(lineAnimation[count]);
+  std::vector<int> bits = Screen.readBytes(this->frames[this->count]);
   for (int row = 0; row < ROWS; row++)
   {
     for (int col = 0; col < bits.size(); col++)
@@ -17,10 +19,10 @@ void lines()
 
   Screen.render();
 
-  count++;
-  if (count >= 4)
+  this->count++;
+  if (this->count >= 4)
   {
-    count = 0;
+    this->count = 0;
   }
   delay(200);
 }

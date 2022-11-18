@@ -174,7 +174,7 @@ void Screen_::render()
 
 void Screen_::cacheCurrent()
 {
-  for (int i = 0; i < 16; i++)
+  for (int i = 0; i < COLS * ROWS; i++)
   {
     this->cache[i] = this->renderBuffer_[i];
   }

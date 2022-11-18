@@ -26,6 +26,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Lines
   - Circle
   - Clock
+  - Custom Animation with the "Creator"
 
 # How to
 

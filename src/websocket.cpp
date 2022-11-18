@@ -68,16 +68,37 @@ void onWsEvent(
       else
       {
         const char *event = wsRequest["event"];
+        if (!strcmp(event, "upload"))
+        {
+          if (currentMode != LOADING)
+          {
+            currentMode = LOADING;
+            int size = (int)wsRequest["screens"];
 
-        if (!strcmp(event, "mode"))
+            customAnimationFrames.resize(size);
+            for (int i = 0; i < size; i++)
+            {
+              for (int k = 0; k < 32; k++)
+              {
+                if (k == 0)
+                {
+                  customAnimationFrames[i].resize(32);
+                }
+                customAnimationFrames[i][k] = (int)wsRequest["data"][i][k];
+              }
+            }
+            setMode(CUSTOM, true);
+          }
+        }
+        else if (!strcmp(event, "mode"))
         {
           MODE mode = getModeByString(wsRequest["mode"]);
+          setModeByString(wsRequest["mode"], sendModeToAllClients);
+
           if (mode == NONE)
           {
             sendStateAndInfo();
           }
-
-          setModeByString(wsRequest["mode"], sendModeToAllClients);
         }
         else if (!strcmp(event, "persist-mode"))
         {

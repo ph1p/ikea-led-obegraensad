@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { ReadyState } from 'react-use-websocket/dist/lib/constants';
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
 import {
@@ -7,22 +7,15 @@ import {
   rotateArrayByDegree,
 } from './helpers';
 import { MODE } from './types';
-import {
-  button,
-  connectionInformation,
-  controlRow,
-  controls,
-  grid,
-  ledInner,
-  ledScreen,
-  ledWrapper,
-  wrapper,
-} from './app.css';
+import { controlColumn, wrapper } from './App.css';
+import { LedMatrix } from './components/LedMatrix';
+import { Button } from './components/Button';
+import { Layout } from './components/Layout';
+import { connectionInformation } from './main.css';
 
 export function App() {
   const [rotation, setRotation] = useState<number>(0);
   const [triggerClear, setTriggerClear] = useState(false);
-  const [isMouseDown, setMouseIsDown] = useState(false);
   const [indexMatrix, setIndexMatrix] = useState<number[]>(
     [...new Array(256)].map((_, i) => i)
   );
@@ -35,6 +28,7 @@ export function App() {
         : import.meta.env.VITE_WS_URL
     }ws`,
     {
+      share: true,
       shouldReconnect: () => true,
       reconnectAttempts: 10,
       reconnectInterval: 3000,
@@ -51,12 +45,12 @@ export function App() {
               setMode(Object.values(MODE)[json.mode as number]);
               setRotation(json.rotation);
 
-              setIndexMatrix(
-                rotateArrayByDegree(
+              setIndexMatrix([
+                ...rotateArrayByDegree(
                   [...new Array(256)].map((_, i) => i),
                   json.rotation
-                )
-              );
+                ),
+              ]);
               if (json.data) {
                 setLeds(rotateArrayByDegree(json.data, json.rotation));
               }
@@ -67,27 +61,6 @@ export function App() {
       },
     }
   );
-
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Open',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Try to reconnect',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-  }[readyState];
-
-  const setLed = (index: number) => {
-    const rotatedIndex = indexMatrix[index];
-
-    setLeds((state: number[]) => {
-      const status = !state[rotatedIndex];
-      wsMessage('led', {
-        index: rotatedIndex,
-        status,
-      });
-      return state.map((led, i) => (i === index ? Number(status) : led));
-    });
-  };
 
   const loadImage = () => {
     loadImageAndGetDataArray((data) => {
@@ -144,111 +117,107 @@ export function App() {
 
   const sendMode = (mode: MODE) => wsMessage('mode', { mode });
 
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: 'Connecting',
+    [ReadyState.OPEN]: 'Open',
+    [ReadyState.CLOSING]: 'Closing',
+    [ReadyState.CLOSED]: 'Try to reconnect',
+    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+  }[readyState];
+
   if (readyState !== ReadyState.OPEN) {
     return (
-      <div className={wrapper}>
-        <div className={connectionInformation}>{connectionStatus}...</div>
-      </div>
+      <Layout
+        content={
+          <div className={wrapper}>
+            <div className={connectionInformation}>{connectionStatus}...</div>
+          </div>
+        }
+        footer={
+          <>
+            <a href="#/creator">creator</a>
+          </>
+        }
+      ></Layout>
     );
   }
 
   return (
-    <div className={wrapper}>
-      <div>
-        <div className={`${ledScreen} ${mode !== MODE.NONE ? 'disabled' : ''}`}>
-          <div
-            className={grid}
-            onPointerUp={() => {
-              setMouseIsDown(false);
-            }}
-            onPointerLeave={() => {
-              setMouseIsDown(false);
-            }}
-          >
-            {leds.map((led, ledIndex) => (
-              <div
-                key={ledIndex}
-                className={ledWrapper}
-                onPointerDown={() => {
-                  setLed(ledIndex);
-                  setMouseIsDown(true);
-                }}
-                onPointerEnter={() => {
-                  if (isMouseDown) {
-                    setLed(ledIndex);
-                  }
-                }}
-              >
-                <div className={`${ledInner} ${led ? 'active' : ''}`}></div>
-              </div>
-            ))}
+    <Layout
+      content={
+        <div className={wrapper}>
+          <div>
+            <LedMatrix
+              disabled={mode !== MODE.NONE}
+              data={leds}
+              indexData={indexMatrix}
+              onSetLed={(data) => {
+                wsMessage('led', data);
+              }}
+              onSetMatrix={(data) => {
+                setLeds([...data]);
+              }}
+            />
           </div>
         </div>
-        <div className={controls}>
-          <div className={controlRow}>
-            <button className={button} onClick={() => sendMode(MODE.STARS)}>
-              stars
-            </button>
-            <button className={button} onClick={() => sendMode(MODE.LINES)}>
-              lines
-            </button>
-            <button className={button} onClick={() => sendMode(MODE.BREAKOUT)}>
-              breakout
-            </button>
-            <button
-              className={button}
-              onClick={() => sendMode(MODE.GAMEOFLIFE)}
+      }
+      footer={
+        <>
+          <div className={controlColumn}>
+            <select
+              onChange={(e) => {
+                const currentMode = e.currentTarget.value as MODE;
+                setMode(currentMode);
+                sendMode(currentMode);
+              }}
+              value={mode}
             >
-              game of life
-            </button>
-            <button className={button} onClick={() => sendMode(MODE.CIRCLE)}>
-              circle
-            </button>
-            <button className={button} onClick={() => sendMode(MODE.CLOCK)}>
-              clock
-            </button>
+              <option value={MODE.NONE}>draw</option>
+              <option value={MODE.STARS}>stars</option>
+              <option value={MODE.LINES}>lines</option>
+              <option value={MODE.BREAKOUT}>breakout</option>
+              <option value={MODE.GAMEOFLIFE}>game of life</option>
+              <option value={MODE.CIRCLE}>circle</option>
+              <option value={MODE.CLOCK}>clock</option>
+              <option value={MODE.CUSTOM}>custom</option>
+            </select>
 
-            <button
-              className={button}
-              onClick={() => wsMessage('persist-mode')}
-            >
-              set mode as default
-            </button>
+            <Button onClick={() => wsMessage('persist-mode')}>
+              set as default
+            </Button>
           </div>
 
-          <div className={controlRow}>
-            <button className={button} onClick={() => rotate(false)}>
-              rotate left
-            </button>
-            <button className={button} onClick={() => rotate(true)}>
-              rotate right
-            </button>
+          <div className={controlColumn}>
+            <Button onClick={() => rotate(false)}>
+              <i class="fa-solid fa-rotate-left"></i>
+            </Button>
+            <Button onClick={() => rotate(true)}>
+              <i class="fa-solid fa-rotate-right"></i>
+            </Button>
           </div>
 
-          <div className={controlRow}>
-            {mode === MODE.NONE ? (
+          <div className={controlColumn}>
+            {mode === MODE.NONE && (
               <>
-                <button className={button} onClick={() => loadImage()}>
-                  load image
-                </button>
-                <button className={button} onClick={clear}>
-                  clear
-                </button>
-                <button className={button} onClick={() => wsMessage('persist')}>
-                  persist
-                </button>
-                <button className={button} onClick={() => wsMessage('load')}>
-                  load
-                </button>
+                <Button onClick={() => loadImage()}>
+                  <i class="fa-solid fa-file-import"></i>
+                </Button>
+                <Button onClick={clear}>
+                  <i class="fa-solid fa-trash"></i>
+                </Button>
+                <Button onClick={() => wsMessage('persist')}>
+                  <i class="fa-solid fa-floppy-disk"></i>
+                </Button>
+                <Button onClick={() => wsMessage('load')}>
+                  <i class="fa-solid fa-refresh"></i>
+                </Button>
               </>
-            ) : (
-              <button className={button} onClick={() => sendMode(MODE.NONE)}>
-                draw mode
-              </button>
             )}
+
+            <a href="#/creator">creator</a>
           </div>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }

@@ -59,6 +59,8 @@
     "set": "cpp",
     "chrono": "cpp",
     "ratio": "cpp",
-    "thread": "cpp"
+    "thread": "cpp",
+    "codecvt": "cpp",
+    "variant": "cpp"
   }
 }

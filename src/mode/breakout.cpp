@@ -204,7 +204,6 @@ void Breakout::end()
 
 void Breakout::setup()
 {
-  Screen.clear();
   this->gameState = Breakout::GAME_STATE_END;
 }
 

@@ -2,14 +2,14 @@
 
 void Circle::setup()
 {
-    Screen.clear();
+    this->circleStep = 0;
 }
 
 void Circle::loop()
 {
     listenOnButtonToChangeMode();
 
-    std::vector<int> bits = Screen.readBytes(circleAnimation[this->circleStep]);
+    std::vector<int> bits = Screen.readBytes(this->frames[this->circleStep]);
 
     for (int i = 0; i < bits.size(); i++)
     {

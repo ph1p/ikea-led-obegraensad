@@ -1,4 +1,4 @@
-import { createVar, globalStyle } from '@vanilla-extract/css';
+import { createVar, globalStyle, style } from '@vanilla-extract/css';
 
 export const multiplier = createVar();
 
@@ -9,7 +9,6 @@ globalStyle('*', {
 globalStyle(':root', {
   fontFamily: 'Helvetica, Arial, sans-serif',
   fontSize: 16,
-  lineHeight: 24,
   fontWeight: 400,
   margin: 0,
   padding: 0,
@@ -34,4 +33,20 @@ globalStyle('html, body, #app', {
       margin: 0,
     },
   },
+});
+
+globalStyle('select', {
+  padding: '10px 10px',
+  fontSize: '1em',
+});
+
+export const connectionInformation = style({
+  textAlign: 'center',
+  fontSize: '2em',
+  color: '#fff',
+  textTransform: 'uppercase',
+  height: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
 });

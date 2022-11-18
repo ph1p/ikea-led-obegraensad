@@ -10,6 +10,7 @@
 #include "circle.h"
 #include "clock.h"
 #include "signs.h"
+#include "custom.h"
 
 extern int buttonModeCount;
 extern int modeButtonState;
@@ -24,6 +25,7 @@ enum MODE
   GAMEOFLIFE,
   CIRCLE,
   CLOCK,
+  CUSTOM,
   // SYSTEM
   UPDATE,
   LOADING,
@@ -31,7 +33,7 @@ enum MODE
 
 extern MODE currentMode;
 
-void setMode(MODE mode);
+void setMode(MODE mode, bool selfLoading = false);
 void setModeByString(String mode);
 MODE getModeByString(String mode);
 void setModeByString(String mode, void (*callback)(MODE mode));

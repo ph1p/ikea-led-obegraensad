@@ -10,10 +10,12 @@ int lastModeButtonState = 0;
 GameOfLife gameOfLife;
 Breakout breakout;
 Circle circle;
+Lines lines;
+Custom custom;
 
-void setMode(MODE mode)
+void setMode(MODE mode, bool selfLoading)
 {
-  if (mode == currentMode || currentMode == LOADING)
+  if (mode == currentMode || (currentMode == LOADING && !selfLoading))
     return;
 
   if (currentMode == NONE)
@@ -38,7 +40,6 @@ void setMode(MODE mode)
   {
     buttonModeCount = 0;
     Screen.restoreCache();
-    Screen.render();
   }
   else if (mode == STARS)
   {
@@ -46,6 +47,7 @@ void setMode(MODE mode)
   }
   else if (mode == LINES)
   {
+    lines.setup();
     buttonModeCount = 2;
   }
   else if (mode == BREAKOUT)
@@ -70,9 +72,19 @@ void setMode(MODE mode)
 #endif
     buttonModeCount = 6;
   }
+  else if (mode == CUSTOM)
+  {
+    custom.setup();
+    buttonModeCount = 7;
+  }
 
-  delay(1500);
+  delay(800);
   currentMode = mode;
+
+  if (currentMode == NONE)
+  {
+    Screen.render();
+  }
 }
 
 MODE getModeByString(String mode)
@@ -100,6 +112,10 @@ MODE getModeByString(String mode)
   else if (mode == "clock")
   {
     return CLOCK;
+  }
+  else if (mode == "custom")
+  {
+    return CUSTOM;
   }
   return NONE;
 }
@@ -153,10 +169,14 @@ void listenOnButtonToChangeMode()
       {
         setMode(CLOCK);
       }
+      else if (buttonModeCount == 7)
+      {
+        setMode(CUSTOM);
+      }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 6)
+      if (buttonModeCount > 7)
       {
         buttonModeCount = 0;
       }
@@ -180,7 +200,7 @@ void loopOfAllModes()
     }
     if (currentMode == LINES)
     {
-      lines();
+      lines.loop();
     }
     if (currentMode == BREAKOUT)
     {
@@ -194,7 +214,11 @@ void loopOfAllModes()
     {
       circle.loop();
     }
-    while (currentMode == CLOCK)
+    if (currentMode == CUSTOM)
+    {
+      custom.loop();
+    }
+    if (currentMode == CLOCK)
     {
 #ifdef ENABLE_SERVER
       clockLoop();

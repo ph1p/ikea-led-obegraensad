@@ -35,12 +35,11 @@ uint8_t GameOfLife::updateCell(int row, int col)
 void GameOfLife::setup()
 {
   memset(previous, 0, ROWS * COLS);
-  Screen.setRenderBuffer(this->buffer);
-  Screen.clear();
   for (int i = 0; i < ROWS * COLS; i++)
   {
     this->buffer[i] = (random(20)) ? 1 : 0;
   }
+  Screen.setRenderBuffer(this->buffer);
   this->next();
 };
 
