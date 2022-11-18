@@ -8,6 +8,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
 ![ezgif-3-2019fca7a4](https://user-images.githubusercontent.com/15351728/200184222-a590575d-983d-4ab8-a322-c6bcf433d364.gif)
 
+
 ## Features
 
 - Persist your drawing
@@ -26,6 +27,14 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Lines
   - Circle
   - Clock
+  
+# Control the board
+
+https://user-images.githubusercontent.com/15351728/202763445-3275e4e9-d976-4e35-b0cf-9550b8561b4c.mp4
+
+You can control the lamp with a supplied web GUI.
+You can get the IP via serial output or you can search it in your router settings.
+
 
 # How to
 
@@ -94,10 +103,6 @@ BUTTON OTHER END -> GND
 
 <img src="https://user-images.githubusercontent.com/15351728/200183467-e304677f-8fee-4130-a3ad-c4942ed3a4bd.JPG" width="60%" />
 
-# Control the board
-
-You can control the lamp with a supplied web GUI.
-You can get the IP via serial output or you can search it in your router settings.
 
 # Development
 
