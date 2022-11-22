@@ -4,7 +4,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
 > 👉 This software is in an early stage and is my first of its kind. If you have anything to improve, I would be very happy about a PR or an issue :)
 
-> ⚠ Use this code and instrctions at your own risk! The device could be damaged! ⚠
+> ⚠ Use this code and instructions at your own risk! The device could be damaged! ⚠
 
 ![ezgif-3-2019fca7a4](https://user-images.githubusercontent.com/15351728/200184222-a590575d-983d-4ab8-a322-c6bcf433d364.gif)
 
@@ -27,7 +27,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Lines
   - Circle
   - Clock
-  - Custom Animation with the "Creator"
+- Custom Animation with the "Creator"
 
 # Control the board
 
@@ -115,6 +115,13 @@ BUTTON OTHER END -> GND
   - Set your device IP inside the `.env` file
   - Start the server with `npm run dev`
   - Build it with `npm run build`. This command creates the `webgui.cpp` for you.
+
+# Ideas
+
+[] gifs
+[] weather
+[] animation upload
+[] use `<canvas />`
 
 ## Credits
 
