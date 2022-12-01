@@ -7,7 +7,7 @@ import {
   rotateArrayByDegree,
 } from './helpers';
 import { MODE } from './types';
-import { controlColumn, wrapper } from './App.css';
+import { controlColumn, wrapper } from './app.css';
 import { LedMatrix } from './components/LedMatrix';
 import { Button } from './components/Button';
 import { Layout } from './components/Layout';
