@@ -48,7 +48,7 @@ Verified to work with TTGO LoRa32 V2.1 (T3_V1.6.1).
 
 ## Open the lamp
 
-I'm sorry to say this, but you'll have to pry open the back of your Lamp, as IKEA didn't install regular screws here. I lifted the back with a screwdriver between the screws and pried it open with a second object.
+I'm sorry to say this, but you'll have to pry open the back of your Lamp, as IKEA didn't install regular screws here. I lifted the back with a screwdriver between the screws and pried it open with a second object, but you can also drill out the rivets to avoid breaking the backpanel.
 
 ## The panels
 
