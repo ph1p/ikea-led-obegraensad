@@ -44,9 +44,11 @@ The ESP32 I used:
 
 <img src="https://user-images.githubusercontent.com/15351728/200148521-86d0f9e6-2c41-4707-b2d9-8aa24a0e440e.jpg" width="60%" />
 
+Verified to work with TTGO LoRa32 V2.1 (T3_V1.6.1).
+
 ## Open the lamp
 
-I'm sorry to say this, but you'll have to pry open the back of your Lamp, as IKEA didn't install regular screws here. I lifted the back with a screwdriver between the screws and pried it open with a second object.
+I'm sorry to say this, but you'll have to pry open the back of your Lamp, as IKEA didn't install regular screws here. I lifted the back with a screwdriver between the screws and pried it open with a second object, but you can also drill out the rivets to avoid breaking the backpanel.
 
 ## The panels
 
@@ -85,21 +87,18 @@ also set username and password inside `upload.py`, if you want to use OTA Update
 
 ### PINS
 
-You can edit the pins in `include/constants.h`.
+Connect them like this and remember to set them in `include/constants.h` according to your board.
 
-Connect them like this:
-
-```
-GND -> GND
-VCC -> V5
-EN -> GPIO26
-IN -> GPIO27
-CLK -> GPIO14
-CLA -> GPIO12
-
-BUTTON ONE END -> GPIO16
-BUTTON OTHER END -> GND
-```
+| LCD              | ESP32  | TTGO LoRa32 |
+| :----------------|:------:|:-----------:|
+| GND              | GND    | GND         |
+| VCC              | 5V     | 5V          |
+| EN               | GPIO26 | IO22        |
+| IN               | GPIO27 | IO23        |
+| CLK              | GPIO14 | IO02        |
+| CLA              | GPIO12 | IO15        |
+| BUTTON one end   | GPIO16 | IO21        |
+| BUTTON other end | GND    | GND         |  
 
 <img src="https://user-images.githubusercontent.com/15351728/200183467-e304677f-8fee-4130-a3ad-c4942ed3a4bd.JPG" width="60%" />
 
@@ -111,7 +110,7 @@ BUTTON OTHER END -> GND
   - You can uncomment the OTA lines in `platform.ini` if you want. Replace the IP with your device IP.
 
 - `frontend` contains the web code.
-  - First run `npm run i`
+  - First run `npm i`
   - Set your device IP inside the `.env` file
   - Start the server with `npm run dev`
   - Build it with `npm run build`. This command creates the `webgui.cpp` for you.

@@ -1,5 +1,5 @@
 import { render } from 'preact';
-import { App } from './App';
+import { App } from './app';
 import { Creator } from './Creator';
 import './main.css';
 import { useEffect, useState } from 'preact/hooks';
