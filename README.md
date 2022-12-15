@@ -57,7 +57,7 @@ I'm sorry to say this, but you'll have to pry open the back of your Lamp, as IKE
 After you open the back, you will see 4 identical plates. These are each equipped with 64 Leds in 4 fields. We are only interested in the lowest one. Here you will find 6 connectors at the bottom edge, to which we connect our board.
 Above is a microcontroller. You have to remove it, because it contains the standard programs.
 
-<img src="https://user-images.githubusercontent.com/15351728/200183463-7dd2cfea-dc8b-4790-83aa-b2a2221a3f86.JPG" width="60%" />
+<img src="https://user-images.githubusercontent.com/86414213/205998862-e9962695-1328-49ea-b546-be592cbad3c2.jpg" width="90%" />
 
 ## Clone repository and set variables
 
@@ -100,8 +100,7 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 | BUTTON one end   | GPIO16 | IO21        |
 | BUTTON other end | GND    | GND         |  
 
-<img src="https://user-images.githubusercontent.com/15351728/200183467-e304677f-8fee-4130-a3ad-c4942ed3a4bd.JPG" width="60%" />
-
+<img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
 # Development
 
