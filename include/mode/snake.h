@@ -7,8 +7,6 @@
 class Snake
 {
 private:
-  static const unsigned int LENGTH = 3;
-
   static const unsigned int DEBOUNCE_TIME = 100;
   static const unsigned int X_MAX = 16;
   static const unsigned int Y_MAX = 16;
@@ -41,6 +39,7 @@ private:
   int ballMovement[2];
   unsigned int ballDelay;
   unsigned int score;
+  std::vector<int> position = {240,241,242};
   unsigned int dot;
   unsigned long lastBallUpdate = 0;
 
@@ -48,6 +47,9 @@ private:
   void initGame();
   void initSnake();
   void newDot();
+  void moveSnake();
+
+
   void newLevel();
   void updateBall();
   void hitBrick(byte i);

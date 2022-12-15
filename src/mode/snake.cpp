@@ -12,45 +12,106 @@ void Snake::initGame()
 
 void Snake::initSnake()
 {
-  // this->destroyedBricks = 0;
-  // for (byte i = 0; i < Snake::Snake::BRICK_AMOUNT; i++)
-  // {
-  //   if (currentMode == SNAKE)
-  //   {
-  //     this->bricks[i].x = i % Snake::X_MAX;
-  //     this->bricks[i].y = i / Snake::X_MAX;
-  //     Screen.setPixelAtIndex(this->bricks[i].y * Snake::X_MAX + this->bricks[i].x, Snake::LED_TYPE_ON);
-
-  //     delay(25);
-  //     Screen.render();
-  //   }
-  // }
-
-  for (byte i = 0; i < Snake::Snake::LENGTH; i++)
+  for (const int &n: this->position)
   {
-    Screen.setPixelAtIndex(241 + i, Snake::LED_TYPE_ON);
-    delay(25);
-    Screen.render();
+    Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
   }
 
+  Screen.render();
   newDot();
-
 }
 
 void Snake::newDot() {
 
-  this->dot = random(1, 256);
-  //todo: check if point is on snake - just testing if.
-  if (this->dot > 241 || this->dot <  161 ) {
-     Serial.println("Dot on Snake!");
-    newDot();
-    return;
+  this->dot = random(0, 255);
+  for (const int &n: this->position) {
+    if (n == this->dot) { // todo: avoid next dot to be in direct front of snake
+      newDot();
+      return;
+    }
   }
-  Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_ON);
-  delay(25);
-  Screen.render();
 
+  Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_ON);
+  Screen.render();
+  
   this->gameState = Snake::GAME_STATE_RUNNING;
+
+  moveSnake(); // just here for testing. uncomment this function in loop
+}
+
+void Snake::moveSnake() {
+
+  // possible directions
+  bool up = true;
+  bool down = true;
+  bool left = true;
+  bool right = true;
+
+  int snakesize = this->position.size();
+  int snakehead = this->position[snakesize - 1];
+
+  int up_pos = snakehead - 16;
+  int down_pos = snakehead + 16;
+  int left_pos = snakehead - 1;
+  int right_pos = snakehead + 1;
+
+  // remove possible directions by grid borders
+  if (snakehead <= 15) { up = false; }
+  if (snakehead >= 240) { down = false; }
+  if (snakehead % 16 == 0) { left = false; }
+  if (snakehead % 16 == 1) { right = false; }
+
+  // remove possible directions by snake position
+  for (const int &n: this->position) {
+    if (up && n == up_pos) { up = false; }
+    if (down && n == down_pos) { down = false; }
+    if (left && n == left_pos) { left = false; }
+    if (right && n == right_pos) { right = false; }
+  }
+
+  if (up) { Serial.println("snake can go up"); }
+  if (down) { Serial.println("snake can go down"); }
+  if (left) { Serial.println("snake can go left"); }
+  if (right) { Serial.println("snake can go right"); }
+
+  // so now we can move the snake random... but what about intelligent movement...?
+
+  // left, right or stay in col?
+  if (snakehead % 16 == this->dot % 16) {
+    // stay in col
+  } elseif (snakehead % 16 > this->dot % 16) {
+    // go right
+  } else {
+    // go left
+  }
+
+  // up, down or stay in row?
+  // WARNING STOPPED HERE - DOES NOT WORK.
+  if (snakehead / 16 == this->dot / 16) {
+    // stay in row
+  } elseif (snakehead % 16 > this->dot % 16) {
+    // go up
+  } else {
+    // go down
+  }
+
+    // find shortest way to dot
+
+
+
+
+
+
+
+
+  // add snake dot to front
+
+
+  // if (first snake dot == dot)
+  //    generate new dot + speed up snake
+  // else 
+  //    remove last snake dot
+
 }
 
 void Snake::newLevel()
@@ -241,6 +302,7 @@ void Snake::loop()
     this->newLevel();
     break;
   case Snake::GAME_STATE_RUNNING:
+    //this->moveSnake();
     //this->updateBall();
     //this->updatePaddle();
     //delay(300);
