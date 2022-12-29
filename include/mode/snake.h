@@ -18,7 +18,6 @@ private:
   unsigned int dot;
 
   void initGame();
-  void initSnake();
   void newDot();
   void findDirection();
   void moveSnake(int newpos);

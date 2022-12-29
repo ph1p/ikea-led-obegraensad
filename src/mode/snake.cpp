@@ -6,11 +6,7 @@ void Snake::initGame()
 
   //this->ballDelay = ;
   //this->score = 0;
-  initSnake();
-}
-
-void Snake::initSnake()
-{
+  
   this->position = {240,241,242};
   for (const int &n: this->position)
   {
