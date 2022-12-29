@@ -47,7 +47,8 @@ private:
   void initGame();
   void initSnake();
   void newDot();
-  void moveSnake();
+  void findDirection();
+  void moveSnake(int newpos);
 
 
   void newLevel();
