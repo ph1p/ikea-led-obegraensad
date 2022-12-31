@@ -11,6 +11,7 @@ GameOfLife gameOfLife;
 Breakout breakout;
 Circle circle;
 Lines lines;
+Robots robots;
 Custom custom;
 
 void setMode(MODE mode, bool selfLoading)
@@ -72,10 +73,15 @@ void setMode(MODE mode, bool selfLoading)
 #endif
     buttonModeCount = 6;
   }
+  else if (mode == ROBOTS)
+  {
+    robots.setup();
+    buttonModeCount = 7;
+  }
   else if (mode == CUSTOM)
   {
     custom.setup();
-    buttonModeCount = 7;
+    buttonModeCount = 8;
   }
 
   delay(800);
@@ -116,6 +122,10 @@ MODE getModeByString(String mode)
   else if (mode == "custom")
   {
     return CUSTOM;
+  }
+  else if (mode == "robots")
+  {
+    return ROBOTS;
   }
   return NONE;
 }
@@ -171,12 +181,16 @@ void listenOnButtonToChangeMode()
       }
       else if (buttonModeCount == 7)
       {
+        setMode(ROBOTS);
+      }
+      else if (buttonModeCount == 8)
+      {
         setMode(CUSTOM);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 7)
+      if (buttonModeCount > 8)
       {
         buttonModeCount = 0;
       }
@@ -197,6 +211,10 @@ void loopOfAllModes()
     if (currentMode == STARS)
     {
       stars();
+    }
+    if (currentMode == ROBOTS)
+    {
+      robots.loop();
     }
     if (currentMode == LINES)
     {

@@ -6,6 +6,7 @@
 #include "mode/gameoflife.h"
 #include "mode/stars.h"
 #include "mode/lines.h"
+#include "mode/robots.h"
 #include "screen.h"
 #include "circle.h"
 #include "clock.h"
@@ -25,6 +26,7 @@ enum MODE
   GAMEOFLIFE,
   CIRCLE,
   CLOCK,
+  ROBOTS,
   CUSTOM,
   // SYSTEM
   UPDATE,
