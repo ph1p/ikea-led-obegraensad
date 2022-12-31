@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'preact/hooks';
-import { ReadyState } from 'react-use-websocket/dist/lib/constants';
-import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
+import { useEffect, useState } from "preact/hooks";
+import { ReadyState } from "react-use-websocket/dist/lib/constants";
+import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
 import {
   loadImageAndGetDataArray,
   rotateArray,
   rotateArrayByDegree,
-} from './helpers';
-import { MODE } from './types';
-import { controlColumn, wrapper } from './app.css';
-import { LedMatrix } from './components/LedMatrix';
-import { Button } from './components/Button';
-import { Layout } from './components/Layout';
-import { connectionInformation } from './main.css';
+} from "./helpers";
+import { MODE } from "./types";
+import { controlColumn, wrapper } from "./app.css";
+import { LedMatrix } from "./components/LedMatrix";
+import { Button } from "./components/Button";
+import { Layout } from "./components/Layout";
+import { connectionInformation } from "./main.css";
 
 export function App() {
   const [rotation, setRotation] = useState<number>(0);
@@ -24,7 +24,7 @@ export function App() {
   const { sendMessage, readyState } = useWebSocket(
     `${
       (import.meta as any).PROD
-        ? location.href.replace('http', 'ws')
+        ? location.href.replace("http", "ws")
         : import.meta.env.VITE_WS_URL
     }ws`,
     {
@@ -38,10 +38,10 @@ export function App() {
           const json = JSON.parse(event.data);
 
           switch (json.event) {
-            case 'mode':
+            case "mode":
               setMode(Object.values(MODE)[json.mode as number]);
               break;
-            case 'info':
+            case "info":
               setMode(Object.values(MODE)[json.mode as number]);
               setRotation(json.rotation);
 
@@ -65,14 +65,14 @@ export function App() {
   const loadImage = () => {
     loadImageAndGetDataArray((data) => {
       setLeds(() => indexMatrix.map((index) => data[index]));
-      wsMessage('screen', { data });
+      wsMessage("screen", { data });
     });
   };
 
   const clear = () => {
     setLeds([...new Array(256).fill(0)]);
     setTriggerClear(!triggerClear);
-    wsMessage('clear');
+    wsMessage("clear");
   };
 
   const rotate = (turnRight = false) => {
@@ -91,21 +91,21 @@ export function App() {
 
     sendMessage(
       JSON.stringify({
-        event: 'rotate',
-        direction: turnRight ? 'right' : 'left',
+        event: "rotate",
+        direction: turnRight ? "right" : "left",
       })
     );
   };
 
   const wsMessage = (
     event:
-      | 'persist'
-      | 'load'
-      | 'clear'
-      | 'mode'
-      | 'screen'
-      | 'led'
-      | 'persist-mode',
+      | "persist"
+      | "load"
+      | "clear"
+      | "mode"
+      | "screen"
+      | "led"
+      | "persist-mode",
     data?: any
   ) =>
     sendMessage(
@@ -115,14 +115,14 @@ export function App() {
       })
     );
 
-  const sendMode = (mode: MODE) => wsMessage('mode', { mode });
+  const sendMode = (mode: MODE) => wsMessage("mode", { mode });
 
   const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Open',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Try to reconnect',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Open",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Try to reconnect",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
   if (readyState !== ReadyState.OPEN) {
@@ -152,7 +152,7 @@ export function App() {
               data={leds}
               indexData={indexMatrix}
               onSetLed={(data) => {
-                wsMessage('led', data);
+                wsMessage("led", data);
               }}
               onSetMatrix={(data) => {
                 setLeds([...data]);
@@ -179,10 +179,11 @@ export function App() {
               <option value={MODE.GAMEOFLIFE}>game of life</option>
               <option value={MODE.CIRCLE}>circle</option>
               <option value={MODE.CLOCK}>clock</option>
+              <option value={MODE.ROBOTS}>robots</option>
               <option value={MODE.CUSTOM}>custom</option>
             </select>
 
-            <Button onClick={() => wsMessage('persist-mode')}>
+            <Button onClick={() => wsMessage("persist-mode")}>
               set as default
             </Button>
           </div>
@@ -205,10 +206,10 @@ export function App() {
                 <Button onClick={clear}>
                   <i class="fa-solid fa-trash"></i>
                 </Button>
-                <Button onClick={() => wsMessage('persist')}>
+                <Button onClick={() => wsMessage("persist")}>
                   <i class="fa-solid fa-floppy-disk"></i>
                 </Button>
-                <Button onClick={() => wsMessage('load')}>
+                <Button onClick={() => wsMessage("load")}>
                   <i class="fa-solid fa-refresh"></i>
                 </Button>
               </>
