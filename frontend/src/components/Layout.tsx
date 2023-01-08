@@ -1,11 +1,11 @@
-import { VNode } from 'preact';
+import { Component } from 'solid-js';
 import { content, footer, layout } from './Layout.css';
 
-export const Layout = (props: { content: VNode; footer: VNode }) => {
+export const Layout: Component<{ content: any; footer: any }> = (props) => {
   return (
-    <main className={layout}>
-      <section className={content}>{props.content}</section>
-      <footer className={footer}>{props.footer}</footer>
+    <main class={layout}>
+      <section class={content}>{props.content}</section>
+      <footer class={footer}>{props.footer}</footer>
     </main>
   );
 };

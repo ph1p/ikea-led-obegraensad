@@ -1,5 +1,5 @@
 export enum MODE {
-  NONE = '',
+  NONE = 'draw',
   STARS = 'stars',
   LINES = 'lines',
   BREAKOUT = 'breakout',

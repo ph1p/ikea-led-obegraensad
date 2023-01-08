@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { multiplier } from '../main.css';
+import { multiplier } from '../index.css';
 
 export const ledScreen = style({
   position: 'relative',
