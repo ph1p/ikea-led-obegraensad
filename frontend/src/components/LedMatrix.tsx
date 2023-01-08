@@ -1,4 +1,5 @@
 import { Component, createSignal, Index } from 'solid-js';
+import { createVisibilityObserver } from '@solid-primitives/intersection-observer';
 import { grid, ledInner, ledScreen, ledWrapper } from './LedMatrix.css';
 
 interface Props {
@@ -10,9 +11,9 @@ interface Props {
 }
 
 export const LedMatrix: Component<Props> = (props) => {
-  // const { ref, inView } = useInView({
-  //   threshold: 0.99,
-  // });
+  let ref: HTMLDivElement | undefined;
+  const useVisibilityObserver = createVisibilityObserver({ threshold: 0.9 });
+  const visible = useVisibilityObserver(() => ref);
   const [isMouseDown, setMouseIsDown] = createSignal(false);
 
   const setLed = (index: number) => {
@@ -35,8 +36,10 @@ export const LedMatrix: Component<Props> = (props) => {
 
   return (
     <div
-      // ref={ref}
-      class={`${ledScreen} ${'in-view'} ${props.disabled ? 'disabled' : ''}`}
+      ref={ref}
+      class={`${ledScreen} ${visible() ? 'in-view' : ''} ${
+        props.disabled ? 'disabled' : ''
+      }`}
     >
       <div
         class={grid}

@@ -10,16 +10,17 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@types/offscreencanvas": "^2019.7.0",
     "@gfx/zopfli": "^1.0.15",
-    "typescript": "^4.9.4",
-    "vite": "^4.0.4",
-    "vite-plugin-solid": "^2.5.0",
+    "@types/offscreencanvas": "^2019.7.0",
     "@vanilla-extract/css": "^1.9.2",
     "@vanilla-extract/vite-plugin": "^3.7.0",
-    "vite-plugin-singlefile": "^0.13.2"
+    "typescript": "^4.9.4",
+    "vite": "^4.0.4",
+    "vite-plugin-singlefile": "^0.13.2",
+    "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
+    "@solid-primitives/intersection-observer": "^2.0.3",
     "@solid-primitives/websocket": "^0.3.3",
     "solid-js": "^1.6.8"
   }

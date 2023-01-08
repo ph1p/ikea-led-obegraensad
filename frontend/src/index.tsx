@@ -5,6 +5,7 @@ import './index.css';
 
 import { App } from './app';
 import { Creator } from './creator';
+import { StoreProvider } from './store';
 
 const Router = () => {
   const [hash, setHash] = createSignal(window.location.hash);
@@ -29,4 +30,11 @@ const Router = () => {
   );
 };
 
-render(() => <Router />, document.getElementById('app') as HTMLElement);
+render(
+  () => (
+    <StoreProvider>
+      <Router />
+    </StoreProvider>
+  ),
+  document.getElementById('app') as HTMLElement
+);

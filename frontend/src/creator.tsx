@@ -12,28 +12,18 @@ import {
 } from './creator.css';
 import { chunkArray, matrixToHexArray } from './helpers';
 import { connectionInformation } from './index.css';
+import { useStore } from './store';
 
-export function Creator() {
-  let ref: HTMLDivElement;
+export const Creator = () => {
+  const store = useStore();
+
   const [isPlaying, setIsPlaying] = createSignal(false);
-  const [indexMatrix] = createSignal<number[]>(
-    [...new Array(256)].map((_, i) => i)
-  );
   const [screens, setScreens] = createSignal<number[][]>([]);
   const [currentFrame, setCurrentFrame] = createSignal<number[]>([]);
   const [intervalId, setIntervalId] = createSignal(0);
-  const [connect, disconnect, send, connectionState] = createWebsocket(
-    `${
-      import.meta.env.PROD
-        ? window.location.href.replace('http', 'ws')
-        : import.meta.env.VITE_WS_URL
-    }ws`,
-    () => {},
-    () => {},
-    [],
-    3,
-    5000
-  );
+
+  let ref: HTMLDivElement;
+
   const scrollToEnd = () => {
     if (ref) {
       setTimeout(() => {
@@ -63,15 +53,14 @@ export function Creator() {
     setScreens((state) => state.filter((_, i) => i !== index));
   };
 
-  const uploadData = () => {
-    send(
+  const uploadData = () =>
+    store!.send(
       JSON.stringify({
         event: 'upload',
         screens: screens().length,
         data: screens().map((screen) => matrixToHexArray(screen)),
       })
     );
-  };
 
   const exportData = () => {
     const animation = [];
@@ -124,7 +113,6 @@ if (size > 0)
   };
 
   onMount(() => {
-    connect();
     if (!isPlaying()) {
       clearInterval(intervalId());
       setIntervalId(0);
@@ -151,23 +139,14 @@ if (size > 0)
     };
   });
 
-  onCleanup(() => disconnect());
-
-  const connectionStatus = {
-    0: 'Connecting',
-    1: 'Open',
-    2: 'Closing',
-    3: 'Try to reconnect',
-  }[connectionState()];
-
   return (
     <Show
-      when={connectionState() === 1}
+      when={store!.connectionState() === 1}
       fallback={
         <Layout
           content={
             <div class={wrapper}>
-              <div class={connectionInformation}>{connectionStatus}...</div>
+              <div class={connectionInformation}>{store?.connectionStatus}...</div>
             </div>
           }
           footer={
@@ -182,13 +161,13 @@ if (size > 0)
         content={
           <div class={wrapper}>
             {screens().length ? (
-              <div class={screensWrapper} ref={ref}>
+              <div class={screensWrapper} ref={ref!}>
                 <Show
                   when={!isPlaying()}
                   fallback={
                     <LedMatrix
                       data={currentFrame()}
-                      indexData={indexMatrix()}
+                      indexData={store!.indexMatrix()}
                     />
                   }
                 >
@@ -206,7 +185,7 @@ if (size > 0)
                         </header>
                         <LedMatrix
                           data={screen()}
-                          indexData={indexMatrix()}
+                          indexData={store!.indexMatrix()}
                           onSetLed={(data) => {
                             setScreens((state) => {
                               state[index][data.index] = Number(data.status);
@@ -257,4 +236,4 @@ if (size > 0)
       />
     </Show>
   );
-}
+};
