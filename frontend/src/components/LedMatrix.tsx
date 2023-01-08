@@ -18,8 +18,6 @@ export function LedMatrix(props: Props) {
   const [isMouseDown, setMouseIsDown] = useState(false);
 
   const setLed = (index: number) => {
-    const rotatedIndex = props.indexData[index];
-
     const status = Number(!props.data[index]);
     const newState = props.data.map((led, i) =>
       i === index ? Number(status) : led
@@ -27,7 +25,7 @@ export function LedMatrix(props: Props) {
 
     if (props.onSetLed) {
       props.onSetLed({
-        index: rotatedIndex,
+        index,
         status,
       });
     }
@@ -53,23 +51,28 @@ export function LedMatrix(props: Props) {
           setMouseIsDown(false);
         }}
       >
-        {props.data.map((status, index) => (
-          <div
-            key={index}
-            className={ledWrapper}
-            onPointerDown={() => {
-              setLed(index);
-              setMouseIsDown(true);
-            }}
-            onPointerEnter={() => {
-              if (isMouseDown) {
-                setLed(index);
-              }
-            }}
-          >
-            <div className={`${ledInner} ${status ? 'active' : ''}`}></div>
-          </div>
-        ))}
+        {props.data.map((_, index) => {
+          const rIndex = props.indexData[index];
+          return (
+            <div
+              key={rIndex}
+              className={ledWrapper}
+              onPointerDown={() => {
+                setLed(rIndex);
+                setMouseIsDown(true);
+              }}
+              onPointerEnter={() => {
+                if (isMouseDown) {
+                  setLed(rIndex);
+                }
+              }}
+            >
+              <div
+                className={`${ledInner} ${props.data[rIndex] ? 'active' : ''}`}
+              ></div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

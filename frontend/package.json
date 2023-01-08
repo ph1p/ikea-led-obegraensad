@@ -16,13 +16,13 @@
   },
   "devDependencies": {
     "@gfx/zopfli": "^1.0.15",
-    "@preact/preset-vite": "^2.4.0",
+    "@preact/preset-vite": "^2.5.0",
     "@vanilla-extract/css": "^1.9.2",
     "@vanilla-extract/vite-plugin": "^3.7.0",
-    "sass": "^1.56.1",
-    "terser": "^5.15.1",
-    "typescript": "^4.9.3",
-    "vite": "^3.2.4",
-    "vite-plugin-singlefile": "^0.13.1"
+    "sass": "^1.57.1",
+    "terser": "^5.16.1",
+    "typescript": "^4.9.4",
+    "vite": "^4.0.4",
+    "vite-plugin-singlefile": "^0.13.2"
   }
 }

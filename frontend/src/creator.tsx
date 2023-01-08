@@ -10,7 +10,7 @@ import {
   screenHeader,
   screensWrapper,
   wrapper,
-} from './Creator.css';
+} from './creator.css';
 import { chunkArray, matrixToHexArray } from './helpers';
 import { connectionInformation } from './main.css';
 

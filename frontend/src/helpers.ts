@@ -35,46 +35,30 @@ export const loadImageAndGetDataArray = (cb: (data: number[]) => void) => {
   };
 };
 
-export const rotateArrayByDegree = (data: number[], degree: number) => {
-  const numRotations = degree / 90;
-  const isRight = numRotations > 0;
-
-  [...new Array(Math.abs(numRotations))].forEach(() => {
-    data = rotateArray(data, isRight);
-  });
-
-  return data;
-};
-
-export const rotateArray = (matrix: number[], turnRight = false) => {
+export const rotateArray = (matrix: number[], rotations: number) => {
   const SIZE = 16;
   const newState = [...matrix];
-  for (let i = 0; i < SIZE; i++) {
-    for (let j = i; j < SIZE; j++) {
-      let temp = newState[i * SIZE + j];
-      newState[i * SIZE + j] = newState[j * SIZE + i];
-      newState[j * SIZE + i] = temp;
-    }
-  }
 
-  for (let i = 0; i < SIZE; i++) {
-    let col1 = 0;
-    let col2 = SIZE - 1;
-    while (col1 < col2) {
-      let index1 = i * SIZE + col1;
-      let index2 = i * SIZE + col2;
-      if (!turnRight) {
-        index1 = col1 * SIZE + i;
-        index2 = col2 * SIZE + i;
+  const swap = (arr: number[], i: number, j: number) => {
+    const temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  };
+
+  for (let row = 0; row < SIZE / 2; row++) {
+    for (let col = row; col < SIZE - row - 1; col++) {
+      for (let r = 0; r < rotations; r++) {
+        swap(newState, row * SIZE + col, col * SIZE + (SIZE - 1 - row));
+        swap(
+          newState,
+          row * SIZE + col,
+          (SIZE - 1 - row) * SIZE + (SIZE - 1 - col)
+        );
+        swap(newState, row * SIZE + col, (SIZE - 1 - col) * SIZE + row);
       }
-
-      let temp = newState[index1];
-      newState[index1] = newState[index2];
-      newState[index2] = temp;
-      col1++;
-      col2--;
     }
   }
+
   return newState;
 };
 
