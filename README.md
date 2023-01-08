@@ -13,7 +13,6 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
 - Persist your drawing
 - Rotate image
-  - optional with accelerometer
 - Live Drawing
 - OTA Update
 - Wifi Control
