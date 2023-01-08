@@ -5,30 +5,19 @@ import {
   onCleanup,
   onMount,
   ParentComponent,
-  Setter,
+  Show,
   useContext,
 } from 'solid-js';
-import { MODE } from './types';
-
-interface Store {
-  rotation: () => number;
-  indexMatrix: () => number[];
-  leds: () => number[];
-  mode: () => MODE;
-
-  setRotation: Setter<number>;
-  setIndexMatrix: Setter<number[]>;
-  setLeds: Setter<number[]>;
-  setMode: Setter<MODE>;
-  send: (message: string) => void;
-  connectionState: () => number;
-
-  connectionStatus?: string;
-}
+import { toastNotificationStyle } from './index.css';
+import { MODE, Store } from './types';
 
 const StoreContext = createContext<Store>();
 
 export const StoreProvider: ParentComponent = (props) => {
+  const [toastNotification, setToastNotification] = createSignal<{
+    text: string;
+    duration: number;
+  } | null>(null);
   const [rotation, setRotation] = createSignal(0);
   const [indexMatrix, setIndexMatrix] = createSignal(
     [...new Array(256)].map((_, i) => i)
@@ -80,6 +69,14 @@ export const StoreProvider: ParentComponent = (props) => {
     3: 'Try to reconnect',
   }[connectionState()];
 
+  const toast = (text: string, duration: number) => {
+    setToastNotification({
+      text,
+      duration,
+    });
+    setTimeout(() => setToastNotification(null), duration);
+  };
+
   const store = {
     rotation,
     indexMatrix,
@@ -92,10 +89,14 @@ export const StoreProvider: ParentComponent = (props) => {
     send,
     connectionState,
     connectionStatus,
+    toast,
   };
 
   return (
     <StoreContext.Provider value={store}>
+      <Show when={!!toastNotification()}>
+        <div class={toastNotificationStyle}>{toastNotification()?.text}</div>
+      </Show>
       {props.children}
     </StoreContext.Provider>
   );
