@@ -119,9 +119,11 @@ void Screen_::clear(bool rerender)
 
 void Screen_::persist()
 {
+#ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
   storage.putBytes("data", this->renderBuffer_, ROWS * COLS);
   storage.end();
+#endif
 }
 
 void Screen_::setPixelAtIndex(uint8_t index, uint8_t value)

@@ -9,8 +9,8 @@
 // disable if you do not want to have online functionality
 #define ENABLE_SERVER
 
-// comment in if you have connected an accelerometer
-// #define ENABLE_ACCELEROMETER
+// disable if you do not want to use the internal storage
+#define ENABLE_STORAGE
 
 #ifdef ENABLE_SERVER
 #define NTP_SERVER "de.pool.ntp.org"
