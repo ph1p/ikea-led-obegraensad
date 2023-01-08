@@ -8,13 +8,25 @@ const char *otaPassword = OTA_PASSWORD;
 void onOTAStart()
 {
   setMode(UPDATE);
-  Screen.setRenderBuffer(letterU);
+
+  std::vector<int> bits = Screen.readBytes(letterU);
+
+  for (int i = 0; i < bits.size(); i++)
+  {
+    Screen.setPixelAtIndex(i, bits[i]);
+  }
+
   Screen.render();
 }
 
 void onOTAEnd()
 {
-  Screen.setRenderBuffer(letterR);
+  std::vector<int> bits = Screen.readBytes(letterR);
+
+  for (int i = 0; i < bits.size(); i++)
+  {
+    Screen.setPixelAtIndex(i, bits[i]);
+  }
   Screen.render();
   delay(1000);
   Screen.loadFromStorage();
