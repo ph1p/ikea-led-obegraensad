@@ -21,10 +21,11 @@ export function App() {
   );
   const [leds, setLeds] = useState<number[]>([...new Array(256)].fill(0));
   const [mode, setMode] = useState<MODE>(MODE.NONE);
+
   const { sendMessage, readyState } = useWebSocket(
     `${
-      (import.meta as any).PROD
-        ? location.href.replace('http', 'ws')
+      import.meta.env.PROD
+        ? window.location.href.replace('http', 'ws')
         : import.meta.env.VITE_WS_URL
     }ws`,
     {

@@ -25,8 +25,8 @@ export function Creator() {
   const [intervalId, setIntervalId] = useState(0);
   const { sendMessage, readyState } = useWebSocket(
     `${
-      (import.meta as any).PROD
-        ? location.href.replace('http', 'ws')
+      import.meta.env.PROD
+        ? window.location.href.replace('http', 'ws')
         : import.meta.env.VITE_WS_URL
     }ws`,
     {
@@ -35,7 +35,6 @@ export function Creator() {
       reconnectAttempts: 10,
       reconnectInterval: 3000,
       retryOnError: true,
-      onMessage: (event) => {},
     }
   );
 
