@@ -13,6 +13,7 @@ private:
   static const unsigned int GAME_STATE_END = 2;
 
   byte gameState;
+  byte lastDirection = 0; // 0=unset 1=up 2=right 3=down 4 =left
 
   std::vector<int> position = {240,241,242};
   unsigned int dot;
