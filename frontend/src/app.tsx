@@ -1,11 +1,7 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import { ReadyState } from 'react-use-websocket/dist/lib/constants';
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
-import {
-  loadImageAndGetDataArray,
-  rotateArray,
-  rotateArrayByDegree,
-} from './helpers';
+import { loadImageAndGetDataArray, rotateArray } from './helpers';
 import { MODE } from './types';
 import { controlColumn, wrapper } from './app.css';
 import { LedMatrix } from './components/LedMatrix';
@@ -21,10 +17,16 @@ export function App() {
   );
   const [leds, setLeds] = useState<number[]>([...new Array(256)].fill(0));
   const [mode, setMode] = useState<MODE>(MODE.NONE);
+
+  const rotatedMatrix = useMemo(
+    () => rotateArray(indexMatrix, rotation),
+    [rotation, indexMatrix]
+  );
+
   const { sendMessage, readyState } = useWebSocket(
     `${
-      (import.meta as any).PROD
-        ? location.href.replace('http', 'ws')
+      import.meta.env.PROD
+        ? window.location.href.replace('http', 'ws')
         : import.meta.env.VITE_WS_URL
     }ws`,
     {
@@ -45,14 +47,10 @@ export function App() {
               setMode(Object.values(MODE)[json.mode as number]);
               setRotation(json.rotation);
 
-              setIndexMatrix([
-                ...rotateArrayByDegree(
-                  [...new Array(256)].map((_, i) => i),
-                  json.rotation
-                ),
-              ]);
+              setIndexMatrix([...new Array(256)].map((_, i) => i));
+
               if (json.data) {
-                setLeds(rotateArrayByDegree(json.data, json.rotation));
+                setLeds(json.data);
               }
 
               break;
@@ -76,18 +74,17 @@ export function App() {
   };
 
   const rotate = (turnRight = false) => {
-    if (turnRight) {
-      setRotation(rotation + 90);
-    } else {
-      setRotation(rotation - 90);
-    }
+    let currentRotation = rotation;
 
-    if (rotation <= -360 || rotation >= 360) {
-      setRotation(0);
-    }
+    currentRotation = turnRight
+      ? currentRotation > 3
+        ? 1
+        : currentRotation + 1
+      : currentRotation <= 0
+      ? 3
+      : currentRotation - 1;
 
-    setLeds((state: number[]) => rotateArray(state, turnRight));
-    setIndexMatrix((state: number[]) => rotateArray(state, turnRight));
+    setRotation(currentRotation);
 
     sendMessage(
       JSON.stringify({
@@ -150,7 +147,7 @@ export function App() {
             <LedMatrix
               disabled={mode !== MODE.NONE}
               data={leds}
-              indexData={indexMatrix}
+              indexData={rotatedMatrix}
               onSetLed={(data) => {
                 wsMessage('led', data);
               }}

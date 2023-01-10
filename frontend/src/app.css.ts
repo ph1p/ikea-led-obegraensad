@@ -1,5 +1,4 @@
 import { style } from '@vanilla-extract/css';
-import { multiplier } from './main.css';
 
 export const wrapper = style({
   display: 'grid',
