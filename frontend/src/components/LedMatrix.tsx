@@ -1,6 +1,5 @@
-import { useState } from 'preact/hooks';
-import { useInView } from 'react-intersection-observer';
-
+import { Component, createSignal, Index } from 'solid-js';
+import { createVisibilityObserver } from '@solid-primitives/intersection-observer';
 import { grid, ledInner, ledScreen, ledWrapper } from './LedMatrix.css';
 
 interface Props {
@@ -11,15 +10,13 @@ interface Props {
   indexData: number[];
 }
 
-export function LedMatrix(props: Props) {
-  const { ref, inView } = useInView({
-    threshold: 0.99,
-  });
-  const [isMouseDown, setMouseIsDown] = useState(false);
+export const LedMatrix: Component<Props> = (props) => {
+  let ref: HTMLDivElement | undefined;
+  const useVisibilityObserver = createVisibilityObserver({ threshold: 0.9 });
+  const visible = useVisibilityObserver(() => ref);
+  const [isMouseDown, setMouseIsDown] = createSignal(false);
 
   const setLed = (index: number) => {
-    const rotatedIndex = props.indexData[index];
-
     const status = Number(!props.data[index]);
     const newState = props.data.map((led, i) =>
       i === index ? Number(status) : led
@@ -27,7 +24,7 @@ export function LedMatrix(props: Props) {
 
     if (props.onSetLed) {
       props.onSetLed({
-        index: rotatedIndex,
+        index,
         status,
       });
     }
@@ -40,12 +37,12 @@ export function LedMatrix(props: Props) {
   return (
     <div
       ref={ref}
-      className={`${ledScreen} ${inView ? 'in-view' : ''} ${
+      class={`${ledScreen} ${visible() ? 'in-view' : ''} ${
         props.disabled ? 'disabled' : ''
       }`}
     >
       <div
-        className={grid}
+        class={grid}
         onPointerUp={() => {
           setMouseIsDown(false);
         }}
@@ -53,24 +50,29 @@ export function LedMatrix(props: Props) {
           setMouseIsDown(false);
         }}
       >
-        {props.data.map((status, index) => (
-          <div
-            key={index}
-            className={ledWrapper}
-            onPointerDown={() => {
-              setLed(index);
-              setMouseIsDown(true);
-            }}
-            onPointerEnter={() => {
-              if (isMouseDown) {
-                setLed(index);
-              }
-            }}
-          >
-            <div className={`${ledInner} ${status ? 'active' : ''}`}></div>
-          </div>
-        ))}
+        <Index each={props.data}>
+          {(_, index) => (
+            <div
+              class={ledWrapper}
+              onPointerDown={() => {
+                setLed(props.indexData[index]);
+                setMouseIsDown(true);
+              }}
+              onPointerEnter={() => {
+                if (isMouseDown()) {
+                  setLed(props.indexData[index]);
+                }
+              }}
+            >
+              <div
+                class={`${ledInner} ${
+                  props.data[props.indexData[index]] ? 'active' : ''
+                }`}
+              ></div>
+            </div>
+          )}
+        </Index>
       </div>
     </div>
   );
-}
+};

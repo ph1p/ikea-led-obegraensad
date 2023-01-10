@@ -13,7 +13,6 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
 - Persist your drawing
 - Rotate image
-  - optional with accelerometer
 - Live Drawing
 - OTA Update
 - Wifi Control
@@ -98,7 +97,7 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 | CLK              | GPIO14 | IO02        |
 | CLA              | GPIO12 | IO15        |
 | BUTTON one end   | GPIO16 | IO21        |
-| BUTTON other end | GND    | GND         |  
+| BUTTON other end | GND    | GND         |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
