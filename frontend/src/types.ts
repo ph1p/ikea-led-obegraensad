@@ -3,6 +3,7 @@ export enum MODE {
   STARS = 'stars',
   LINES = 'lines',
   BREAKOUT = 'breakout',
+  SNAKE = 'snake',
   GAMEOFLIFE = 'gameoflife',
   CIRCLE = 'circle',
   CLOCK = 'clock',
