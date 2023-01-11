@@ -25,7 +25,7 @@ void BigClock::loop()
       Screen.clear();
       if (leadingZero) {
         hh.erase(hh.begin());
-        Screen.drawBigNumbers(COLS/2, 0, hh);
+        Screen.drawBigNumbers(COLS/2 + 1, 0, hh);
         Screen.drawBigNumbers(0, ROWS/2, mm);
       } else {
         Screen.drawBigNumbers(0, 0, hh);
