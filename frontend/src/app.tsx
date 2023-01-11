@@ -176,6 +176,7 @@ export function App() {
               <option value={MODE.STARS}>stars</option>
               <option value={MODE.LINES}>lines</option>
               <option value={MODE.BREAKOUT}>breakout</option>
+              <option value={MODE.SNAKE}>snake</option>
               <option value={MODE.GAMEOFLIFE}>game of life</option>
               <option value={MODE.CIRCLE}>circle</option>
               <option value={MODE.CLOCK}>clock</option>

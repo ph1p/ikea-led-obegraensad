@@ -9,6 +9,7 @@ int lastModeButtonState = 0;
 
 GameOfLife gameOfLife;
 Breakout breakout;
+Snake snake;
 Circle circle;
 Lines lines;
 Custom custom;
@@ -55,27 +56,32 @@ void setMode(MODE mode, bool selfLoading)
     breakout.setup();
     buttonModeCount = 3;
   }
+  else if (mode == SNAKE)
+  {
+    snake.setup();
+    buttonModeCount = 4;
+  }
   else if (mode == GAMEOFLIFE)
   {
     gameOfLife.setup();
-    buttonModeCount = 4;
+    buttonModeCount = 5;
   }
   else if (mode == CIRCLE)
   {
     circle.setup();
-    buttonModeCount = 5;
+    buttonModeCount = 6;
   }
   else if (mode == CLOCK)
   {
 #ifdef ENABLE_SERVER
     clockSetup();
 #endif
-    buttonModeCount = 6;
+    buttonModeCount = 7;
   }
   else if (mode == CUSTOM)
   {
     custom.setup();
-    buttonModeCount = 7;
+    buttonModeCount = 8;
   }
 
   delay(800);
@@ -100,6 +106,10 @@ MODE getModeByString(String mode)
   else if (mode == "breakout")
   {
     return BREAKOUT;
+  }
+  else if (mode == "snake")
+  {
+    return SNAKE;
   }
   else if (mode == "gameoflife")
   {
@@ -159,24 +169,28 @@ void listenOnButtonToChangeMode()
       }
       else if (buttonModeCount == 4)
       {
-        setMode(GAMEOFLIFE);
+        setMode(SNAKE);
       }
       else if (buttonModeCount == 5)
       {
-        setMode(CIRCLE);
+        setMode(GAMEOFLIFE);
       }
       else if (buttonModeCount == 6)
       {
-        setMode(CLOCK);
+        setMode(CIRCLE);
       }
       else if (buttonModeCount == 7)
+      {
+        setMode(CLOCK);
+      }
+      else if (buttonModeCount == 8)
       {
         setMode(CUSTOM);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 7)
+      if (buttonModeCount > 8)
       {
         buttonModeCount = 0;
       }
@@ -205,6 +219,10 @@ void loopOfAllModes()
     if (currentMode == BREAKOUT)
     {
       breakout.loop();
+    }
+    if (currentMode == SNAKE)
+    {
+      snake.loop();
     }
     if (currentMode == GAMEOFLIFE)
     {
