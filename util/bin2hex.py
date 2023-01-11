@@ -7,4 +7,4 @@ with open("bits", "r") as f:
         num = int(line, 2)
         hex_num = hex(num)
         nums.append(hex_num)
-    print("{" + ",".join(nums) + "}")
+    print("{" + ", ".join(nums) + "}")
