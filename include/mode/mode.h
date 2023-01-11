@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "constants.h"
 #include "mode/breakout.h"
+#include "mode/snake.h"
 #include "mode/gameoflife.h"
 #include "mode/stars.h"
 #include "mode/lines.h"
@@ -22,6 +23,7 @@ enum MODE
   STARS,
   LINES,
   BREAKOUT,
+  SNAKE,
   GAMEOFLIFE,
   CIRCLE,
   CLOCK,
