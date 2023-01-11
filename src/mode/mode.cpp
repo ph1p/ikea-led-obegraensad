@@ -11,6 +11,7 @@ GameOfLife gameOfLife;
 Breakout breakout;
 Circle circle;
 Lines lines;
+BigClock bigClock;
 Custom custom;
 
 void setMode(MODE mode, bool selfLoading)
@@ -68,9 +69,16 @@ void setMode(MODE mode, bool selfLoading)
   else if (mode == CLOCK)
   {
 #ifdef ENABLE_SERVER
-    bigClockSetup();
+    clockSetup();
 #endif
     buttonModeCount = CLOCK;
+  }
+  else if (mode == BIGCLOCK)
+  {
+#ifdef ENABLE_SERVER
+    bigClock.setup();
+#endif
+    buttonModeCount = BIGCLOCK;
   }
   else if (mode == CUSTOM)
   {
@@ -112,6 +120,10 @@ MODE getModeByString(String mode)
   else if (mode == "clock")
   {
     return CLOCK;
+  }
+  else if (mode == "bigclock")
+  {
+    return BIGCLOCK;
   }
   else if (mode == "custom")
   {
@@ -169,6 +181,10 @@ void listenOnButtonToChangeMode()
       {
         setMode(CLOCK);
       }
+      else if (buttonModeCount == BIGCLOCK)
+      {
+        setMode(BIGCLOCK);
+      }
       else if (buttonModeCount == CUSTOM)
       {
         setMode(CUSTOM);
@@ -221,7 +237,13 @@ void loopOfAllModes()
     if (currentMode == CLOCK)
     {
 #ifdef ENABLE_SERVER
-      bigClockLoop();
+      clockLoop();
+#endif
+    }
+    if (currentMode == BIGCLOCK)
+    {
+#ifdef ENABLE_SERVER
+      bigClock.loop();
 #endif
     }
   }
