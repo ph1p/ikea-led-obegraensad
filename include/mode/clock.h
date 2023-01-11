@@ -14,5 +14,7 @@ extern int previousHour;
 
 void clockSetup();
 void clockLoop();
+void bigClockSetup();
+void bigClockLoop();
 
 #endif

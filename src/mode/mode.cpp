@@ -221,7 +221,7 @@ void loopOfAllModes()
     if (currentMode == CLOCK)
     {
 #ifdef ENABLE_SERVER
-      clockLoop();
+      bigClockLoop();
 #endif
     }
   }
