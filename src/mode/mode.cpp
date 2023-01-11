@@ -11,6 +11,7 @@ GameOfLife gameOfLife;
 Breakout breakout;
 Circle circle;
 Lines lines;
+BigClock bigClock;
 Custom custom;
 
 void setMode(MODE mode, bool selfLoading)
@@ -38,44 +39,51 @@ void setMode(MODE mode, bool selfLoading)
 
   if (mode == NONE)
   {
-    buttonModeCount = 0;
+    buttonModeCount = NONE;
     Screen.restoreCache();
   }
   else if (mode == STARS)
   {
-    buttonModeCount = 1;
+    buttonModeCount = STARS;
   }
   else if (mode == LINES)
   {
     lines.setup();
-    buttonModeCount = 2;
+    buttonModeCount = STARS;
   }
   else if (mode == BREAKOUT)
   {
     breakout.setup();
-    buttonModeCount = 3;
+    buttonModeCount = BREAKOUT;
   }
   else if (mode == GAMEOFLIFE)
   {
     gameOfLife.setup();
-    buttonModeCount = 4;
+    buttonModeCount = GAMEOFLIFE;
   }
   else if (mode == CIRCLE)
   {
     circle.setup();
-    buttonModeCount = 5;
+    buttonModeCount = CIRCLE;
   }
   else if (mode == CLOCK)
   {
 #ifdef ENABLE_SERVER
     clockSetup();
 #endif
-    buttonModeCount = 6;
+    buttonModeCount = CLOCK;
+  }
+  else if (mode == BIGCLOCK)
+  {
+#ifdef ENABLE_SERVER
+    bigClock.setup();
+#endif
+    buttonModeCount = BIGCLOCK;
   }
   else if (mode == CUSTOM)
   {
     custom.setup();
-    buttonModeCount = 7;
+    buttonModeCount = CUSTOM;
   }
 
   delay(800);
@@ -113,6 +121,10 @@ MODE getModeByString(String mode)
   {
     return CLOCK;
   }
+  else if (mode == "bigclock")
+  {
+    return BIGCLOCK;
+  }
   else if (mode == "custom")
   {
     return CUSTOM;
@@ -137,48 +149,52 @@ void listenOnButtonToChangeMode()
   {
     if (buttonModeCount < 0)
     {
-      buttonModeCount = 1;
+      buttonModeCount = NONE;
     }
     else
     {
-      if (buttonModeCount == 0)
+      if (buttonModeCount == NONE)
       {
         setMode(NONE);
       }
-      else if (buttonModeCount == 1)
+      else if (buttonModeCount == STARS)
       {
         setMode(STARS);
       }
-      else if (buttonModeCount == 2)
+      else if (buttonModeCount == LINES)
       {
         setMode(LINES);
       }
-      else if (buttonModeCount == 3)
+      else if (buttonModeCount == BREAKOUT)
       {
         setMode(BREAKOUT);
       }
-      else if (buttonModeCount == 4)
+      else if (buttonModeCount == GAMEOFLIFE)
       {
         setMode(GAMEOFLIFE);
       }
-      else if (buttonModeCount == 5)
+      else if (buttonModeCount == CIRCLE)
       {
         setMode(CIRCLE);
       }
-      else if (buttonModeCount == 6)
+      else if (buttonModeCount == CLOCK)
       {
         setMode(CLOCK);
       }
-      else if (buttonModeCount == 7)
+      else if (buttonModeCount == BIGCLOCK)
+      {
+        setMode(BIGCLOCK);
+      }
+      else if (buttonModeCount == CUSTOM)
       {
         setMode(CUSTOM);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 7)
+      if (buttonModeCount > NUM_MODES)
       {
-        buttonModeCount = 0;
+        buttonModeCount = NONE;
       }
     }
   }
@@ -222,6 +238,12 @@ void loopOfAllModes()
     {
 #ifdef ENABLE_SERVER
       clockLoop();
+#endif
+    }
+    if (currentMode == BIGCLOCK)
+    {
+#ifdef ENABLE_SERVER
+      bigClock.loop();
 #endif
     }
   }
