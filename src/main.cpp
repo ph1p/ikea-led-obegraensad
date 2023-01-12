@@ -43,7 +43,7 @@ void setup()
   }
   if (WiFi.status() != WL_CONNECTED)
   {
-    Serial.println("Resetting");
+    Serial.println("Couldn't connect to WiFi, resetting");
     ESP.restart();
   }
   else
