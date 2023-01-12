@@ -11,6 +11,7 @@
 #include "clock.h"
 #include "signs.h"
 #include "custom.h"
+#include "bigclock.h"
 
 extern int buttonModeCount;
 extern int modeButtonState;
@@ -18,17 +19,20 @@ extern int lastModeButtonState;
 
 enum MODE
 {
-  NONE,
-  STARS,
-  LINES,
-  BREAKOUT,
-  GAMEOFLIFE,
-  CIRCLE,
-  CLOCK,
-  CUSTOM,
-  // SYSTEM
-  UPDATE,
-  LOADING,
+  // DISPLAY MODES
+  NONE = 0,
+  CUSTOM = 1,
+  STARS = 2,
+  LINES = 3,
+  BREAKOUT = 4,
+  GAMEOFLIFE = 5,
+  CIRCLE = 6,
+  CLOCK = 7,
+  BIGCLOCK = 8,
+  NUM_MODES = 9,
+  // SYSTEM MODES
+  UPDATE = 98,
+  LOADING = 99,
 };
 
 extern MODE currentMode;
