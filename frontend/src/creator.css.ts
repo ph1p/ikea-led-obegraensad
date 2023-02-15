@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { multiplier } from './main.css';
+import { multiplier } from './index.css';
 
 export const wrapper = style({
   height: '100%',
@@ -12,7 +12,7 @@ export const screensWrapper = style({
   flexFlow: 'row nowrap',
   WebkitOverflowScrolling: 'touch',
   overflowX: 'auto',
-  gap: 35,
+  gap: 85,
   height: '100%',
   width: '100vw',
   alignItems: 'center',

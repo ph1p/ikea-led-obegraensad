@@ -1,28 +1,27 @@
 {
-  "name": "frontend2",
-  "private": true,
+  "name": "frontend",
   "version": "0.0.0",
-  "type": "module",
+  "description": "",
   "scripts": {
+    "start": "vite",
     "dev": "vite",
-    "build": "tsc && vite build && node compress.js",
-    "preview": "vite preview"
+    "build": "vite build && node compress.mjs",
+    "serve": "vite preview"
   },
-  "dependencies": {
-    "@types/offscreencanvas": "^2019.7.0",
-    "preact": "^10.11.3",
-    "react-intersection-observer": "^9.4.1",
-    "react-use-websocket": "^4.2.0"
-  },
+  "license": "MIT",
   "devDependencies": {
     "@gfx/zopfli": "^1.0.15",
-    "@preact/preset-vite": "^2.5.0",
+    "@types/offscreencanvas": "^2019.7.0",
     "@vanilla-extract/css": "^1.9.2",
     "@vanilla-extract/vite-plugin": "^3.7.0",
-    "sass": "^1.57.1",
-    "terser": "^5.16.1",
     "typescript": "^4.9.4",
     "vite": "^4.0.4",
-    "vite-plugin-singlefile": "^0.13.2"
+    "vite-plugin-singlefile": "^0.13.2",
+    "vite-plugin-solid": "^2.5.0"
+  },
+  "dependencies": {
+    "@solid-primitives/intersection-observer": "^2.0.3",
+    "@solid-primitives/websocket": "^0.3.3",
+    "solid-js": "^1.6.8"
   }
 }

@@ -50,3 +50,14 @@ export const connectionInformation = style({
   justifyContent: 'center',
   alignItems: 'center',
 });
+
+export const toastNotificationStyle = style({
+  position: 'fixed',
+  left: '15px',
+  top: '15px',
+  padding: '8px 12px',
+  backgroundColor: '#fff',
+  borderRadius: '0',
+  boxShadow: 'rgb(0 0 0 / 20%) 0 15px 15px',
+  zIndex: 99,
+});
