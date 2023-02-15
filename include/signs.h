@@ -4,8 +4,8 @@
 #include <vector>
 #include "constants.h"
 
-extern uint8_t letterU[ROWS * COLS];
-extern uint8_t letterR[ROWS * COLS];
+extern std::vector<int> letterU;
+extern std::vector<int> letterR;
 
 extern std::vector<std::vector<int>> circleAnimation;
 extern std::vector<std::vector<int>> smallNumbers;

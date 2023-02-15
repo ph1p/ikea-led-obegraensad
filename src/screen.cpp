@@ -10,7 +10,20 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer)
   }
 }
 
-const uint8_t *Screen_::getRenderBuffer() const
+uint8_t *Screen_::getRotatedRenderBuffer()
+{
+  this->rotatedRenderBuffer_[ROWS * COLS];
+  for (int i = 0; i < ROWS * COLS; i++)
+  {
+    this->rotatedRenderBuffer_[i] = this->renderBuffer_[i];
+  }
+
+  this->rotate();
+
+  return this->rotatedRenderBuffer_;
+}
+
+uint8_t *Screen_::getRenderBuffer()
 {
   return this->renderBuffer_;
 }
@@ -22,7 +35,8 @@ uint8_t Screen_::getBufferIndex(int index)
 
 void Screen_::loadFromStorage()
 {
-  // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
+// https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
+#ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
   if (currentMode == NONE)
   {
@@ -35,78 +49,24 @@ void Screen_::loadFromStorage()
     storage.getBytes("data", this->cache, ROWS * COLS);
   }
   storage.end();
+#endif
 }
 
-void Screen_::rotate(int degree)
+void Screen_::rotate()
 {
-  uint8_t SIZE = 16;
-  uint8_t tempPositions[ROWS * COLS];
-
-  bool turnRight = degree > 0;
-  int rotations = abs(floor(degree / 90));
-
-  this->currentRotation = degree;
-  if (this->currentRotation <= -360 || this->currentRotation >= 360)
+  for (int row = 0; row < ROWS / 2; row++)
   {
-    this->currentRotation = 0;
-  }
-
-  if (rotations == 0)
-  {
-    this->currentRotation = 0;
-
-    for (int i = 0; i < ROWS * COLS; i++)
+    for (int col = row; col < COLS - row - 1; col++)
     {
-      this->positions[i] = defaultPositions[i];
-    }
-  }
-  else
-  {
-    for (int i = 0; i < ROWS * COLS; i++)
-    {
-      tempPositions[i] = this->defaultPositions[i];
-    }
-    for (int r = 0; r < rotations; r++)
-    {
-      for (uint8_t i = 0; i < SIZE; i++)
+      for (int r = 0; r < this->currentRotation; r++)
       {
-        for (uint8_t j = i; j < SIZE; j++)
-        {
-          uint8_t temp = tempPositions[i * SIZE + j];
-          tempPositions[i * SIZE + j] = tempPositions[j * SIZE + i];
-          tempPositions[j * SIZE + i] = temp;
-        }
-      }
-
-      for (uint8_t i = 0; i < SIZE; i++)
-      {
-        uint8_t col1 = 0;
-        uint8_t col2 = SIZE - 1;
-        while (col1 < col2)
-        {
-          uint8_t index1 = i * SIZE + col1;
-          uint8_t index2 = i * SIZE + col2;
-          if (turnRight)
-          {
-            index1 = col1 * SIZE + i;
-            index2 = col2 * SIZE + i;
-          }
-
-          uint8_t temp = tempPositions[index1];
-          tempPositions[index1] = tempPositions[index2];
-          tempPositions[index2] = temp;
-          col1++;
-          col2--;
-        }
+        swap(this->rotatedRenderBuffer_[row * ROWS + col], this->rotatedRenderBuffer_[col * ROWS + (ROWS - 1 - row)]);
+        swap(this->rotatedRenderBuffer_[row * ROWS + col], this->rotatedRenderBuffer_[(ROWS - 1 - row) * ROWS + (ROWS - 1 - col)]);
+        swap(this->rotatedRenderBuffer_[row * ROWS + col], this->rotatedRenderBuffer_[(ROWS - 1 - col) * ROWS + row]);
       }
     }
-
-    for (int i = 0; i < ROWS * COLS; i++)
-    {
-      this->positions[i] = tempPositions[i];
-    }
   }
-};
+}
 
 void Screen_::clear(bool rerender)
 {
@@ -119,9 +79,11 @@ void Screen_::clear(bool rerender)
 
 void Screen_::persist()
 {
+#ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
   storage.putBytes("data", this->renderBuffer_, ROWS * COLS);
   storage.end();
+#endif
 }
 
 void Screen_::setPixelAtIndex(uint8_t index, uint8_t value)
@@ -140,36 +102,23 @@ void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value)
   }
 }
 
-int Screen_::findPosition(uint8_t count)
-{
-  uint8_t wantedpos = 0;
-  for (uint8_t i = 0; i < ROWS * COLS; i++)
-  {
-    if (count == this->positions[i])
-    {
-      wantedpos = i;
-      break;
-    }
-  }
-
-  return wantedpos;
-}
-
 void Screen_::render()
 {
-  for (uint8_t row = 0; row < ROWS; row++)
+  for (uint8_t idx = 0; idx < ROWS * COLS; idx++)
   {
-    for (uint8_t col = 0; col < COLS; col++)
+    digitalWrite(PIN_DATA, this->getRotatedRenderBuffer()[positions[idx]]);
+    digitalWrite(PIN_CLOCK, HIGH);
+    digitalWrite(PIN_CLOCK, LOW);
+
+    // TODO: this is a workaround, because the loop runs infinite. Don't know why ...
+    if (idx >= (ROWS * COLS) - 1)
     {
-      digitalWrite(PIN_DATA, this->renderBuffer_[this->findPosition(row * 16 + col)]);
-      digitalWrite(PIN_CLOCK, HIGH);
-      digitalWrite(PIN_CLOCK, LOW);
+      break;
     }
   }
 
   digitalWrite(PIN_LATCH, HIGH);
   digitalWrite(PIN_LATCH, LOW);
-  delayMicroseconds(10);
 }
 
 void Screen_::cacheCurrent()
