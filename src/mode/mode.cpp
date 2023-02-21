@@ -12,6 +12,7 @@ Breakout breakout;
 Snake snake;
 Circle circle;
 Lines lines;
+BigClock bigClock;
 Custom custom;
 
 void setMode(MODE mode, bool selfLoading)
@@ -78,10 +79,15 @@ void setMode(MODE mode, bool selfLoading)
 #endif
     buttonModeCount = 7;
   }
+  else if (mode == BIGCLOCK)
+  {
+    bigClock.setup();
+    buttonModeCount = 8;
+  }
   else if (mode == CUSTOM)
   {
     custom.setup();
-    buttonModeCount = 8;
+    buttonModeCount = 9;
   }
 
   delay(800);
@@ -122,6 +128,10 @@ MODE getModeByString(String mode)
   else if (mode == "clock")
   {
     return CLOCK;
+  }
+  else if (mode == "bigclock")
+  {
+    return BIGCLOCK;
   }
   else if (mode == "custom")
   {
@@ -185,12 +195,16 @@ void listenOnButtonToChangeMode()
       }
       else if (buttonModeCount == 8)
       {
+        setMode(BIGCLOCK);
+      }
+      else if (buttonModeCount == 9)
+      {
         setMode(CUSTOM);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 8)
+      if (buttonModeCount > 9)
       {
         buttonModeCount = 0;
       }
@@ -240,6 +254,12 @@ void loopOfAllModes()
     {
 #ifdef ENABLE_SERVER
       clockLoop();
+#endif
+    }
+    if (currentMode == BIGCLOCK)
+    {
+#ifdef ENABLE_SERVER
+      bigClock.loop();
 #endif
     }
   }

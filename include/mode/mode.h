@@ -11,6 +11,7 @@
 #include "circle.h"
 #include "clock.h"
 #include "signs.h"
+#include "bigclock.h"
 #include "custom.h"
 
 extern int buttonModeCount;
@@ -27,6 +28,7 @@ enum MODE
   GAMEOFLIFE,
   CIRCLE,
   CLOCK,
+  BIGCLOCK,
   CUSTOM,
   // SYSTEM
   UPDATE,

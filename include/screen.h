@@ -65,6 +65,7 @@ public:
   void drawRectangle(int x, int y, int width, int height, bool outline, int ledStatus);
   void drawCharacter(int x, int y, std::vector<int> bits, int bitCount);
   void drawNumbers(int x, int y, std::vector<int> numbers);
+  void drawBigNumbers(int x, int y, std::vector<int> numbers);
   std::vector<int> readBytes(std::vector<int> bytes);
 };
 

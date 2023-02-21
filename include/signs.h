@@ -9,4 +9,5 @@ extern std::vector<int> letterR;
 
 extern std::vector<std::vector<int>> circleAnimation;
 extern std::vector<std::vector<int>> smallNumbers;
+extern std::vector<std::vector<int>> bigNumbers;
 extern std::vector<std::vector<int>> lineAnimation;
