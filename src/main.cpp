@@ -9,6 +9,7 @@
 #include "webserver.h"
 #include "screen.h"
 #include "mode/mode.h"
+#include "mqtt.h"
 
 void setup()
 {
@@ -48,6 +49,8 @@ void setup()
     Serial.println(WiFi.localIP());
   }
 
+  mqttSetup();
+
   // set time server
   configTzTime(TZ_INFO, NTP_SERVER);
 
@@ -63,6 +66,11 @@ void loop()
 
 #ifdef ENABLE_SERVER
   cleanUpClients();
+
+  if (!MQTTclient.connected()){
+    mqttReconnect();
+  }
+  MQTTclient.loop();
 #endif
   delay(20);
 }
