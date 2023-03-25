@@ -18,6 +18,7 @@ void weatherLoop()
 {
     if (lastUpdate >= millis()+1000 * 60 * 30){
         weatherUpdate();
+        lastUpdate = millis();
     }
 }
 
