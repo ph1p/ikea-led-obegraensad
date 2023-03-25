@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_SERVER
 
-int lastUpdate = 0;
+unsigned long lastUpdate = 0;
 
 WiFiClient client;
 HTTPClient http;
@@ -16,10 +16,11 @@ void weatherSetup()
 
 void weatherLoop()
 {
-    if (lastUpdate >= millis()+1000 * 60 * 30){
+    if (millis() >= lastUpdate +(1000 * 60 * 30)){
         weatherUpdate();
         lastUpdate = millis();
-    }
+        Serial.println("updating weather");
+    };
 }
 
 void weatherUpdate()
@@ -37,8 +38,6 @@ void weatherUpdate()
     int weatherIcon = 0;
     int iconY = 1;
     int tempY = 10;
-    Serial.println(doc["weather"][0]["id"].as<int>());
-    Serial.println(conditions);
 
     Screen.clear();
 

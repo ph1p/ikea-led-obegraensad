@@ -270,6 +270,12 @@ void loopOfAllModes()
       bigClock.loop();
 #endif
     }
+    if (currentMode == WEATHER)
+    {
+#ifdef ENABLE_SERVER
+      weatherLoop();
+#endif
+    }
   }
 }
 
