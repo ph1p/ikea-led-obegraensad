@@ -7,12 +7,15 @@
 #include "secrets.h"
 #include "ota.h"
 #include "webserver.h"
-#include "screen.h"
+// #include "screen.h"
 #include "mode/mode.h"
 
 void setup()
 {
   Serial.begin(115200);
+  Serial.println("hello");
+
+  pinMode(15, OUTPUT);
 
   pinMode(PIN_LATCH, OUTPUT);
   pinMode(PIN_CLOCK, OUTPUT);
@@ -20,12 +23,11 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
-  Screen.clear();
-  loadMode();
-  Screen.loadFromStorage();
+  // Screen.clear();
+  // loadMode();
+  // Screen.loadFromStorage();
 
 // server
-#ifdef ENABLE_SERVER
   // wifi
   int attempts = 0;
   WiFi.setHostname(WIFI_HOSTNAME);
@@ -46,19 +48,21 @@ void setup()
     Serial.println("");
     Serial.print("Connected to WiFi network with IP Address: ");
     Serial.println(WiFi.localIP());
+    digitalWrite(15, HIGH);
   }
 
-  // set time server
+  // // set time server
   configTzTime(TZ_INFO, NTP_SERVER);
 
   initOTA(server);
   initWebsocketServer(server);
   initWebServer();
-#endif
+  Serial.println("init done");
 }
 
 void loop()
 {
+  // Serial.print("1");
   loopOfAllModes();
 
 #ifdef ENABLE_SERVER

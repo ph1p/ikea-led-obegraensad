@@ -1,10 +1,10 @@
 #pragma once
 
-#define PIN_ENABLE 26
-#define PIN_DATA 27
-#define PIN_CLOCK 14
-#define PIN_LATCH 12
-#define PIN_BUTTON 16
+#define PIN_ENABLE 38
+#define PIN_DATA 37
+#define PIN_CLOCK 36
+#define PIN_LATCH 35
+#define PIN_BUTTON 34
 
 // disable if you do not want to have online functionality
 #define ENABLE_SERVER
