@@ -24,7 +24,8 @@ export const App: Component = () => {
       | 'mode'
       | 'screen'
       | 'led'
-      | 'persist-mode',
+      | 'persist-mode'
+      | 'brightness',
     data?: any
   ) =>
     store?.send(
@@ -57,8 +58,8 @@ export const App: Component = () => {
         ? 1
         : currentRotation + 1
       : currentRotation <= 0
-      ? 3
-      : currentRotation - 1;
+        ? 3
+        : currentRotation - 1;
 
     store?.setRotation(currentRotation);
 
@@ -71,6 +72,8 @@ export const App: Component = () => {
   };
 
   const sendMode = (mode: MODE) => wsMessage('mode', { mode });
+
+  const sendBrightness = (brightness: number) => wsMessage('brightness', { brightness });
 
   return (
     <Show
@@ -151,6 +154,14 @@ export const App: Component = () => {
               <Button onClick={() => rotate(true)}>
                 <i class="fa-solid fa-rotate-right"></i>
               </Button>
+            </div>
+
+            <div class={controlColumn}>
+              <input type="range" min="0" max="255" value={store?.brightness()} onInput={(e) => {
+                const brightness = parseInt(e.currentTarget.value);
+                store?.setBrightness(brightness);
+                sendBrightness(brightness);
+              }} />
             </div>
 
             <div class={controlColumn}>

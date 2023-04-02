@@ -19,6 +19,7 @@ export const StoreProvider: ParentComponent = (props) => {
     duration: number;
   } | null>(null);
   const [rotation, setRotation] = createSignal(0);
+  const [brightness, setBrightness] = createSignal(0);
   const [indexMatrix, setIndexMatrix] = createSignal(
     [...new Array(256)].map((_, i) => i)
   );
@@ -42,6 +43,7 @@ export const StoreProvider: ParentComponent = (props) => {
           case 'info':
             setMode(Object.values(MODE)[json.mode as number]);
             setRotation(json.rotation);
+            setBrightness(json.brightness);
 
             setIndexMatrix([...new Array(256)].map((_, i) => i));
 
@@ -79,10 +81,12 @@ export const StoreProvider: ParentComponent = (props) => {
 
   const store = {
     rotation,
+    brightness,
     indexMatrix,
     leds,
     mode,
     setRotation,
+    setBrightness,
     setIndexMatrix,
     setLeds,
     setMode,
