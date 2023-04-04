@@ -15,4 +15,9 @@ extern int previousHour;
 void clockSetup();
 void clockLoop();
 
+#ifndef ESP32
+bool getLocalTime(struct tm * info, uint32_t ms = 5000);
+#endif
+
+
 #endif

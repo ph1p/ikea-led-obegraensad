@@ -115,6 +115,20 @@ void IRAM_ATTR Screen_::onScreenTimer()
 void Screen_::setup()
 {
   // TODO find proper unused pins for MISO and SS
+  
+  #ifdef ESP8266
+  SPI.pins(PIN_CLOCK, 34, PIN_DATA, 25); // SCLK, MISO, MOSI, SS);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setFrequency(10000000);
+  SPI.begin();
+
+  timer1_attachInterrupt(&onScreenTimer);
+  timer1_write(200);
+  timer1_enable(TIM_DIV1, TIM_EDGE, TIM_LOOP);
+  #endif
+  
+  #ifdef ESP32
   SPI.begin(PIN_CLOCK, 34, PIN_DATA, 25); // SCLK, MISO, MOSI, SS
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
 
@@ -122,6 +136,7 @@ void Screen_::setup()
   timerAttachInterrupt(Screen_timer, &onScreenTimer, true);
   timerAlarmWrite(Screen_timer, 200, true);
   timerAlarmEnable(Screen_timer);
+  #endif
 }
 
 void Screen_::_render()

@@ -92,16 +92,16 @@ also set username and password inside `upload.py`, if you want to use OTA Update
 
 Connect them like this and remember to set them in `include/constants.h` according to your board.
 
-| LCD              | ESP32  | TTGO LoRa32 |
-| :----------------|:------:|:-----------:|
-| GND              | GND    | GND         |
-| VCC              | 5V     | 5V          |
-| EN               | GPIO26 | IO22        |
-| IN               | GPIO27 | IO23        |
-| CLK              | GPIO14 | IO02        |
-| CLA              | GPIO12 | IO15        |
-| BUTTON one end   | GPIO16 | IO21        |
-| BUTTON other end | GND    | GND         |
+| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 | 
+| :----------------|:------:|:-----------:|:---------:|
+| GND              | GND    | GND         | GND       |
+| VCC              | 5V     | 5V          | VIN       |
+| EN (PIN_ENABLE)  | GPIO26 | IO22        | GPIO16 D0 |
+| IN (PIN_DATA)    | GPIO27 | IO23        | GPIO5  D1 |
+| CLK (PIN_CLOCK)  | GPIO14 | IO02        | GPIO4  D2 |
+| CLA (PIN_LATCH)  | GPIO12 | IO15        | GPIO0  D3 |
+| BUTTON one end   | GPIO16 | IO21        | GPIO2  D4 |
+| BUTTON other end | GND    | GND         | GND       |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 

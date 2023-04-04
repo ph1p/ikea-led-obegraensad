@@ -1,6 +1,13 @@
 #include <Arduino.h>
+
 #include <SPI.h>
+#ifdef ESP32
 #include <WiFi.h>
+#endif
+
+#ifdef ESP8266
+#include <ESP8266WiFi.h>
+#endif
 
 #include "constants.h"
 #include "mode/mode.h"
@@ -19,7 +26,7 @@ void setup()
   Serial.begin(115200);
 
   pinMode(PIN_LATCH, OUTPUT);
-  pinMode(PIN_CLOCK, OUTPUT);
+  pinMode(PIN_CLOCK, OUTPUT); 
   pinMode(PIN_DATA, OUTPUT);
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
@@ -28,7 +35,9 @@ void setup()
 #ifdef ENABLE_SERVER
   // wifi
   int attempts = 0;
+  #ifdef ESP32
   WiFi.setHostname(WIFI_HOSTNAME);
+  #endif
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED && attempts < 7)
   {
