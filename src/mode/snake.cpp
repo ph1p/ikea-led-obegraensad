@@ -15,8 +15,8 @@ void Snake::initGame()
 
 void Snake::newDot() {
 
-  this->dot = random(0, 255);
-  for (const int &n: this->position) {
+  this->dot = uint(random(0, 255));
+  for (const uint &n: this->position) {
     if (n == this->dot) {
       newDot();
       return;
@@ -32,18 +32,18 @@ void Snake::newDot() {
 void Snake::findDirection() {
 
   // possible directions
-  int up = 1;
-  int down = 1;
-  int left = 1;
-  int right = 1;
+  uint up = 1;
+  uint down = 1;
+  uint left = 1;
+  uint right = 1;
 
   int snakesize = this->position.size();
-  int snakehead = this->position[snakesize - 1];
+  uint snakehead = this->position[snakesize - 1];
 
-  int up_pos = snakehead - 16;
-  int down_pos = snakehead + 16;
-  int left_pos = snakehead - 1;
-  int right_pos = snakehead + 1;
+  uint up_pos = snakehead - 16;
+  uint down_pos = snakehead + 16;
+  uint left_pos = snakehead - 1;
+  uint right_pos = snakehead + 1;
 
   // remove possible directions by borders
   if (snakehead <= 15) { up = 0; }
@@ -52,7 +52,7 @@ void Snake::findDirection() {
   if (snakehead % 16 == 15) { right = 0; }
 
   // remove possible directions by snake position to avoid snake hitting
-  for (const int &n: this->position) {
+  for (const uint &n: this->position) {
     if (up && n == up_pos) { up = 0; }
     if (down && n == down_pos) { down = 0; }
     if (left && n == left_pos) { left = 0; }
@@ -60,10 +60,10 @@ void Snake::findDirection() {
   }
 
   // so now we can move the snake random... but what about intelligent movement...?
-  int bestway_up = up;
-  int bestway_down = down;
-  int bestway_left = left;
-  int bestway_right = right;
+  uint bestway_up = up;
+  uint bestway_down = down;
+  uint bestway_left = left;
+  uint bestway_right = right;
 
   // left, right or stay in col?
   if (snakehead % 16 == this->dot % 16) {
@@ -168,7 +168,7 @@ void Snake::findDirection() {
 
 }
 
-void Snake::moveSnake(int newpos) 
+void Snake::moveSnake(uint newpos) 
 {
   if (newpos == this->dot) {
     this->position.push_back(newpos);

@@ -12,7 +12,6 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer)
 
 uint8_t *Screen_::getRotatedRenderBuffer()
 {
-  this->rotatedRenderBuffer_[ROWS * COLS];
   for (int i = 0; i < ROWS * COLS; i++)
   {
     this->rotatedRenderBuffer_[i] = this->renderBuffer_[i];
@@ -104,17 +103,11 @@ void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value)
 
 void Screen_::render()
 {
-  for (uint8_t idx = 0; idx < ROWS * COLS; idx++)
+  for (int idx = 0; idx < ROWS * COLS; idx++)
   {
     digitalWrite(PIN_DATA, this->getRotatedRenderBuffer()[positions[idx]]);
     digitalWrite(PIN_CLOCK, HIGH);
     digitalWrite(PIN_CLOCK, LOW);
-
-    // TODO: this is a workaround, because the loop runs infinite. Don't know why ...
-    if (idx >= (ROWS * COLS) - 1)
-    {
-      break;
-    }
   }
 
   digitalWrite(PIN_LATCH, HIGH);
@@ -197,9 +190,9 @@ std::vector<int> Screen_::readBytes(std::vector<int> bytes)
   vector<int> bits;
   int k = 0;
 
-  for (int i = 0; i < bytes.size(); i++)
+  for (uint i = 0; i < bytes.size(); i++)
   {
-    for (int j = 8 - 1; j >= 0; j--)
+    for (uint j = 8 - 1; j >= 0; j--)
     {
       int b = (bytes[i] >> j) & 1;
       bits.push_back(b);
@@ -212,7 +205,7 @@ std::vector<int> Screen_::readBytes(std::vector<int> bytes)
 
 void Screen_::drawNumbers(int x, int y, std::vector<int> numbers)
 {
-  for (int i = 0; i < numbers.size(); i++)
+  for (uint i = 0; i < numbers.size(); i++)
   {
     this->drawCharacter(x + (i * 5), y, this->readBytes(smallNumbers[numbers.at(i)]), 4);
   }

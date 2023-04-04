@@ -93,7 +93,7 @@ void onWsEvent(
         else if (!strcmp(event, "mode"))
         {
           MODE mode = getModeByString(wsRequest["mode"]);
-          setModeByString(wsRequest["mode"], sendModeToAllClients);
+          setModeByString(wsRequest["mode"], &sendModeToAllClients);
 
           if (mode == NONE)
           {

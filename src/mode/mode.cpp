@@ -83,8 +83,7 @@ void setMode(MODE mode, bool selfLoading)
     custom.setup();
     buttonModeCount = 8;
   }
-
-  delay(800);
+  
   currentMode = mode;
 
   if (currentMode == NONE)
