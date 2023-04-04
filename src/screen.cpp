@@ -104,17 +104,11 @@ void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value)
 
 void Screen_::render()
 {
-  for (uint8_t idx = 0; idx < ROWS * COLS; idx++)
+  for (uint16_t idx = 0; idx < ROWS * COLS; idx++)
   {
     digitalWrite(PIN_DATA, this->getRotatedRenderBuffer()[positions[idx]]);
     digitalWrite(PIN_CLOCK, HIGH);
     digitalWrite(PIN_CLOCK, LOW);
-
-    // TODO: this is a workaround, because the loop runs infinite. Don't know why ...
-    if (idx >= (ROWS * COLS) - 1)
-    {
-      break;
-    }
   }
 
   digitalWrite(PIN_LATCH, HIGH);
