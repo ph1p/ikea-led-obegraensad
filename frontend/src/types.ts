@@ -9,6 +9,7 @@ export enum MODE {
   GAMEOFLIFE = 'gameoflife',
   CIRCLE = 'circle',
   CLOCK = 'clock',
+  BIGCLOCK = 'bigclock',
   CUSTOM = 'custom',
   UPDATE = 'update',
   LOADING = 'loading',

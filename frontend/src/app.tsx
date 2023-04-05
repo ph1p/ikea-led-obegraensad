@@ -134,6 +134,7 @@ export const App: Component = () => {
                 <option value={MODE.GAMEOFLIFE}>game of life</option>
                 <option value={MODE.CIRCLE}>circle</option>
                 <option value={MODE.CLOCK}>clock</option>
+                <option value={MODE.BIGCLOCK}>big clock</option>
                 <option value={MODE.CUSTOM}>custom</option>
               </select>
 
