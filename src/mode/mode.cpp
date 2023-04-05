@@ -97,7 +97,6 @@ void setMode(MODE mode, bool selfLoading)
     buttonModeCount = 10;
   }
 
-  delay(800);
   currentMode = mode;
 
   if (currentMode == NONE)
@@ -226,17 +225,15 @@ void listenOnButtonToChangeMode()
     }
   }
   lastModeButtonState = modeButtonState;
-  delay(10);
+  delayMicroseconds(10);
 }
 
 void loopOfAllModes()
 {
   if (currentMode != UPDATE && currentMode != LOADING)
   {
-    if (currentMode == NONE)
-    {
-      listenOnButtonToChangeMode();
-    }
+    listenOnButtonToChangeMode();
+
     if (currentMode == STARS)
     {
       stars();
