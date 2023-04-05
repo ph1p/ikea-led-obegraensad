@@ -12,6 +12,7 @@ private:
   Screen_() = default;
   int findPosition(uint8_t count);
   void rotate();
+  unsigned int brightness = 255;
   uint8_t renderBuffer_[ROWS * COLS];
   uint8_t rotatedRenderBuffer_[ROWS * COLS];
   uint8_t cache[ROWS * COLS];
@@ -42,6 +43,9 @@ public:
 public:
   int currentRotation;
 
+  unsigned int getCurrentBrightness() const;
+  void setBrightness(unsigned int brightness);
+
   void setRenderBuffer(const uint8_t *renderBuffer);
   uint8_t *getRenderBuffer();
   uint8_t *getRotatedRenderBuffer();
@@ -61,6 +65,8 @@ public:
   void drawRectangle(int x, int y, int width, int height, bool outline, int ledStatus);
   void drawCharacter(int x, int y, std::vector<int> bits, int bitCount);
   void drawNumbers(int x, int y, std::vector<int> numbers);
+  void drawBigNumbers(int x, int y, std::vector<int> numbers);
+  void drawWeather(int x, int y, int weather);
   std::vector<int> readBytes(std::vector<int> bytes);
 };
 

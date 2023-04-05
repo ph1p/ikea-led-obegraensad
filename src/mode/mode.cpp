@@ -12,6 +12,7 @@ Breakout breakout;
 Snake snake;
 Circle circle;
 Lines lines;
+BigClock bigClock;
 Custom custom;
 
 void setMode(MODE mode, bool selfLoading)
@@ -78,12 +79,24 @@ void setMode(MODE mode, bool selfLoading)
 #endif
     buttonModeCount = 7;
   }
+  else if (mode == BIGCLOCK)
+  {
+    bigClock.setup();
+    buttonModeCount = 8;
+  }
+  else if (mode == WEATHER)
+  {
+#ifdef ENABLE_SERVER
+    weatherSetup();
+#endif
+    buttonModeCount = 9;
+  }
   else if (mode == CUSTOM)
   {
     custom.setup();
-    buttonModeCount = 8;
+    buttonModeCount = 10;
   }
-  
+
   currentMode = mode;
 
   if (currentMode == NONE)
@@ -121,6 +134,14 @@ MODE getModeByString(String mode)
   else if (mode == "clock")
   {
     return CLOCK;
+  }
+  else if (mode == "bigclock")
+  {
+    return BIGCLOCK;
+  }
+  else if (mode == "weather")
+  {
+    return WEATHER;
   }
   else if (mode == "custom")
   {
@@ -184,29 +205,35 @@ void listenOnButtonToChangeMode()
       }
       else if (buttonModeCount == 8)
       {
+        setMode(BIGCLOCK);
+      }
+      else if (buttonModeCount == 9)
+      {
+        setMode(WEATHER);
+      }
+      else if (buttonModeCount == 10)
+      {
         setMode(CUSTOM);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 8)
+      if (buttonModeCount > 10)
       {
         buttonModeCount = 0;
       }
     }
   }
   lastModeButtonState = modeButtonState;
-  delay(10);
+  delayMicroseconds(10);
 }
 
 void loopOfAllModes()
 {
   if (currentMode != UPDATE && currentMode != LOADING)
   {
-    if (currentMode == NONE)
-    {
-      listenOnButtonToChangeMode();
-    }
+    listenOnButtonToChangeMode();
+
     if (currentMode == STARS)
     {
       stars();
@@ -231,15 +258,27 @@ void loopOfAllModes()
     {
       circle.loop();
     }
-    if (currentMode == CUSTOM)
-    {
-      custom.loop();
-    }
     if (currentMode == CLOCK)
     {
 #ifdef ENABLE_SERVER
       clockLoop();
 #endif
+    }
+    if (currentMode == BIGCLOCK)
+    {
+#ifdef ENABLE_SERVER
+      bigClock.loop();
+#endif
+    }
+    if (currentMode == WEATHER)
+    {
+#ifdef ENABLE_SERVER
+      weatherLoop();
+#endif
+    }
+    if (currentMode == CUSTOM)
+    {
+      custom.loop();
     }
   }
 }

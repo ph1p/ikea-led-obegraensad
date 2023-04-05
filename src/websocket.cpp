@@ -17,6 +17,7 @@ void sendStateAndInfo()
   jsonDocument["mode"] = currentMode;
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
+  jsonDocument["brightness"] = Screen.getCurrentBrightness();
 
   String output;
   serializeJson(jsonDocument, output);
@@ -115,6 +116,10 @@ void onWsEvent(
         else if (!strcmp(event, "info"))
         {
           sendStateAndInfo();
+        }
+        else if (!strcmp(event, "brightness"))
+        {
+          Screen.setBrightness(wsRequest["brightness"].as<unsigned int>());
         }
 
         if (currentMode == NONE)

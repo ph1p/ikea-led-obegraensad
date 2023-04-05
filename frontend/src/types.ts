@@ -9,18 +9,23 @@ export enum MODE {
   GAMEOFLIFE = 'gameoflife',
   CIRCLE = 'circle',
   CLOCK = 'clock',
+  BIGCLOCK = 'bigclock',
+  WEATHER = 'weather',
   CUSTOM = 'custom',
+  // SYSTEM
   UPDATE = 'update',
   LOADING = 'loading',
 }
 
 export interface Store {
   rotation: () => number;
+  brightness: () => number;
   indexMatrix: () => number[];
   leds: () => number[];
   mode: () => MODE;
 
   setRotation: Setter<number>;
+  setBrightness: Setter<number>;
   setIndexMatrix: Setter<number[]>;
   setLeds: Setter<number[]>;
   setMode: Setter<MODE>;

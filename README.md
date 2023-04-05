@@ -27,6 +27,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Lines
   - Circle
   - Clock
+  - Weather
 - Custom Animation with the "Creator"
 
 # Control the board
@@ -67,6 +68,7 @@ Above is a microcontroller. You have to remove it, because it contains the stand
   - Wifi
   - Upload
   - Your Pins
+  - Latitude, Longitude, and OpenWeatherMap API key
 
 Variables can be found inside `include/constants.h`.
 
@@ -81,6 +83,10 @@ Variables can be found inside `include/constants.h`.
 
 #define OTA_USERNAME ""
 #define OTA_PASSWORD ""
+
+#define LATITUDE ""
+#define LONGITUDE ""
+#define WEATHERKEY "" // https://home.openweathermap.org/api_keys
 ```
 
 also set username and password inside `upload.py`, if you want to use OTA Updates.

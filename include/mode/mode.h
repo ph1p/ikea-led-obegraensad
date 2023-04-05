@@ -7,10 +7,12 @@
 #include "mode/gameoflife.h"
 #include "mode/stars.h"
 #include "mode/lines.h"
+#include "mode/circle.h"
+#include "mode/clock.h"
+#include "mode/weather.h"
 #include "screen.h"
-#include "circle.h"
-#include "clock.h"
 #include "signs.h"
+#include "bigclock.h"
 #include "custom.h"
 
 extern int buttonModeCount;
@@ -27,6 +29,8 @@ enum MODE
   GAMEOFLIFE,
   CIRCLE,
   CLOCK,
+  BIGCLOCK,
+  WEATHER,
   CUSTOM,
   // SYSTEM
   UPDATE,
