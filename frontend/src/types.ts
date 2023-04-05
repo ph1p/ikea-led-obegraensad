@@ -10,8 +10,9 @@ export enum MODE {
   CIRCLE = 'circle',
   CLOCK = 'clock',
   BIGCLOCK = 'bigclock',
-  CUSTOM = 'custom',
   WEATHER = 'weather',
+  CUSTOM = 'custom',
+  // SYSTEM
   UPDATE = 'update',
   LOADING = 'loading',
 }
