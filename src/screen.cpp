@@ -190,9 +190,9 @@ std::vector<int> Screen_::readBytes(std::vector<int> bytes)
   vector<int> bits;
   int k = 0;
 
-  for (uint i = 0; i < bytes.size(); i++)
+  for (int i = 0; i < bytes.size(); i++)
   {
-    for (uint j = 8 - 1; j >= 0; j--)
+    for (int j = 8 - 1; j >= 0; j--)
     {
       int b = (bytes[i] >> j) & 1;
       bits.push_back(b);
@@ -205,7 +205,7 @@ std::vector<int> Screen_::readBytes(std::vector<int> bytes)
 
 void Screen_::drawNumbers(int x, int y, std::vector<int> numbers)
 {
-  for (uint i = 0; i < numbers.size(); i++)
+  for (int i = 0; i < numbers.size(); i++)
   {
     this->drawCharacter(x + (i * 5), y, this->readBytes(smallNumbers[numbers.at(i)]), 4);
   }
