@@ -84,10 +84,17 @@ void setMode(MODE mode, bool selfLoading)
     bigClock.setup();
     buttonModeCount = 8;
   }
+  else if (mode == WEATHER)
+  {
+#ifdef ENABLE_SERVER
+    weatherSetup();
+#endif
+    buttonModeCount = 9;
+  }
   else if (mode == CUSTOM)
   {
     custom.setup();
-    buttonModeCount = 9;
+    buttonModeCount = 10;
   }
 
   delay(800);
@@ -132,6 +139,10 @@ MODE getModeByString(String mode)
   else if (mode == "bigclock")
   {
     return BIGCLOCK;
+  }
+  else if (mode == "weather")
+  {
+    return WEATHER;
   }
   else if (mode == "custom")
   {
@@ -199,12 +210,16 @@ void listenOnButtonToChangeMode()
       }
       else if (buttonModeCount == 9)
       {
+        setMode(WEATHER);
+      }
+      else if (buttonModeCount == 10)
+      {
         setMode(CUSTOM);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 9)
+      if (buttonModeCount > 10)
       {
         buttonModeCount = 0;
       }
@@ -246,10 +261,6 @@ void loopOfAllModes()
     {
       circle.loop();
     }
-    if (currentMode == CUSTOM)
-    {
-      custom.loop();
-    }
     if (currentMode == CLOCK)
     {
 #ifdef ENABLE_SERVER
@@ -261,6 +272,16 @@ void loopOfAllModes()
 #ifdef ENABLE_SERVER
       bigClock.loop();
 #endif
+    }
+    if (currentMode == WEATHER)
+    {
+#ifdef ENABLE_SERVER
+      weatherLoop();
+#endif
+    }
+    if (currentMode == CUSTOM)
+    {
+      custom.loop();
     }
   }
 }
