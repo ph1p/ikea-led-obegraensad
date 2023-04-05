@@ -6,6 +6,7 @@
 #include <HTTPClient.h>
 
 #ifdef ENABLE_SERVER
+
 #include "screen.h"
 #include "mode/mode.h"
 

@@ -27,6 +27,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Lines
   - Circle
   - Clock
+  - Weather
 - Custom Animation with the "Creator"
 
 # Control the board
@@ -85,7 +86,7 @@ Variables can be found inside `include/constants.h`.
 
 #define LATITUDE ""
 #define LONGITUDE ""
-#define WEATHERKEY ""
+#define WEATHERKEY "" // https://home.openweathermap.org/api_keys
 ```
 
 also set username and password inside `upload.py`, if you want to use OTA Updates.

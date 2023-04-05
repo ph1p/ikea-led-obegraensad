@@ -11,9 +11,9 @@ export enum MODE {
   CLOCK = 'clock',
   BIGCLOCK = 'bigclock',
   CUSTOM = 'custom',
+  WEATHER = 'weather',
   UPDATE = 'update',
   LOADING = 'loading',
-  WEATHER = 'weather',
 }
 
 export interface Store {

@@ -91,7 +91,10 @@ void setMode(MODE mode, bool selfLoading)
   }
   else if (mode == WEATHER)
   {
+#ifdef ENABLE_SERVER
     weatherSetup();
+#endif
+    buttonModeCount = 9;
   }
 
   delay(800);

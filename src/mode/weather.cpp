@@ -1,7 +1,9 @@
 #include "mode/weather.h"
+#include "constants.h"
 #include "secrets.h"
 
 #ifdef ENABLE_SERVER
+#include "screen.h"
 
 unsigned long lastUpdate = 0;
 
@@ -86,5 +88,4 @@ void weatherUpdate()
 
     Screen.render();
 }
-
 #endif
