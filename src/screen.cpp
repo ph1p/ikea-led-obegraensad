@@ -48,6 +48,7 @@ void Screen_::loadFromStorage()
   {
     storage.getBytes("data", this->cache, ROWS * COLS);
   }
+  this->setBrightness(storage.getUInt("brightness", 255));
   storage.end();
 #endif
 }
@@ -82,6 +83,7 @@ void Screen_::persist()
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
   storage.putBytes("data", this->renderBuffer_, ROWS * COLS);
+  storage.putUInt("brightness", this->brightness);
   storage.end();
 #endif
 }
@@ -216,6 +218,17 @@ void Screen_::drawNumbers(int x, int y, std::vector<int> numbers)
   {
     this->drawCharacter(x + (i * 5), y, this->readBytes(smallNumbers[numbers.at(i)]), 4);
   }
+}
+
+unsigned int Screen_::getCurrentBrightness() const
+{
+  return this->brightness;
+}
+
+void Screen_::setBrightness(unsigned int brightness)
+{
+  this->brightness = brightness;
+  analogWrite(PIN_ENABLE, 255 - brightness);
 }
 
 Screen_ &Screen_::getInstance()

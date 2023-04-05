@@ -16,11 +16,13 @@ export enum MODE {
 
 export interface Store {
   rotation: () => number;
+  brightness: () => number;
   indexMatrix: () => number[];
   leds: () => number[];
   mode: () => MODE;
 
   setRotation: Setter<number>;
+  setBrightness: Setter<number>;
   setIndexMatrix: Setter<number[]>;
   setLeds: Setter<number[]>;
   setMode: Setter<MODE>;
