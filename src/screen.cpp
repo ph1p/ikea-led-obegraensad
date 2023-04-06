@@ -12,7 +12,6 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer)
 
 uint8_t *Screen_::getRotatedRenderBuffer()
 {
-  this->rotatedRenderBuffer_[ROWS * COLS];
   for (int i = 0; i < ROWS * COLS; i++)
   {
     this->rotatedRenderBuffer_[i] = this->renderBuffer_[i];
@@ -106,17 +105,11 @@ void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value)
 
 void Screen_::render()
 {
-  for (uint8_t idx = 0; idx < ROWS * COLS; idx++)
+  for (int idx = 0; idx < ROWS * COLS; idx++)
   {
     digitalWrite(PIN_DATA, this->getRotatedRenderBuffer()[positions[idx]]);
     digitalWrite(PIN_CLOCK, HIGH);
     digitalWrite(PIN_CLOCK, LOW);
-
-    // TODO: this is a workaround, because the loop runs infinite. Don't know why ...
-    if (idx >= (ROWS * COLS) - 1)
-    {
-      break;
-    }
   }
 
   digitalWrite(PIN_LATCH, HIGH);

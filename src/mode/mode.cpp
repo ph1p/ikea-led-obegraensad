@@ -283,16 +283,21 @@ void loopOfAllModes()
   }
 }
 
+
 void persistMode()
 {
+  #ifdef STORAGE_ENABLED
   storage.begin("led-wall", false);
   storage.putInt("mode", currentMode);
   storage.end();
+  #endif
 }
 
 void loadMode()
 {
+  #ifdef STORAGE_ENABLED
   storage.begin("led-wall", false);
   setMode((MODE)storage.getInt("mode"));
   storage.end();
+  #endif
 }
