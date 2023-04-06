@@ -20,10 +20,6 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
-  Screen.clear();
-  loadMode();
-  Screen.loadFromStorage();
-
 // server
 #ifdef ENABLE_SERVER
   // wifi
@@ -32,7 +28,7 @@ void setup()
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED && attempts < 7)
   {
-    delay(500);
+    delay(2000);
     Serial.print(".");
     attempts++;
   }
@@ -55,6 +51,10 @@ void setup()
   initWebsocketServer(server);
   initWebServer();
 #endif
+
+  Screen.clear();
+  loadMode();
+  Screen.loadFromStorage();
 }
 
 void loop()

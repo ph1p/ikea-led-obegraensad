@@ -10,6 +10,7 @@
 #define ENABLE_SERVER
 
 // disable if you do not want to use the internal storage
+// https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
 #define ENABLE_STORAGE
 
 #ifdef ENABLE_SERVER

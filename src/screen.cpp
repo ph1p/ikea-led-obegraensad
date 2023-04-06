@@ -34,7 +34,6 @@ uint8_t Screen_::getBufferIndex(int index)
 
 void Screen_::loadFromStorage()
 {
-// https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
   if (currentMode == NONE)
