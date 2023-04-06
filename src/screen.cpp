@@ -226,14 +226,15 @@ void Screen_::setBrightness(unsigned int brightness)
 
 void Screen_::drawBigNumbers(int x, int y, std::vector<int> numbers)
 {
-  for (int i = 0; i < numbers.size(); i++) {
+  for (int i = 0; i < numbers.size(); i++)
+  {
     this->drawCharacter(x + (i * 8), y, this->readBytes(bigNumbers[numbers.at(i)]), 8);
   }
 }
 
 void Screen_::drawWeather(int x, int y, int weather)
 {
-    this->drawCharacter(x, y, this->readBytes(weatherIcons[weather]), 16);
+  this->drawCharacter(x, y, this->readBytes(weatherIcons[weather]), 16);
 }
 
 Screen_ &Screen_::getInstance()
