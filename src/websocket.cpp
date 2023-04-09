@@ -62,8 +62,10 @@ void onWsEvent(
 
       if (error)
       {
+        #ifndef ARDUINO_ESP8266_ESP01
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
+        #endif
         return;
       }
       else

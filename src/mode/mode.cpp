@@ -166,6 +166,7 @@ void setModeByString(String mode, void (*callback)(MODE mode))
 
 void listenOnButtonToChangeMode()
 {
+  #ifdef PIN_BUTTON
   modeButtonState = digitalRead(PIN_BUTTON);
   if (modeButtonState != lastModeButtonState && modeButtonState == HIGH)
   {
@@ -234,12 +235,15 @@ void listenOnButtonToChangeMode()
   }
   lastModeButtonState = modeButtonState;
   delayMicroseconds(10);
+  #endif
 }
 
 void loopOfAllModes()
 {
   if (currentMode != UPDATE && currentMode != LOADING)
   {
+    #ifdef PIN_BUTTON
+    #endif
     if (currentMode == STARS)
     {
       stars();

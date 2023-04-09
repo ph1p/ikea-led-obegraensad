@@ -192,8 +192,10 @@ void Snake::findDirection()
     }
     else
     {
+      #ifndef ARDUINO_ESP8266_ESP01
       // killed yourself - no possible directions
       Serial.println("congrats, you killed yourself! (no possible movements)");
+      #endif
       end();
     }
   }
@@ -269,7 +271,9 @@ void Snake::moveSnake(uint newpos)
 
 void Snake::end()
 {
+  #ifndef ARDUINO_ESP8266_ESP01
   Serial.println("GAME OVER!");
+  #endif
 
   for (const int &n : this->position)
   {

@@ -10,7 +10,9 @@ void BigClock::loop()
 {
   if (!getLocalTime(&timeinfo))
   {
+    #ifndef ARDUINO_ESP8266_ESP01
     Serial.println("Failed to obtain time");
+    #endif
   }
   else
   {

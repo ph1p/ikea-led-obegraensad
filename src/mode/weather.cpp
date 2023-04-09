@@ -34,7 +34,9 @@ void weatherLoop()
     {
         weatherUpdate();
         lastUpdate = millis();
+        #ifndef ARDUINO_ESP8266_ESP01
         Serial.println("updating weather");
+        #endif
     };
 }
 
