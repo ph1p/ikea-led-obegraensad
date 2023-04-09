@@ -10,7 +10,7 @@ void Lines::loop()
   std::vector<int> bits = Screen.readBytes(this->frames[this->count]);
   for (int row = 0; row < ROWS; row++)
   {
-    for (int col = 0; col < bits.size(); col++)
+    for (uint col = 0; col < bits.size(); col++)
     {
       Screen.setPixel(col, row, bits[col]);
     }

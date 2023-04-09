@@ -9,7 +9,7 @@ void Circle::loop()
 {
     std::vector<int> bits = Screen.readBytes(this->frames[this->circleStep]);
 
-    for (int i = 0; i < bits.size(); i++)
+    for (uint i = 0; i < bits.size(); i++)
     {
         Screen.setPixelAtIndex(i, bits[i]);
     }
