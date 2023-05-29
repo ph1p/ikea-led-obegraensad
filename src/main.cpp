@@ -5,10 +5,14 @@
 #include "mode/mode.h"
 #include "websocket.h"
 #include "secrets.h"
+
 #include "ota.h"
 #include "webserver.h"
+#include "alexa.h"
 #include "screen.h"
 #include "mode/mode.h"
+
+
 
 void setup()
 {
@@ -50,6 +54,8 @@ void setup()
   initOTA(server);
   initWebsocketServer(server);
   initWebServer();
+  espalexa.addDevice("IKEA Clock", AlexaChanged);
+  espalexa.begin(&server); 
 #endif
 
   Screen.clear();
@@ -64,5 +70,16 @@ void loop()
 #ifdef ENABLE_SERVER
   cleanUpClients();
 #endif
+#ifdef ENABLE_ALEXA
+  espalexa.loop();
+#endif
   delay(20);
+}
+
+void AlexaChanged(uint8_t brightness)
+{
+  if (brightness >= 0 && brightness <= 255)
+  {
+    Screen.setBrightness(brightness);
+  }
 }
