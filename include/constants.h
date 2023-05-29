@@ -9,6 +9,9 @@
 // disable if you do not want to have online functionality
 #define ENABLE_SERVER
 
+// disable if you do not want ALEXA connectivity, only works if ENABLE_SERVER is defined
+#define ENABLE_ALEXA
+
 // disable if you do not want to use the internal storage
 // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
 #define ENABLE_STORAGE
