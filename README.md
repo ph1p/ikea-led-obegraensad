@@ -68,7 +68,7 @@ Above is a microcontroller. You have to remove it, because it contains the stand
   - Wifi
   - Upload
   - Your Pins
-  - Latitude, Longitude, and OpenWeatherMap API key
+  - Latitude, Longitude, City etc. (https://github.com/chubin/wttr.in)
 
 Variables can be found inside `include/constants.h`.
 
@@ -83,10 +83,6 @@ Variables can be found inside `include/constants.h`.
 
 #define OTA_USERNAME ""
 #define OTA_PASSWORD ""
-
-#define LATITUDE ""
-#define LONGITUDE ""
-#define WEATHERKEY "" // https://home.openweathermap.org/api_keys
 ```
 
 also set username and password inside `upload.py`, if you want to use OTA Updates.
@@ -123,7 +119,6 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 # Ideas
 
 [] gifs
-[] weather
 [] animation upload
 [] use `<canvas />`
 

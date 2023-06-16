@@ -7,11 +7,10 @@
 #ifdef ENABLE_SERVER
 
 #include "screen.h"
-#include "mode/mode.h"
+#include "mode.h"
 
 extern unsigned long lastUpdate;
 
-extern WiFiClient client;
 extern HTTPClient http;
 
 void weatherSetup();
