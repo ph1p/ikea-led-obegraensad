@@ -9,7 +9,6 @@ void Custom::setup()
 
 void Custom::loop()
 {
-    listenOnButtonToChangeMode();
     int size = customAnimationFrames.size();
 
     if (size > 0)
@@ -21,7 +20,6 @@ void Custom::loop()
             Screen.setPixelAtIndex(i, bits[i]);
         }
 
-        Screen.render();
         this->step++;
 
         if (this->step >= size)

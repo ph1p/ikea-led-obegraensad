@@ -57,9 +57,7 @@ void GameOfLife::next()
 
 void GameOfLife::loop()
 {
-  listenOnButtonToChangeMode();
   this->next();
-  Screen.render();
 
   if (memcmp(this->previous, this->buffer, sizeof(this->previous)) == 0)
   {

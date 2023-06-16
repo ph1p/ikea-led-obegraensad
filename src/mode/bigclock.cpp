@@ -8,8 +8,6 @@ void BigClock::setup()
 
 void BigClock::loop()
 {
-  listenOnButtonToChangeMode();
-
   if (!getLocalTime(&timeinfo))
   {
     Serial.println("Failed to obtain time");
@@ -33,11 +31,10 @@ void BigClock::loop()
         Screen.drawBigNumbers(0, 0, hh);
         Screen.drawBigNumbers(0, ROWS / 2, mm);
       }
-      Screen.render();
+
     }
 
     previousMinutes = timeinfo.tm_min;
     previousHour = timeinfo.tm_hour;
   }
-  delay(60);
 }

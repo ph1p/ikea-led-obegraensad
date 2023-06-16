@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <SPI.h>
 #include <WiFi.h>
 
 #include "constants.h"
@@ -52,6 +53,7 @@ void setup()
   initWebServer();
 #endif
 
+  Screen.setup();
   Screen.clear();
   loadMode();
   Screen.loadFromStorage();
@@ -64,5 +66,4 @@ void loop()
 #ifdef ENABLE_SERVER
   cleanUpClients();
 #endif
-  delay(20);
 }

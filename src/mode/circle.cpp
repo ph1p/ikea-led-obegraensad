@@ -7,8 +7,6 @@ void Circle::setup()
 
 void Circle::loop()
 {
-    listenOnButtonToChangeMode();
-
     std::vector<int> bits = Screen.readBytes(this->frames[this->circleStep]);
 
     for (int i = 0; i < bits.size(); i++)
@@ -16,7 +14,6 @@ void Circle::loop()
         Screen.setPixelAtIndex(i, bits[i]);
     }
 
-    Screen.render();
     this->circleStep++;
     if (this->circleStep > 14)
     {

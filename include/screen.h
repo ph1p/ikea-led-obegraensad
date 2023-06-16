@@ -12,7 +12,7 @@ private:
   Screen_() = default;
   int findPosition(uint8_t count);
   void rotate();
-  unsigned int brightness = 255;
+  uint8_t brightness = 255;
   uint8_t renderBuffer_[ROWS * COLS];
   uint8_t rotatedRenderBuffer_[ROWS * COLS];
   uint8_t cache[ROWS * COLS];
@@ -33,6 +33,8 @@ private:
       0xc7, 0xc6, 0xc5, 0xc4, 0xc3, 0xc2, 0xc1, 0xc0, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7,
       0xe7, 0xe6, 0xe5, 0xe4, 0xe3, 0xe2, 0xe1, 0xe0, 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
       0xef, 0xee, 0xed, 0xec, 0xeb, 0xea, 0xe9, 0xe8, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+  static void onScreenTimer();
+  void _render();
 
 public:
   static Screen_ &getInstance();
@@ -43,30 +45,30 @@ public:
 public:
   int currentRotation;
 
-  unsigned int getCurrentBrightness() const;
-  void setBrightness(unsigned int brightness);
+  uint8_t getCurrentBrightness() const;
+  void setBrightness(uint8_t brightness);
 
-  void setRenderBuffer(const uint8_t *renderBuffer);
+  void setRenderBuffer(const uint8_t *renderBuffer, bool grays = false);
   uint8_t *getRenderBuffer();
   uint8_t *getRotatedRenderBuffer();
 
-  void clear(bool rerender = true);
+  void clear();
   void drawLine(uint8_t line, bool isHorizontal);
-  void setPixel(uint8_t x, uint8_t y, uint8_t value);
-  void setPixelAtIndex(uint8_t index, uint8_t value);
-  void render();
+  void setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness = 255);
+  void setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness = 255);
+  void setup();
   void loadFromStorage();
   void persist();
   void cacheCurrent();
   void restoreCache();
   uint8_t getBufferIndex(int index);
 
-  void drawLine(int x1, int y1, int x2, int y2, int ledStatus);
-  void drawRectangle(int x, int y, int width, int height, bool outline, int ledStatus);
-  void drawCharacter(int x, int y, std::vector<int> bits, int bitCount);
-  void drawNumbers(int x, int y, std::vector<int> numbers);
-  void drawBigNumbers(int x, int y, std::vector<int> numbers);
-  void drawWeather(int x, int y, int weather);
+  void drawLine(int x1, int y1, int x2, int y2, int ledStatus, uint8_t brightness = 255);
+  void drawRectangle(int x, int y, int width, int height, bool outline, int ledStatus, uint8_t brightness = 255);
+  void drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness = 255);
+  void drawNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness = 255);
+  void drawBigNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness = 255);
+  void drawWeather(int x, int y, int weather, uint8_t brightness = 255);
   std::vector<int> readBytes(std::vector<int> bytes);
 };
 

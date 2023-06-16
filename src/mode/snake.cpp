@@ -10,7 +10,6 @@ void Snake::initGame()
     Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
   }
 
-  Screen.render();
   newDot();
 }
 
@@ -26,8 +25,7 @@ void Snake::newDot()
     }
   }
 
-  Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_ON);
-  Screen.render();
+  Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_ON, 40);
 
   this->gameState = Snake::GAME_STATE_RUNNING;
 }
@@ -250,10 +248,11 @@ void Snake::findDirection()
   }
 }
 
-void Snake::moveSnake(uint newpos) 
+void Snake::moveSnake(uint newpos)
 {
   if (newpos == this->dot)
   {
+    Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_ON);
     this->position.push_back(newpos);
     newDot();
   }
@@ -265,8 +264,6 @@ void Snake::moveSnake(uint newpos)
 
     Screen.setPixelAtIndex(this->position[0], Snake::LED_TYPE_OFF);
     this->position.erase(this->position.begin()); // removing first element (end) of snake
-
-    Screen.render();
   }
 }
 
@@ -278,54 +275,46 @@ void Snake::end()
   {
     Screen.setPixelAtIndex(n, Snake::LED_TYPE_OFF);
   }
-  Screen.render();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
   }
-  Screen.render();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, Snake::LED_TYPE_OFF);
   }
-  Screen.render();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
   }
-  Screen.render();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, Snake::LED_TYPE_OFF);
   }
-  Screen.render();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
   }
-  Screen.render();
   delay(500);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, Snake::LED_TYPE_OFF);
-    Screen.render();
     delay(200);
   }
 
   delay(200);
   Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_OFF);
-  Screen.render();
   delay(500);
 
   this->gameState = Snake::GAME_STATE_END;
@@ -338,7 +327,6 @@ void Snake::setup()
 
 void Snake::loop()
 {
-  listenOnButtonToChangeMode();
   switch (this->gameState)
   {
   case Snake::GAME_STATE_RUNNING:

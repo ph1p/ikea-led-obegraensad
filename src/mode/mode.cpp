@@ -36,7 +36,6 @@ void setMode(MODE mode, bool selfLoading)
   Screen.setPixel(8, 7, 1);
   Screen.setPixel(10, 7, 1);
   Screen.setPixel(11, 7, 1);
-  Screen.render();
 
   if (mode == NONE)
   {
@@ -98,11 +97,6 @@ void setMode(MODE mode, bool selfLoading)
   }
 
   currentMode = mode;
-
-  if (currentMode == NONE)
-  {
-    Screen.render();
-  }
 }
 
 MODE getModeByString(String mode)
@@ -232,8 +226,6 @@ void loopOfAllModes()
 {
   if (currentMode != UPDATE && currentMode != LOADING)
   {
-    listenOnButtonToChangeMode();
-
     if (currentMode == STARS)
     {
       stars();

@@ -7,7 +7,6 @@ void Lines::setup()
 
 void Lines::loop()
 {
-  listenOnButtonToChangeMode();
   std::vector<int> bits = Screen.readBytes(this->frames[this->count]);
   for (int row = 0; row < ROWS; row++)
   {
@@ -16,8 +15,6 @@ void Lines::loop()
       Screen.setPixel(col, row, bits[col]);
     }
   }
-
-  Screen.render();
 
   this->count++;
   if (this->count >= 4)

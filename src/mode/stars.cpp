@@ -2,7 +2,7 @@
 
 void stars()
 {
-  listenOnButtonToChangeMode();
+  uint8_t buf[256];
   for (uint8_t row = 0; row < ROWS; row++)
   {
     for (uint8_t col = 0; col < COLS; col++)
@@ -13,9 +13,9 @@ void stars()
       {
         ra = 0;
       }
-      Screen.setPixel(row, col, ra);
+      buf[col * 16 + row] = ra * random(255);
     }
   }
-  Screen.render();
+  Screen.setRenderBuffer(buf, true);
   delay(400);
 }

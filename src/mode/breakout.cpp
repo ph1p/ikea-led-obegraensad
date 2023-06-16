@@ -20,10 +20,9 @@ void Breakout::initBricks()
     {
       this->bricks[i].x = i % Breakout::X_MAX;
       this->bricks[i].y = i / Breakout::X_MAX;
-      Screen.setPixelAtIndex(this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_ON);
+      Screen.setPixelAtIndex(this->bricks[i].y * Breakout::X_MAX + this->bricks[i].x, Breakout::LED_TYPE_ON, 50);
 
       delay(25);
-      Screen.render();
     }
   }
 }
@@ -35,17 +34,16 @@ void Breakout::newLevel()
   {
     this->paddle[i].x = (Breakout::X_MAX / 2) - (Breakout::PADDLE_WIDTH / 2) + i;
     this->paddle[i].y = Breakout::Y_MAX - 1;
-    Screen.setPixelAtIndex(this->paddle[i].y * Breakout::X_MAX + paddle[i].x, Breakout::LED_TYPE_ON);
+    Screen.setPixelAtIndex(this->paddle[i].y * Breakout::X_MAX + paddle[i].x, Breakout::LED_TYPE_ON, 50);
   }
   this->ball.x = this->paddle[1].x;
   this->ball.y = this->paddle[1].y - 1;
 
-  Screen.setPixelAtIndex(ball.y * Breakout::X_MAX + ball.x, Breakout::LED_TYPE_ON);
+  Screen.setPixelAtIndex(ball.y * Breakout::X_MAX + ball.x, Breakout::LED_TYPE_ON, 128);
   this->ballMovement[0] = 1;
   this->ballMovement[1] = -1;
   this->lastBallUpdate = 0;
 
-  Screen.render();
   this->level++;
   this->gameState = Breakout::GAME_STATE_RUNNING;
 }
@@ -57,7 +55,7 @@ void Breakout::updateBall()
     return;
   }
   this->lastBallUpdate = millis();
-  Screen.setPixelAtIndex(this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_OFF);
+  Screen.setPixelAtIndex(this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_OFF, 100);
 
   if (this->ballMovement[1] == 1)
   {
@@ -98,8 +96,7 @@ void Breakout::updateBall()
   this->ball.x += this->ballMovement[0];
   this->ball.y += this->ballMovement[1];
 
-  Screen.setPixelAtIndex(this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
-  Screen.render();
+  Screen.setPixelAtIndex(this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON, 100);
 }
 
 void Breakout::hitBrick(byte i)
@@ -163,7 +160,7 @@ void Breakout::updatePaddle()
 {
   byte direction = random(0, 2) > 0 ? 1 : 2;
 
-  unsigned int moveDirection = 0;
+  uint8_t moveDirection = 0;
   if (direction == Breakout::DIRECTION_LEFT && this->paddle[0].x > 0)
   {
     moveDirection = -1;
@@ -189,17 +186,13 @@ void Breakout::updatePaddle()
       Screen.setPixelAtIndex(this->paddle[i].y * Breakout::X_MAX + this->paddle[i].x, Breakout::LED_TYPE_ON);
     }
   }
-  Screen.render();
+
 }
 
 void Breakout::end()
 {
-  // Serial.println("GAME OVER!");
   this->gameState = Breakout::GAME_STATE_END;
   Screen.setPixelAtIndex(this->ball.y * Breakout::X_MAX + this->ball.x, Breakout::LED_TYPE_ON);
-
-  Screen.render();
-  // Serial.println("Final score: " + String(score) + " in level " + String(level));
 }
 
 void Breakout::setup()
@@ -209,7 +202,6 @@ void Breakout::setup()
 
 void Breakout::loop()
 {
-  listenOnButtonToChangeMode();
   switch (this->gameState)
   {
   case Breakout::GAME_STATE_LEVEL:
