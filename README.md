@@ -28,6 +28,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Circle
   - Clock
   - Weather
+  - Rain
 - Custom Animation with the "Creator"
 
 # Control the board
@@ -115,6 +116,9 @@ Connect them like this and remember to set them in `include/constants.h` accordi
   - Set your device IP inside the `.env` file
   - Start the server with `npm run dev`
   - Build it with `npm run build`. This command creates the `webgui.cpp` for you.
+
+- Build frontend using `Docker`
+  - From the root of the repo, run `docker compose run node`
 
 # Ideas
 

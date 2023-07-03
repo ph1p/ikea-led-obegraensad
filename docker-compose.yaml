@@ -1,0 +1,13 @@
+version: '2.0'
+
+services:
+  node:
+    image: "node:alpine"
+    user: "node"
+    volumes:
+      - ./:/home/node/app
+    working_dir: /home/node/app/frontend
+    stdin_open: true
+    tty: true
+    command: >
+      ash -c "npm i && npm run build"

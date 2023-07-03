@@ -11,6 +11,7 @@ export enum MODE {
   CLOCK = 'clock',
   BIGCLOCK = 'bigclock',
   WEATHER = 'weather',
+  RAIN = 'rain',
   CUSTOM = 'custom',
   // SYSTEM
   UPDATE = 'update',
