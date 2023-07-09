@@ -136,6 +136,7 @@ export const App: Component = () => {
                 <option value={MODE.CLOCK}>clock</option>
                 <option value={MODE.BIGCLOCK}>big clock</option>
                 <option value={MODE.WEATHER}>weather</option>
+                <option value={MODE.RAIN}>rain</option>
                 <option value={MODE.CUSTOM}>custom</option>
               </select>
 
