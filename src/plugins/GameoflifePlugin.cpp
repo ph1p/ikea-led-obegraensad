@@ -1,6 +1,6 @@
-#include "mode/gameoflife.h"
+#include "plugins/GameOfLifePlugin.h"
 
-uint8_t GameOfLife::countNeighbours(int row, int col)
+uint8_t GameOfLifePlugin::countNeighbours(int row, int col)
 {
   int i, j;
   int count = 0;
@@ -15,7 +15,7 @@ uint8_t GameOfLife::countNeighbours(int row, int col)
   return count;
 };
 
-uint8_t GameOfLife::updateCell(int row, int col)
+uint8_t GameOfLifePlugin::updateCell(int row, int col)
 {
   uint8_t total = this->countNeighbours(row, col);
   if (total > 4 || total < 3)
@@ -32,42 +32,53 @@ uint8_t GameOfLife::updateCell(int row, int col)
   }
 };
 
-void GameOfLife::setup()
+void GameOfLifePlugin::setup()
 {
+  Screen.clear();
+
   memset(previous, 0, ROWS * COLS);
   for (int i = 0; i < ROWS * COLS; i++)
   {
-    this->buffer[i] = (random(20)) ? 1 : 0;
+    this->buffer[i] = (random(10)) ? 1 : 0;
   }
-  Screen.setRenderBuffer(this->buffer);
   this->next();
 };
 
-void GameOfLife::next()
+void GameOfLifePlugin::next()
 {
+  Screen.clear();
   for (int i = 0; i < ROWS; i++)
   {
     for (int j = 0; j < COLS; j++)
     {
       this->buffer[i * 16 + j] = this->updateCell(i, j);
-      Screen.setPixelAtIndex(i * 16 + j, this->buffer[i * 16 + j]);
     }
   }
 }
 
-void GameOfLife::loop()
+int generations = 30;
+void GameOfLifePlugin::loop()
 {
+  generations--;
   this->next();
 
-  if (memcmp(this->previous, this->buffer, sizeof(this->previous)) == 0)
+  for (int i = 0; i < ROWS; i++)
   {
-    this->setup();
-    delay(1000);
+    for (int j = 0; j < COLS; j++)
+    {
+      Screen.setPixelAtIndex(i * 16 + j, this->buffer[i * 16 + j]);
+    }
   }
+  delay(150);
 
-  for (int i = 0; i < ROWS * COLS; i++)
+  if (generations == 0)
   {
-    this->previous[i] = this->buffer[i];
+    generations = 30;
+    this->setup();
   }
-  delay(300);
 };
+
+const char *GameOfLifePlugin::getName() const
+{
+  return "GameOfLife";
+}

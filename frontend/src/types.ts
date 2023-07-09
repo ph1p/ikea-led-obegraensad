@@ -1,18 +1,8 @@
-import { Setter } from "solid-js";
+import { Setter } from 'solid-js';
 
-export enum MODE {
+export enum SYSTEM_STATUS {
   NONE = 'draw',
-  STARS = 'stars',
-  LINES = 'lines',
-  BREAKOUT = 'breakout',
-  SNAKE = 'snake',
-  GAMEOFLIFE = 'gameoflife',
-  CIRCLE = 'circle',
-  CLOCK = 'clock',
-  BIGCLOCK = 'bigclock',
-  WEATHER = 'weather',
-  RAIN = 'rain',
-  CUSTOM = 'custom',
+  WSBINARY = 'wsbinary',
   // SYSTEM
   UPDATE = 'update',
   LOADING = 'loading',
@@ -23,14 +13,17 @@ export interface Store {
   brightness: () => number;
   indexMatrix: () => number[];
   leds: () => number[];
-  mode: () => MODE;
+  plugins: () => { id: number; name: string }[];
+  plugin: () => number;
+  systemStatus: () => SYSTEM_STATUS;
 
   setRotation: Setter<number>;
   setBrightness: Setter<number>;
   setIndexMatrix: Setter<number[]>;
   setLeds: Setter<number[]>;
-  setMode: Setter<MODE>;
-  send: (message: string) => void;
+  setPlugin: Setter<number>;
+  setSystemStatus: Setter<SYSTEM_STATUS>;
+  send: (message: string | ArrayBuffer) => void;
   connectionState: () => number;
 
   connectionStatus?: string;

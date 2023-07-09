@@ -1,11 +1,11 @@
-#include "mode/lines.h"
+#include "plugins/LinesPlugin.h"
 
-void Lines::setup()
+void LinesPlugin::setup()
 {
   this->count = 0;
 }
 
-void Lines::loop()
+void LinesPlugin::loop()
 {
   std::vector<int> bits = Screen.readBytes(this->frames[this->count]);
   for (int row = 0; row < ROWS; row++)
@@ -22,4 +22,9 @@ void Lines::loop()
     this->count = 0;
   }
   delay(200);
+}
+
+const char *LinesPlugin::getName() const
+{
+  return "Lines";
 }

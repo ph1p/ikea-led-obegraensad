@@ -1,13 +1,4 @@
-#include "mode/weather.h"
-#include <WiFiClient.h>
-
-#ifdef ENABLE_SERVER
-
-unsigned long lastUpdate = 0;
-
-HTTPClient http;
-WiFiClient wifiClient;
-
+#include "plugins/WeatherPlugin.h"
 
 // https://github.com/chubin/wttr.in/blob/master/share/translations/en.txt
 std::vector<int> thunderCodes = {200, 386, 389, 392, 395};
@@ -25,33 +16,42 @@ std::vector<int> snowCodes = {
     332, 335, 338, 368, 371,
     392, 395, 230, 350};
 
-void weatherSetup()
+void WeatherPlugin::setup()
 {
-    lastUpdate = millis();
-    weatherUpdate();
+    // loading screen
+    Screen.clear();
+    currentStatus = LOADING;
+    Screen.setPixel(4, 7, 1);
+    Screen.setPixel(5, 7, 1);
+    Screen.setPixel(7, 7, 1);
+    Screen.setPixel(8, 7, 1);
+    Screen.setPixel(10, 7, 1);
+    Screen.setPixel(11, 7, 1);
+    this->lastUpdate = millis();
+    this->update();
+    currentStatus = NONE;
 }
 
-void weatherLoop()
+void WeatherPlugin::loop()
 {
-    if (millis() >= lastUpdate + (1000 * 60 * 30))
+    if (millis() >= this->lastUpdate + (1000 * 60 * 30))
     {
-        weatherUpdate();
-        lastUpdate = millis();
-        #ifndef ARDUINO_ESP8266_ESP01
+        this->update();
+        this->lastUpdate = millis();
         Serial.println("updating weather");
-        #endif
     };
 }
 
-void weatherUpdate()
+void WeatherPlugin::update()
 {
     String weatherApiString = "https://wttr.in/" + String(WEATHER_LOCATION) + "?format=j2&lang=en";
-    http.begin(wifiClient, weatherApiString);
-    http.GET();
+    this->http.begin(weatherApiString);
+    int code = this->http.GET();
 
-    if (code == HTTP_CODE_OK) {
+    if (code == HTTP_CODE_OK)
+    {
         DynamicJsonDocument doc(2048);
-        deserializeJson(doc, http.getString());
+        deserializeJson(doc, this->http.getString());
 
         int temperature = round(doc["current_condition"][0]["temp_C"].as<float>());
         int weatherCode = doc["current_condition"][0]["weatherCode"].as<int>();
@@ -120,6 +120,9 @@ void weatherUpdate()
             Screen.drawNumbers(3, tempY, {temperature});
         }
     }
-
 }
-#endif
+
+const char *WeatherPlugin::getName() const
+{
+    return "Weather";
+}

@@ -1,11 +1,11 @@
-#include "mode/circle.h"
+#include "plugins/CirclePlugin.h"
 
-void Circle::setup()
+void CirclePlugin::setup()
 {
     this->circleStep = 0;
 }
 
-void Circle::loop()
+void CirclePlugin::loop()
 {
     std::vector<int> bits = Screen.readBytes(this->frames[this->circleStep]);
 
@@ -20,4 +20,9 @@ void Circle::loop()
         this->circleStep = 7;
     }
     delay(200);
+}
+
+const char *CirclePlugin::getName() const
+{
+  return "Circle";
 }

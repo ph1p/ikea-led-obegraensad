@@ -1,10 +1,8 @@
 #pragma once
 
-#include <Arduino.h>
-#include "mode/mode.h"
-#include "screen.h"
+#include "PluginManager.h"
 
-class Breakout
+class BreakoutPlugin : public Plugin
 {
 private:
   static const uint8_t DEBOUNCE_TIME = 100;
@@ -32,8 +30,8 @@ private:
   byte gameState;
   byte level;
   byte destroyedBricks;
-  Coords paddle[Breakout::PADDLE_WIDTH];
-  Coords bricks[Breakout::BRICK_AMOUNT];
+  Coords paddle[BreakoutPlugin::PADDLE_WIDTH];
+  Coords bricks[BreakoutPlugin::BRICK_AMOUNT];
   Coords ball;
 
   int ballMovement[2];
@@ -52,6 +50,7 @@ private:
   void end();
 
 public:
-  void setup();
-  void loop();
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
 };

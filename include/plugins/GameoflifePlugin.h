@@ -1,11 +1,8 @@
 #pragma once
 
-#include <Arduino.h>
-#include "mode/mode.h"
-#include "screen.h"
-#include "constants.h"
+#include "PluginManager.h"
 
-class GameOfLife
+class GameOfLifePlugin : public Plugin
 {
 private:
   uint8_t previous[ROWS * COLS];
@@ -15,6 +12,7 @@ private:
   void next();
 
 public:
-  void setup();
-  void loop();
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
 };

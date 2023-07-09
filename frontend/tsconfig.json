@@ -10,6 +10,7 @@
     "jsxImportSource": "solid-js",
     "types": ["vite/client", "offscreencanvas"],
     "noEmit": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "resolveJsonModule": true
   }
 }

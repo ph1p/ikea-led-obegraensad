@@ -1,6 +1,8 @@
-#include "mode/stars.h"
+#include "plugins/StarsPlugin.h"
 
-void stars()
+void StarsPlugin::setup() {}
+
+void StarsPlugin::loop()
 {
   uint8_t buf[256];
   for (uint8_t row = 0; row < ROWS; row++)
@@ -18,4 +20,9 @@ void stars()
   }
   Screen.setRenderBuffer(buf, true);
   delay(400);
+}
+
+const char *StarsPlugin::getName() const
+{
+  return "Stars";
 }

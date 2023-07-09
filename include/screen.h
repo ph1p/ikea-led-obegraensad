@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <vector>
-#include "mode/mode.h"
+#include "PluginManager.h"
 #include "signs.h"
 #include "constants.h"
 #include "storage.h"

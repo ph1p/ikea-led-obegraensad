@@ -8,7 +8,6 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
 ![ezgif-3-2019fca7a4](https://user-images.githubusercontent.com/15351728/200184222-a590575d-983d-4ab8-a322-c6bcf433d364.gif)
 
-
 ## Features
 
 - Persist your drawing
@@ -18,8 +17,9 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Wifi Control
 - Web-GUI
 - Load an image
-- Switch mode by pressing the button
-- Modes
+- Switch plugin by pressing the button
+- Plugins
+  - Draw
   - Game of life
   - Breakout
   - Snake
@@ -27,9 +27,10 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Lines
   - Circle
   - Clock
+  - Big Clock
   - Weather
   - Rain
-- Custom Animation with the "Creator"
+  - Animation with the "Creator"
 
 # Control the board
 
@@ -93,26 +94,28 @@ also set username and password inside `upload.py`, if you want to use OTA Update
 
 Connect them like this and remember to set them in `include/constants.h` according to your board.
 
-| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 | 
-| :----------------|:------:|:-----------:|:---------:|
-| GND              | GND    | GND         | GND       |
-| VCC              | 5V     | 5V          | VIN       |
-| EN (PIN_ENABLE)  | GPIO26 | IO22        | GPIO16 D0 |
-| IN (PIN_DATA)    | GPIO27 | IO23        | GPIO13 D7 |
-| CLK (PIN_CLOCK)  | GPIO14 | IO02        | GPIO14 D5 |
-| CLA (PIN_LATCH)  | GPIO12 | IO15        | GPIO0  D3 |
-| BUTTON one end   | GPIO16 | IO21        | GPIO2  D4 |
-| BUTTON other end | GND    | GND         | GND       |
+| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 |
+| :--------------- | :----: | :---------: | :-------: |
+| GND              |  GND   |     GND     |    GND    |
+| VCC              |   5V   |     5V      |    VIN    |
+| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 |
+| IN (PIN_DATA)    | GPIO27 |    IO23     | GPIO13 D7 |
+| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |
+| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  |
+| BUTTON one end   | GPIO16 |    IO21     | GPIO2 D4  |
+| BUTTON other end |  GND   |     GND     |    GND    |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
 # Development
 
 - `src` contains the arduino code.
+
   - Run it with platform io
   - You can uncomment the OTA lines in `platform.ini` if you want. Replace the IP with your device IP.
 
 - `frontend` contains the web code.
+
   - First run `npm i`
   - Set your device IP inside the `.env` file
   - Start the server with `npm run dev`
@@ -120,6 +123,69 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 
 - Build frontend using `Docker`
   - From the root of the repo, run `docker compose run node`
+
+## Plugins
+
+1. Start by creating a new C++ file for your plugin. For example, let's call it plugins/MyPlugin.(cpp/h).
+
+**plugins/MyPlugin.h**
+
+```cpp
+#pragma once
+
+#include "PluginManager.h"
+
+class MyPlugin : public Plugin {
+public:
+    MyPlugin();
+    ~MyPlugin() override;
+
+    void setup() override;
+    void loop() override;
+    const char* getName() const override;
+
+    void teardown() override; // optional
+    void websocketHook(DynamicJsonDocument &request) override; // optional
+};
+```
+
+**plugins/MyPlugin.cpp**
+
+```cpp
+#include "plugins/MyPlugin.h"
+
+MyPlugin::MyPlugin() {
+    // Constructor logic, if needed
+}
+
+void MyPlugin::setup() {
+    // Setup logic for your plugin
+}
+
+void MyPlugin::loop() {
+    // Loop logic for your plugin
+}
+
+const char* MyPlugin::getName() const {
+    return "MyPlugin"; // name in GUI
+}
+
+void MyPlugin::teardown() {
+  // code if plugin gets deactivated
+}
+
+void MyPlugin::websocketHook(DynamicJsonDocument &request) {
+  // handle websocket requests
+}
+```
+
+2. Add your plugin to the `main.cpp`.
+
+```cpp
+#include "plugins/MyPlugin.h"
+
+pluginManager.addPlugin(new MyPlugin());
+```
 
 # Ideas
 

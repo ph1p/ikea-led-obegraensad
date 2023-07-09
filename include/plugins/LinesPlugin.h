@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Arduino.h>
-#include "mode/mode.h"
-class Lines
+#include "PluginManager.h"
+
+class LinesPlugin : public Plugin
 {
 private:
   uint8_t count = 0;
@@ -13,6 +13,7 @@ private:
       {0x99, 0x99}};
 
 public:
-  void loop();
-  void setup();
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
 };

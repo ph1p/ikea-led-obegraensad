@@ -1,19 +1,19 @@
-#include "mode/snake.h"
+#include "plugins/SnakePlugin.h"
 
-void Snake::initGame()
+void SnakePlugin::initGame()
 {
   Screen.clear();
 
   this->position = {240, 241, 242};
   for (const int &n : this->position)
   {
-    Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
+    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
   }
 
   newDot();
 }
 
-void Snake::newDot()
+void SnakePlugin::newDot()
 {
   this->dot = random(0, 255);
   for (const uint &n : this->position)
@@ -25,12 +25,12 @@ void Snake::newDot()
     }
   }
 
-  Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_ON, 40);
+  Screen.setPixelAtIndex(this->dot, SnakePlugin::LED_TYPE_ON, 40);
 
-  this->gameState = Snake::GAME_STATE_RUNNING;
+  this->gameState = SnakePlugin::GAME_STATE_RUNNING;
 }
 
-void Snake::findDirection()
+void SnakePlugin::findDirection()
 {
   // possible directions
   uint up = 1;
@@ -248,93 +248,98 @@ void Snake::findDirection()
   }
 }
 
-void Snake::moveSnake(uint newpos)
+void SnakePlugin::moveSnake(uint newpos)
 {
   if (newpos == this->dot)
   {
-    Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_ON);
+    Screen.setPixelAtIndex(this->dot, SnakePlugin::LED_TYPE_ON);
     this->position.push_back(newpos);
     newDot();
   }
   else
   {
 
-    Screen.setPixelAtIndex(newpos, Snake::LED_TYPE_ON);
+    Screen.setPixelAtIndex(newpos, SnakePlugin::LED_TYPE_ON);
     this->position.push_back(newpos); // adding element (head) to snake
 
-    Screen.setPixelAtIndex(this->position[0], Snake::LED_TYPE_OFF);
+    Screen.setPixelAtIndex(this->position[0], SnakePlugin::LED_TYPE_OFF);
     this->position.erase(this->position.begin()); // removing first element (end) of snake
   }
 }
 
-void Snake::end()
+void SnakePlugin::end()
 {
   Serial.println("GAME OVER!");
 
   for (const int &n : this->position)
   {
-    Screen.setPixelAtIndex(n, Snake::LED_TYPE_OFF);
+    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
   }
   delay(200);
 
   for (const int &n : this->position)
   {
-    Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
+    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
   }
   delay(200);
 
   for (const int &n : this->position)
   {
-    Screen.setPixelAtIndex(n, Snake::LED_TYPE_OFF);
+    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
   }
   delay(200);
 
   for (const int &n : this->position)
   {
-    Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
+    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
   }
   delay(200);
 
   for (const int &n : this->position)
   {
-    Screen.setPixelAtIndex(n, Snake::LED_TYPE_OFF);
+    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
   }
   delay(200);
 
   for (const int &n : this->position)
   {
-    Screen.setPixelAtIndex(n, Snake::LED_TYPE_ON);
+    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
   }
   delay(500);
 
   for (const int &n : this->position)
   {
-    Screen.setPixelAtIndex(n, Snake::LED_TYPE_OFF);
+    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
     delay(200);
   }
 
   delay(200);
-  Screen.setPixelAtIndex(this->dot, Snake::LED_TYPE_OFF);
+  Screen.setPixelAtIndex(this->dot, SnakePlugin::LED_TYPE_OFF);
   delay(500);
 
-  this->gameState = Snake::GAME_STATE_END;
+  this->gameState = SnakePlugin::GAME_STATE_END;
 }
 
-void Snake::setup()
+void SnakePlugin::setup()
 {
-  this->gameState = Snake::GAME_STATE_END;
+  this->gameState = SnakePlugin::GAME_STATE_END;
 }
 
-void Snake::loop()
+void SnakePlugin::loop()
 {
   switch (this->gameState)
   {
-  case Snake::GAME_STATE_RUNNING:
+  case SnakePlugin::GAME_STATE_RUNNING:
     this->findDirection();
     delay(100);
     break;
-  case Snake::GAME_STATE_END:
+  case SnakePlugin::GAME_STATE_END:
     this->initGame();
     break;
   }
+}
+
+const char *SnakePlugin::getName() const
+{
+  return "Snake";
 }

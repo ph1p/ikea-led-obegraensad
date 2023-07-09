@@ -1,5 +1,8 @@
 #pragma once
 
+// disable if you do not want to have online functionality
+#define ENABLE_SERVER
+
 #ifdef ESP32
 #define PIN_ENABLE 26
 #define PIN_DATA 27
@@ -16,9 +19,6 @@
 #define PIN_BUTTON 2
 #endif
 
-// disable if you do not want to have online functionality
-#define ENABLE_SERVER
-
 // disable if you do not want to use the internal storage
 // https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
 // timer1 on esp8266 is not compatible with flash file system reads
@@ -27,12 +27,26 @@
 #endif
 
 #ifdef ENABLE_SERVER
+// https://github.com/nayarsystems/posix_tz_db/blob/master/zones.json
 #define NTP_SERVER "de.pool.ntp.org"
-#define TZ_INFO "WEST-1DWEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"
+#define TZ_INFO "CET-1CEST,M3.5.0,M10.5.0/3"
 #endif
 
 #define COLS 16
 #define ROWS 16
 
 // set your city or coords (https://github.com/chubin/wttr.in)
-#define WEATHER_LOCATION "51.233334,6.783333"
+#define WEATHER_LOCATION "Hamburg"
+
+
+// ---------------
+
+enum SYSTEM_STATUS
+{
+  NONE,
+  WSBINARY,
+  UPDATE,
+  LOADING,
+};
+
+extern SYSTEM_STATUS currentStatus;

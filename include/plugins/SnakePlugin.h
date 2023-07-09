@@ -1,10 +1,8 @@
 #pragma once
 
-#include <Arduino.h>
-#include "mode/mode.h"
-#include "screen.h"
+#include "PluginManager.h"
 
-class Snake
+class SnakePlugin : public Plugin
 {
 private:
   static const uint8_t LED_TYPE_OFF = 0;
@@ -26,6 +24,7 @@ private:
   void end();
 
 public:
-  void setup();
-  void loop();
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
 };
