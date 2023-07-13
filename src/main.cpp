@@ -1,6 +1,12 @@
 #include <Arduino.h>
 #include <SPI.h>
+#ifdef ESP32
 #include <WiFi.h>
+#endif
+
+#ifdef ESP8266
+#include <ESP8266WiFi.h>
+#endif
 
 #include "constants.h"
 #include "mode/mode.h"
@@ -32,7 +38,7 @@ void setup()
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED && attempts < 7)
   {
-    delay(2000);
+    delay(2500);
     Serial.print(".");
     attempts++;
   }
@@ -64,12 +70,16 @@ void setup()
 
 void loop()
 {
+#ifdef ESP8266
+  listenOnButtonToChangeMode();
+#endif
   loopOfAllModes();
   unsigned long currentMillis = millis();
   // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
   if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >=interval)) {
     Serial.println("Reconnecting to WiFi...");
     WiFi.disconnect();
+
     WiFi.reconnect();
     previousMillis = currentMillis;
   }

@@ -47,6 +47,7 @@ The ESP32 I used:
 <img src="https://user-images.githubusercontent.com/15351728/200148521-86d0f9e6-2c41-4707-b2d9-8aa24a0e440e.jpg" width="60%" />
 
 Verified to work with TTGO LoRa32 V2.1 (T3_V1.6.1).
+Note: On esp8266 per pixel brightness only works when storage and global brightness (analogWrite) are disabled.
 
 ## Open the lamp
 
@@ -92,16 +93,16 @@ also set username and password inside `upload.py`, if you want to use OTA Update
 
 Connect them like this and remember to set them in `include/constants.h` according to your board.
 
-| LCD              | ESP32  | TTGO LoRa32 |
-| :----------------|:------:|:-----------:|
-| GND              | GND    | GND         |
-| VCC              | 5V     | 5V          |
-| EN               | GPIO26 | IO22        |
-| IN               | GPIO27 | IO23        |
-| CLK              | GPIO14 | IO02        |
-| CLA              | GPIO12 | IO15        |
-| BUTTON one end   | GPIO16 | IO21        |
-| BUTTON other end | GND    | GND         |
+| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 | 
+| :----------------|:------:|:-----------:|:---------:|
+| GND              | GND    | GND         | GND       |
+| VCC              | 5V     | 5V          | VIN       |
+| EN (PIN_ENABLE)  | GPIO26 | IO22        | GPIO16 D0 |
+| IN (PIN_DATA)    | GPIO27 | IO23        | GPIO13 D7 |
+| CLK (PIN_CLOCK)  | GPIO14 | IO02        | GPIO14 D5 |
+| CLA (PIN_LATCH)  | GPIO12 | IO15        | GPIO0  D3 |
+| BUTTON one end   | GPIO16 | IO21        | GPIO2  D4 |
+| BUTTON other end | GND    | GND         | GND       |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
