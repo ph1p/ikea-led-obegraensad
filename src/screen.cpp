@@ -1,6 +1,9 @@
 #include "screen.h"
 #include <SPI.h>
 
+#define TIMER_INTERVAL_US 200
+#define GRAY_LEVELS 64 // must be a power of two
+
 using namespace std;
 
 void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
@@ -108,23 +111,38 @@ void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
 
 void IRAM_ATTR Screen_::onScreenTimer()
 {
+#ifdef ESP32
   listenOnButtonToChangeMode();
+#endif
   Screen._render();
 }
 
 void Screen_::setup()
 {
   // TODO find proper unused pins for MISO and SS
+  
+  #ifdef ESP8266
+  SPI.pins(PIN_CLOCK, 12, PIN_DATA, 15); // SCLK, MISO, MOSI, SS);
+  SPI.begin();
+  SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
+  
+  timer1_attachInterrupt(&onScreenTimer);
+  timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE); 
+  timer1_write(100);
+  #endif
+  
+  #ifdef ESP32
   SPI.begin(PIN_CLOCK, 34, PIN_DATA, 25); // SCLK, MISO, MOSI, SS
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
 
   hw_timer_t *Screen_timer = timerBegin(0, 80, true);
   timerAttachInterrupt(Screen_timer, &onScreenTimer, true);
-  timerAlarmWrite(Screen_timer, 200, true);
+  timerAlarmWrite(Screen_timer, TIMER_INTERVAL_US, true);
   timerAlarmEnable(Screen_timer);
+  #endif
 }
 
-void Screen_::_render()
+void ICACHE_RAM_ATTR Screen_::_render()
 {
   const auto buf = this->getRotatedRenderBuffer();
 
@@ -138,11 +156,14 @@ void Screen_::_render()
     bits[idx >> 3] |= (buf[positions[idx]] > counter ? 0x80 : 0) >> (idx & 7);
   }
 
-  counter += (256 / 64);
+  counter += (256 / GRAY_LEVELS);
 
   digitalWrite(PIN_LATCH, LOW);
   SPI.writeBytes(bits, sizeof(bits));
   digitalWrite(PIN_LATCH, HIGH);
+#ifdef ESP8266
+  timer1_write(100);
+#endif
 }
 
 void Screen_::cacheCurrent()
@@ -247,7 +268,11 @@ uint8_t Screen_::getCurrentBrightness() const
 void Screen_::setBrightness(uint8_t brightness)
 {
   this->brightness = brightness;
+  
+  #ifndef ESP8266
+  // analogWrite disable the timer1 interrupt on esp8266 
   analogWrite(PIN_ENABLE, 255 - brightness);
+  #endif
 }
 
 void Screen_::drawBigNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness)
