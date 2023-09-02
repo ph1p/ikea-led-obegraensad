@@ -2,6 +2,7 @@
 #include <SPI.h>
 #ifdef ESP32
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #endif
 
 #ifdef ESP8266
@@ -54,6 +55,15 @@ void setup()
     Serial.println(WiFi.localIP());
   }
 
+  // mdns
+  #ifdef MDNS_HOSTNAME
+  if (!MDNS.begin(MDNS_HOSTNAME))
+  {
+    Serial.println("Error setting up MDNS responder!");
+  }
+  Serial.println("mDNS responder started");
+  #endif
+
   // set time server
   configTzTime(TZ_INFO, NTP_SERVER);
 
@@ -76,7 +86,8 @@ void loop()
   loopOfAllModes();
   unsigned long currentMillis = millis();
   // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
-  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >=interval)) {
+  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= interval))
+  {
     Serial.println("Reconnecting to WiFi...");
     WiFi.disconnect();
 

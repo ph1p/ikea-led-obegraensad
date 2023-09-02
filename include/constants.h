@@ -5,7 +5,7 @@
 #define PIN_DATA 27
 #define PIN_CLOCK 14
 #define PIN_LATCH 12
-#define PIN_BUTTON 16
+#define PIN_BUTTON 19
 #endif
 
 #ifdef ESP8266
@@ -27,6 +27,8 @@
 #endif
 
 #ifdef ENABLE_SERVER
+// MDNS hostname will be whatever is put below + '.local', e.g. obegransad.local
+#define MDNS_HOSTNAME "obegransad"
 #define NTP_SERVER "de.pool.ntp.org"
 #define TZ_INFO "WEST-1DWEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"
 #endif

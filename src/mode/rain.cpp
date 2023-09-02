@@ -58,5 +58,5 @@ void Rain::loop()
     }
   }
 
-  delay(200);
+  delay(80);
 }

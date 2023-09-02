@@ -1,4 +1,5 @@
 #include "webserver.h"
+#include <ESPmDNS.h>
 
 #ifdef ENABLE_SERVER
 
@@ -15,6 +16,10 @@ void initWebServer()
                     { request->send(404, "text/plain", "Page not found!"); });
 
   server.begin();
+
+  #ifdef MDNS_HOSTNAME
+    MDNS.addService("http", "tcp", 80);
+  #endif
 }
 
 #endif
