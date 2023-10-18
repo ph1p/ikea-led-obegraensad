@@ -1,18 +1,28 @@
 #include "screen.h"
+#include <SPI.h>
+
+#define TIMER_INTERVAL_US 200
+#define GRAY_LEVELS 64 // must be a power of two
 
 using namespace std;
 
-void Screen_::setRenderBuffer(const uint8_t *renderBuffer)
+void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
 {
-  for (int i = 0; i < ROWS * COLS; i++)
+  if (grays)
   {
-    this->renderBuffer_[i] = renderBuffer[i];
+    memcpy(this->renderBuffer_, renderBuffer, ROWS * COLS);
+  }
+  else
+  {
+    for (int i = 0; i < ROWS * COLS; i++)
+    {
+      this->renderBuffer_[i] = renderBuffer[i] * 255;
+    }
   }
 }
 
 uint8_t *Screen_::getRotatedRenderBuffer()
 {
-  this->rotatedRenderBuffer_[ROWS * COLS];
   for (int i = 0; i < ROWS * COLS; i++)
   {
     this->rotatedRenderBuffer_[i] = this->renderBuffer_[i];
@@ -35,19 +45,19 @@ uint8_t Screen_::getBufferIndex(int index)
 
 void Screen_::loadFromStorage()
 {
-// https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
+  this->setBrightness(255);
   if (currentMode == NONE)
   {
     this->clear();
     storage.getBytes("data", this->renderBuffer_, ROWS * COLS);
-    this->render();
   }
   else
   {
     storage.getBytes("data", this->cache, ROWS * COLS);
   }
+  this->setBrightness(storage.getUInt("brightness", 255));
   storage.end();
 #endif
 }
@@ -68,13 +78,9 @@ void Screen_::rotate()
   }
 }
 
-void Screen_::clear(bool rerender)
+void Screen_::clear()
 {
   memset(this->renderBuffer_, 0, ROWS * COLS);
-  if (rerender)
-  {
-    this->render();
-  }
 }
 
 void Screen_::persist()
@@ -82,59 +88,95 @@ void Screen_::persist()
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
   storage.putBytes("data", this->renderBuffer_, ROWS * COLS);
+  storage.putUInt("brightness", this->brightness);
   storage.end();
 #endif
 }
 
-void Screen_::setPixelAtIndex(uint8_t index, uint8_t value)
+void Screen_::setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness)
 {
   if (index >= 0 && index < COLS * ROWS)
   {
-    this->renderBuffer_[index] = value;
+    this->renderBuffer_[index] = value * brightness;
   }
 }
 
-void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value)
+void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
 {
   if (x >= 0 && y >= 0 && x < 16 && y < 16)
   {
-    this->renderBuffer_[y * 16 + x] = value;
+    this->renderBuffer_[y * 16 + x] = value * brightness;
   }
 }
 
-void Screen_::render()
+void IRAM_ATTR Screen_::onScreenTimer()
 {
-  for (uint8_t idx = 0; idx < ROWS * COLS; idx++)
-  {
-    digitalWrite(PIN_DATA, this->getRotatedRenderBuffer()[positions[idx]]);
-    digitalWrite(PIN_CLOCK, HIGH);
-    digitalWrite(PIN_CLOCK, LOW);
+#ifdef ESP32
+  listenOnButtonToChangeMode();
+#endif
+  Screen._render();
+}
 
-    // TODO: this is a workaround, because the loop runs infinite. Don't know why ...
-    if (idx >= (ROWS * COLS) - 1)
-    {
-      break;
-    }
+void Screen_::setup()
+{
+  // TODO find proper unused pins for MISO and SS
+  
+  #ifdef ESP8266
+  SPI.pins(PIN_CLOCK, 12, PIN_DATA, 15); // SCLK, MISO, MOSI, SS);
+  SPI.begin();
+  SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
+  
+  timer1_attachInterrupt(&onScreenTimer);
+  timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE); 
+  timer1_write(100);
+  #endif
+  
+  #ifdef ESP32
+  SPI.begin(PIN_CLOCK, 34, PIN_DATA, 25); // SCLK, MISO, MOSI, SS
+  SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
+
+  hw_timer_t *Screen_timer = timerBegin(0, 80, true);
+  timerAttachInterrupt(Screen_timer, &onScreenTimer, true);
+  timerAlarmWrite(Screen_timer, TIMER_INTERVAL_US, true);
+  timerAlarmEnable(Screen_timer);
+  #endif
+}
+
+void ICACHE_RAM_ATTR Screen_::_render()
+{
+  const auto buf = this->getRotatedRenderBuffer();
+
+  static byte bits[ROWS * COLS / 8] = {0};
+  memset(bits, 0, ROWS * COLS / 8);
+
+  static byte counter = 0;
+
+  for (int idx = 0; idx < ROWS * COLS; idx++)
+  {
+    bits[idx >> 3] |= (buf[positions[idx]] > counter ? 0x80 : 0) >> (idx & 7);
   }
 
-  digitalWrite(PIN_LATCH, HIGH);
+  counter += (256 / GRAY_LEVELS);
+
   digitalWrite(PIN_LATCH, LOW);
+  SPI.writeBytes(bits, sizeof(bits));
+  digitalWrite(PIN_LATCH, HIGH);
+#ifdef ESP8266
+  timer1_write(100);
+#endif
 }
 
 void Screen_::cacheCurrent()
 {
-  for (int i = 0; i < COLS * ROWS; i++)
-  {
-    this->cache[i] = this->renderBuffer_[i];
-  }
+  memcpy(this->cache, this->renderBuffer_, ROWS * COLS);
 }
 
 void Screen_::restoreCache()
 {
-  this->setRenderBuffer(this->cache);
+  this->setRenderBuffer(this->cache, true);
 }
 
-void Screen_::drawLine(int x1, int y1, int x2, int y2, int ledStatus)
+void Screen_::drawLine(int x1, int y1, int x2, int y2, int ledStatus, uint8_t brightness)
 {
   int dx = abs(x2 - x1);
   int sx = x1 < x2 ? 1 : -1;
@@ -144,50 +186,50 @@ void Screen_::drawLine(int x1, int y1, int x2, int y2, int ledStatus)
 
   while (x1 != x2 || y1 != y2)
   {
-    this->setPixel(x1, y1, ledStatus);
+    this->setPixel(x1, y1, ledStatus, brightness);
 
     int error2 = error;
     if (error2 > -dx)
     {
       error -= dy;
       x1 += sx;
-      setPixel(x1, y1, ledStatus);
+      setPixel(x1, y1, ledStatus, brightness);
     }
 
     else if (error2 < dy)
     {
       error += dx;
       y1 += sy;
-      setPixel(x1, y1, ledStatus);
+      setPixel(x1, y1, ledStatus, brightness);
     }
   };
 };
 
-void Screen_::drawRectangle(int x, int y, int width, int height, bool fill, int ledStatus)
+void Screen_::drawRectangle(int x, int y, int width, int height, bool fill, int ledStatus, uint8_t brightness)
 {
   if (!fill)
   {
-    this->drawLine(x, y, x + width, y, ledStatus);
-    this->drawLine(x, y + 1, x, y + height - 1, ledStatus);
-    this->drawLine(x + width, y + 1, x + width, y + height - 1, ledStatus);
-    this->drawLine(x, y + height - 1, x + width, y + height - 1, ledStatus);
+    this->drawLine(x, y, x + width, y, ledStatus, brightness);
+    this->drawLine(x, y + 1, x, y + height - 1, ledStatus, brightness);
+    this->drawLine(x + width, y + 1, x + width, y + height - 1, ledStatus, brightness);
+    this->drawLine(x, y + height - 1, x + width, y + height - 1, ledStatus, brightness);
   }
   else
   {
     for (int i = x; i < x + width; i++)
     {
-      this->drawLine(i, y, i, y + height - 1, ledStatus);
+      this->drawLine(i, y, i, y + height - 1, ledStatus, brightness);
     }
   }
 };
 
-void Screen_::drawCharacter(int x, int y, std::vector<int> bits, int bitCount)
+void Screen_::drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness)
 {
   for (int i = 0; i < bits.size(); i += bitCount)
   {
     for (int j = 0; j < bitCount; j++)
     {
-      setPixel(x + j, (y + (i / bitCount)), bits[i + j]);
+      setPixel(x + j, (y + (i / bitCount)), bits[i + j], brightness);
     }
   }
 }
@@ -210,12 +252,40 @@ std::vector<int> Screen_::readBytes(std::vector<int> bytes)
   return bits;
 };
 
-void Screen_::drawNumbers(int x, int y, std::vector<int> numbers)
+void Screen_::drawNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness)
 {
   for (int i = 0; i < numbers.size(); i++)
   {
-    this->drawCharacter(x + (i * 5), y, this->readBytes(smallNumbers[numbers.at(i)]), 4);
+    this->drawCharacter(x + (i * 5), y, this->readBytes(smallNumbers[numbers.at(i)]), 4, brightness);
   }
+}
+
+uint8_t Screen_::getCurrentBrightness() const
+{
+  return this->brightness;
+}
+
+void Screen_::setBrightness(uint8_t brightness)
+{
+  this->brightness = brightness;
+  
+  #ifndef ESP8266
+  // analogWrite disable the timer1 interrupt on esp8266 
+  analogWrite(PIN_ENABLE, 255 - brightness);
+  #endif
+}
+
+void Screen_::drawBigNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness)
+{
+  for (int i = 0; i < numbers.size(); i++)
+  {
+    this->drawCharacter(x + (i * 8), y, this->readBytes(bigNumbers[numbers.at(i)]), 8, brightness);
+  }
+}
+
+void Screen_::drawWeather(int x, int y, int weather, uint8_t brightness)
+{
+  this->drawCharacter(x, y, this->readBytes(weatherIcons[weather]), 16, brightness);
 }
 
 Screen_ &Screen_::getInstance()

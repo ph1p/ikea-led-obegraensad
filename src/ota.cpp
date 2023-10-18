@@ -16,7 +16,7 @@ void onOTAStart()
     Screen.setPixelAtIndex(i, bits[i]);
   }
 
-  Screen.render();
+
 }
 
 void onOTAEnd()
@@ -27,7 +27,7 @@ void onOTAEnd()
   {
     Screen.setPixelAtIndex(i, bits[i]);
   }
-  Screen.render();
+
   delay(1000);
   Screen.loadFromStorage();
 }

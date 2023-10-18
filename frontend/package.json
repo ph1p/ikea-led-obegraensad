@@ -12,16 +12,16 @@
   "devDependencies": {
     "@gfx/zopfli": "^1.0.15",
     "@types/offscreencanvas": "^2019.7.0",
-    "@vanilla-extract/css": "^1.9.2",
-    "@vanilla-extract/vite-plugin": "^3.7.0",
-    "typescript": "^4.9.4",
-    "vite": "^4.0.4",
-    "vite-plugin-singlefile": "^0.13.2",
-    "vite-plugin-solid": "^2.5.0"
+    "@vanilla-extract/css": "^1.11.0",
+    "@vanilla-extract/vite-plugin": "^3.8.0",
+    "typescript": "^5.0.3",
+    "vite": "^4.2.1",
+    "vite-plugin-singlefile": "^0.13.5",
+    "vite-plugin-solid": "^2.7.0"
   },
   "dependencies": {
-    "@solid-primitives/intersection-observer": "^2.0.3",
-    "@solid-primitives/websocket": "^0.3.3",
-    "solid-js": "^1.6.8"
+    "@solid-primitives/intersection-observer": "^2.0.11",
+    "@solid-primitives/websocket": "^0.3.7",
+    "solid-js": "^1.7.2"
   }
 }

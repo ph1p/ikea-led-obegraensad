@@ -1,5 +1,12 @@
 #include <Arduino.h>
+#include <SPI.h>
+#ifdef ESP32
 #include <WiFi.h>
+#endif
+
+#ifdef ESP8266
+#include <ESP8266WiFi.h>
+#endif
 
 #include "constants.h"
 #include "mode/mode.h"
@@ -10,10 +17,12 @@
 // #include "screen.h"
 #include "mode/mode.h"
 
+unsigned long previousMillis = 0;
+unsigned long interval = 30000;
+
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("hello");
 
   pinMode(15, OUTPUT);
 
@@ -23,18 +32,15 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
-  // Screen.clear();
-  // loadMode();
-  // Screen.loadFromStorage();
-
 // server
+#ifdef ENABLE_SERVER
   // wifi
   int attempts = 0;
   WiFi.setHostname(WIFI_HOSTNAME);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED && attempts < 7)
   {
-    delay(500);
+    delay(2500);
     Serial.print(".");
     attempts++;
   }
@@ -51,22 +57,36 @@ void setup()
     digitalWrite(15, HIGH);
   }
 
-  // // set time server
+  // set time server
   configTzTime(TZ_INFO, NTP_SERVER);
 
   initOTA(server);
   initWebsocketServer(server);
   initWebServer();
-  Serial.println("init done");
+#endif
+
+  Screen.setup();
+  Screen.clear();
+  loadMode();
+  Screen.loadFromStorage();
 }
 
 void loop()
 {
-  // Serial.print("1");
+#ifdef ESP8266
+  listenOnButtonToChangeMode();
+#endif
   loopOfAllModes();
+  unsigned long currentMillis = millis();
+  // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
+  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >=interval)) {
+    Serial.println("Reconnecting to WiFi...");
+    WiFi.disconnect();
 
+    WiFi.reconnect();
+    previousMillis = currentMillis;
+  }
 #ifdef ENABLE_SERVER
   cleanUpClients();
 #endif
-  delay(20);
 }

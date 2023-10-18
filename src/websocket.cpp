@@ -17,6 +17,7 @@ void sendStateAndInfo()
   jsonDocument["mode"] = currentMode;
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
+  jsonDocument["brightness"] = Screen.getCurrentBrightness();
 
   String output;
   serializeJson(jsonDocument, output);
@@ -93,7 +94,7 @@ void onWsEvent(
         else if (!strcmp(event, "mode"))
         {
           MODE mode = getModeByString(wsRequest["mode"]);
-          setModeByString(wsRequest["mode"], sendModeToAllClients);
+          setModeByString(wsRequest["mode"], &sendModeToAllClients);
 
           if (mode == NONE)
           {
@@ -109,12 +110,14 @@ void onWsEvent(
           bool isRight = (bool)!strcmp(wsRequest["direction"], "right");
 
           Screen.currentRotation = isRight ? (Screen.currentRotation > 3 ? 1 : Screen.currentRotation + 1) : (Screen.currentRotation <= 0 ? 3 : Screen.currentRotation - 1);
-
-          Screen.render();
         }
         else if (!strcmp(event, "info"))
         {
           sendStateAndInfo();
+        }
+        else if (!strcmp(event, "brightness"))
+        {
+          Screen.setBrightness(wsRequest["brightness"].as<uint8_t>());
         }
 
         if (currentMode == NONE)
@@ -126,7 +129,6 @@ void onWsEvent(
           else if (!strcmp(event, "led"))
           {
             Screen.setPixelAtIndex(wsRequest["index"], wsRequest["status"]);
-            Screen.render();
           }
           else if (!strcmp(event, "screen"))
           {
@@ -136,8 +138,6 @@ void onWsEvent(
               buffer[i] = wsRequest["data"][i];
             }
             Screen.setRenderBuffer(buffer);
-            delay(10);
-            Screen.render();
           }
           else if (!strcmp(event, "persist"))
           {
@@ -146,8 +146,7 @@ void onWsEvent(
           else if (!strcmp(event, "load"))
           {
             Screen.loadFromStorage();
-            delay(10);
-            Screen.render();
+
             sendStateAndInfo();
           }
         }

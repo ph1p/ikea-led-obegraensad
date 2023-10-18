@@ -12,6 +12,8 @@ Breakout breakout;
 Snake snake;
 Circle circle;
 Lines lines;
+BigClock bigClock;
+Rain rain;
 Custom custom;
 
 void setMode(MODE mode, bool selfLoading)
@@ -35,7 +37,6 @@ void setMode(MODE mode, bool selfLoading)
   Screen.setPixel(8, 7, 1);
   Screen.setPixel(10, 7, 1);
   Screen.setPixel(11, 7, 1);
-  Screen.render();
 
   if (mode == NONE)
   {
@@ -78,19 +79,30 @@ void setMode(MODE mode, bool selfLoading)
 #endif
     buttonModeCount = 7;
   }
+  else if (mode == BIGCLOCK)
+  {
+    bigClock.setup();
+    buttonModeCount = 8;
+  }
+  else if (mode == WEATHER)
+  {
+#ifdef ENABLE_SERVER
+    weatherSetup();
+#endif
+    buttonModeCount = 9;
+  }
+  else if (mode == RAIN)
+  {
+    rain.setup();
+    buttonModeCount = 10;
+  }
   else if (mode == CUSTOM)
   {
     custom.setup();
-    buttonModeCount = 8;
+    buttonModeCount = 11;
   }
 
-  delay(800);
   currentMode = mode;
-
-  if (currentMode == NONE)
-  {
-    Screen.render();
-  }
 }
 
 MODE getModeByString(String mode)
@@ -122,6 +134,18 @@ MODE getModeByString(String mode)
   else if (mode == "clock")
   {
     return CLOCK;
+  }
+  else if (mode == "bigclock")
+  {
+    return BIGCLOCK;
+  }
+  else if (mode == "weather")
+  {
+    return WEATHER;
+  }
+  else if (mode == "rain")
+  {
+    return RAIN;
   }
   else if (mode == "custom")
   {
@@ -185,29 +209,37 @@ void listenOnButtonToChangeMode()
       }
       else if (buttonModeCount == 8)
       {
+        setMode(BIGCLOCK);
+      }
+      else if (buttonModeCount == 9)
+      {
+        setMode(WEATHER);
+      }
+      else if (buttonModeCount == 10)
+      {
+        setMode(RAIN);
+      }
+      else if (buttonModeCount == 11)
+      {
         setMode(CUSTOM);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 8)
+      if (buttonModeCount > 11)
       {
         buttonModeCount = 0;
       }
     }
   }
   lastModeButtonState = modeButtonState;
-  delay(10);
+  delayMicroseconds(10);
 }
 
 void loopOfAllModes()
 {
   if (currentMode != UPDATE && currentMode != LOADING)
   {
-    if (currentMode == NONE)
-    {
-      listenOnButtonToChangeMode();
-    }
     if (currentMode == STARS)
     {
       stars();
@@ -232,29 +264,49 @@ void loopOfAllModes()
     {
       circle.loop();
     }
-    if (currentMode == CUSTOM)
-    {
-      custom.loop();
-    }
     if (currentMode == CLOCK)
     {
 #ifdef ENABLE_SERVER
       clockLoop();
 #endif
     }
+    if (currentMode == BIGCLOCK)
+    {
+#ifdef ENABLE_SERVER
+      bigClock.loop();
+#endif
+    }
+    if (currentMode == WEATHER)
+    {
+#ifdef ENABLE_SERVER
+      weatherLoop();
+#endif
+    }
+    if (currentMode == RAIN)
+    {
+      rain.loop();
+    }
+    if (currentMode == CUSTOM)
+    {
+      custom.loop();
+    }
   }
 }
 
 void persistMode()
 {
+  #ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
   storage.putInt("mode", currentMode);
   storage.end();
+  #endif
 }
 
 void loadMode()
 {
+  #ifdef ENABLE_STORAGE
   storage.begin("led-wall", false);
   setMode((MODE)storage.getInt("mode"));
   storage.end();
+  #endif
 }
