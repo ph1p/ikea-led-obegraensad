@@ -13,6 +13,7 @@ Snake snake;
 Circle circle;
 Lines lines;
 BigClock bigClock;
+Rain rain;
 Custom custom;
 
 void setMode(MODE mode, bool selfLoading)
@@ -90,10 +91,15 @@ void setMode(MODE mode, bool selfLoading)
 #endif
     buttonModeCount = 9;
   }
+  else if (mode == RAIN)
+  {
+    rain.setup();
+    buttonModeCount = 10;
+  }
   else if (mode == CUSTOM)
   {
     custom.setup();
-    buttonModeCount = 10;
+    buttonModeCount = 11;
   }
 
   currentMode = mode;
@@ -136,6 +142,10 @@ MODE getModeByString(String mode)
   else if (mode == "weather")
   {
     return WEATHER;
+  }
+  else if (mode == "rain")
+  {
+    return RAIN;
   }
   else if (mode == "custom")
   {
@@ -207,12 +217,16 @@ void listenOnButtonToChangeMode()
       }
       else if (buttonModeCount == 10)
       {
+        setMode(RAIN);
+      }
+      else if (buttonModeCount == 11)
+      {
         setMode(CUSTOM);
       }
 
       buttonModeCount++;
 
-      if (buttonModeCount > 10)
+      if (buttonModeCount > 11)
       {
         buttonModeCount = 0;
       }
@@ -267,6 +281,10 @@ void loopOfAllModes()
 #ifdef ENABLE_SERVER
       weatherLoop();
 #endif
+    }
+    if (currentMode == RAIN)
+    {
+      rain.loop();
     }
     if (currentMode == CUSTOM)
     {

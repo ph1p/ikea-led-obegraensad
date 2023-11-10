@@ -1,10 +1,13 @@
 #include "mode/weather.h"
+#include <WiFiClient.h>
 
 #ifdef ENABLE_SERVER
 
 unsigned long lastUpdate = 0;
 
 HTTPClient http;
+WiFiClient wifiClient;
+
 
 // https://github.com/chubin/wttr.in/blob/master/share/translations/en.txt
 std::vector<int> thunderCodes = {200, 386, 389, 392, 395};
@@ -43,8 +46,8 @@ void weatherLoop()
 void weatherUpdate()
 {
     String weatherApiString = "https://wttr.in/" + String(WEATHER_LOCATION) + "?format=j2&lang=en";
-    http.begin(weatherApiString);
-    int code = http.GET();
+    http.begin(wifiClient, weatherApiString);
+    http.GET();
 
     if (code == HTTP_CODE_OK) {
         DynamicJsonDocument doc(2048);
