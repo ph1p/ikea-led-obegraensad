@@ -39,6 +39,15 @@
 #define WEATHER_LOCATION "Hamburg"
 
 
+// use ALL of the following to use static IP config
+/*
+#define IP_ADDRESS "192.168.0.250"
+#define SUBNET "255.255.255.0"
+#define DNS1 "1.1.1.1"
+#define DNS2 "8.8.8.8"
+#define GWY "192.168.0.1"
+*/
+
 // ---------------
 
 enum SYSTEM_STATUS

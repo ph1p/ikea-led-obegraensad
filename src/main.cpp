@@ -6,6 +6,7 @@
 #endif
 #ifdef ESP32
 #include <WiFi.h>
+#include <IPAddress.h>
 #include <ESPmDNS.h>
 #endif
 
@@ -49,6 +50,25 @@ void connectToWiFi()
 
   // Delete old config
   WiFi.disconnect(true);
+
+#if defined(IP_ADDRESS) && defined(GWY) && defined(SUBNET) && defined(DNS1) && defined(DNS2)
+  auto ip = IPAddress();
+  ip.fromString(IP_ADDRESS);
+
+  auto gwy = IPAddress();
+  gwy.fromString(GWY);
+
+  auto subnet = IPAddress();
+  subnet.fromString(SUBNET);
+
+  auto dns1 = IPAddress();
+  dns1.fromString(DNS1);
+
+  auto dns2 = IPAddress();
+  dns2.fromString(DNS2);
+
+  WiFi.config(ip, gwy, subnet, dns1, dns2);
+#endif
 
   WiFi.setHostname(WIFI_HOSTNAME);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
