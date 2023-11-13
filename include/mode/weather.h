@@ -15,7 +15,7 @@
 #include "screen.h"
 #include "mode.h"
 
-extern unsigned long lastUpdate;
+extern unsigned long nextUpdate;
 
 extern HTTPClient http;
 

@@ -1,13 +1,14 @@
 #include "mode/weather.h"
-#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 
 #ifdef ENABLE_SERVER
 
-unsigned long lastUpdate = 0;
+unsigned long nextUpdate = 0;
+
+extern const uint8_t rootca_crt_bundle_start[] asm("_binary_data_cert_x509_crt_bundle_bin_start");
 
 HTTPClient http;
-WiFiClient wifiClient;
-
+WiFiClientSecure wifiClientSecure;
 
 // https://github.com/chubin/wttr.in/blob/master/share/translations/en.txt
 std::vector<int> thunderCodes = {200, 386, 389, 392, 395};
@@ -27,16 +28,15 @@ std::vector<int> snowCodes = {
 
 void weatherSetup()
 {
-    lastUpdate = millis();
+    wifiClientSecure.setCACertBundle(rootca_crt_bundle_start);
     weatherUpdate();
 }
 
 void weatherLoop()
 {
-    if (millis() >= lastUpdate + (1000 * 60 * 30))
+    if (millis() >= nextUpdate)
     {
         weatherUpdate();
-        lastUpdate = millis();
         #ifndef ARDUINO_ESP8266_ESP01
         Serial.println("updating weather");
         #endif
@@ -46,7 +46,7 @@ void weatherLoop()
 void weatherUpdate()
 {
     String weatherApiString = "https://wttr.in/" + String(WEATHER_LOCATION) + "?format=j2&lang=en";
-    http.begin(wifiClient, weatherApiString);
+    http.begin(wifiClientSecure, weatherApiString);
     int code = http.GET();
 
     if (code == HTTP_CODE_OK) {
@@ -119,7 +119,11 @@ void weatherUpdate()
             Screen.drawCharacter(9, tempY, Screen.readBytes(degreeSymbol), 4, 50);
             Screen.drawNumbers(3, tempY, {temperature});
         }
-    }
 
+        nextUpdate = millis() + 1000 * 60 * 30;
+    } else {
+        Serial.println("Updating weather failed with code " + String(code) + " and error " + http.getString());
+        nextUpdate = millis() + 1000 * 30;
+    }
 }
 #endif
