@@ -47,7 +47,7 @@ void weatherUpdate()
 {
     String weatherApiString = "https://wttr.in/" + String(WEATHER_LOCATION) + "?format=j2&lang=en";
     http.begin(wifiClient, weatherApiString);
-    http.GET();
+    int code = http.GET();
 
     if (code == HTTP_CODE_OK) {
         DynamicJsonDocument doc(2048);
