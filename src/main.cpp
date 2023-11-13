@@ -165,6 +165,27 @@ void setup()
 
   Screen.setup();
 
+  // screen test
+
+  int currentBrightness = Screen.getCurrentBrightness();
+  Screen.setBrightness(255);
+
+  for (int i = 0; i < ROWS * COLS; i++) {
+      // need to call this with 1, see https://github.com/ph1p/ikea-led-obegraensad/issues/52
+      Screen.setPixelAtIndex(i, 255, 1);
+
+      delay(10);
+  }
+
+  for (int i = 0; i < ROWS * COLS; i++) {
+      Screen.setPixelAtIndex(i, 0);
+      delay(10);
+  }
+
+  Screen.setBrightness(currentBrightness);
+
+  // end screen test
+
   pluginManager.addPlugin(new DrawPlugin());
   pluginManager.addPlugin(new BreakoutPlugin());
   pluginManager.addPlugin(new SnakePlugin());
