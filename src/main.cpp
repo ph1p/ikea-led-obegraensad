@@ -42,29 +42,6 @@ SYSTEM_STATUS currentStatus = NONE;
 unsigned long lastConnectionAttempt = 0;
 const unsigned long connectionInterval = 10000;
 
-TaskHandle_t buttonTask;
-
-void buttonTaskFunction(void *pvParameters)
-{
-  int modeButtonState = 0;
-  int lastModeButtonState = 1;
-
-  while (1)
-  {
-    if (currentStatus != LOADING)
-    {
-      modeButtonState = digitalRead(PIN_BUTTON);
-      if (modeButtonState != lastModeButtonState && modeButtonState == HIGH)
-      {
-        pluginManager.activateNextPlugin();
-      }
-      lastModeButtonState = modeButtonState;
-      currentStatus = NONE;
-    }
-    vTaskDelay(10);
-  }
-}
-
 void connectToWiFi()
 {
   Serial.println("Connecting to Wi-Fi...");
@@ -140,13 +117,6 @@ void setup()
 #endif
 
   pluginManager.init();
-
-  if (pluginManager.getActivePlugin()->getId() == 1)
-  {
-    Screen.loadFromStorage();
-  }
-
-  xTaskCreate(buttonTaskFunction, "ButtonTask", 4096, NULL, 1, &buttonTask);
 }
 
 void loop()
@@ -162,5 +132,4 @@ void loop()
 #ifdef ENABLE_SERVER
   cleanUpClients();
 #endif
-  delayMicroseconds(5);
 }

@@ -98,7 +98,7 @@ void onWsEvent(
 
             pluginManager.setActivePluginById(pluginId);
 
-            sendInfo();
+            sendMinimalInfo();
           }
           else if (!strcmp(event, "persist-plugin"))
           {

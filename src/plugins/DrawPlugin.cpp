@@ -3,7 +3,17 @@
 void DrawPlugin::setup()
 {
   Screen.clear();
-  Screen.restoreCache();
+  if (Screen.isCacheEmpty())
+  {
+    Screen.loadFromStorage();
+  }
+  else
+  {
+    Screen.restoreCache();
+  }
+#ifdef ENABLE_SERVER
+  sendInfo();
+#endif
 }
 
 void DrawPlugin::teardown()

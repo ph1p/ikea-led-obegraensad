@@ -6,6 +6,18 @@
 
 using namespace std;
 
+bool Screen_::isCacheEmpty()
+{
+  for (int i = 0; i < sizeof(this->cache); i++)
+  {
+    if (this->cache[i] != 0)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
 {
   if (grays)

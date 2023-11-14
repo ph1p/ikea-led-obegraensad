@@ -1,6 +1,9 @@
 #include "plugins/WeatherPlugin.h"
 
 // https://github.com/chubin/wttr.in/blob/master/share/translations/en.txt
+#ifdef ESP8266
+WiFiClient wiFiClient;
+#endif
 
 void WeatherPlugin::setup()
 {
@@ -31,7 +34,13 @@ void WeatherPlugin::loop()
 void WeatherPlugin::update()
 {
     String weatherApiString = "https://wttr.in/" + String(WEATHER_LOCATION) + "?format=j2&lang=en";
+#ifdef ESP32
     http.begin(weatherApiString);
+#endif
+#ifdef ESP8266
+    http.begin(wiFiClient, weatherApiString);
+#endif
+
     int code = http.GET();
 
     if (code == HTTP_CODE_OK)

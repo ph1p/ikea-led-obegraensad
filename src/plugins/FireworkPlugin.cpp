@@ -22,13 +22,13 @@ void FireworkPlugin::explode(int x, int y)
   for (int radius = 1; radius <= maxRadius; radius++)
   {
     drawExplosion(x, y, radius, 255);
-    delay(60);
+    delay(explosionDelay);
   }
 
   for (int brightness = 248; brightness >= 0; brightness -= 8)
   {
     drawExplosion(x, y, maxRadius, brightness);
-    delay(24);
+    delay(fadeDelay);
   }
 }
 
@@ -39,22 +39,38 @@ void FireworkPlugin::setup()
 
 void FireworkPlugin::loop()
 {
-  Screen.clear();
+  static int rocketY = 16;
+  static int rocketX = 0;
+  static bool rocketLaunched = false;
 
-  int rocketX = random(16);
+  unsigned long currentMillis = millis();
 
-  int r = random(6);
-  for (int i = 16 - 1; i >= r; i--)
+  if (!rocketLaunched)
   {
-    Screen.clear();
-    Screen.setPixel(rocketX, i, 1, 255);
+    if (currentMillis - previousMillis >= rocketDelay)
+    {
+      previousMillis = currentMillis;
+      Screen.clear();
+      Screen.setPixel(rocketX, rocketY, 1, 255);
+      rocketY--;
 
-    delay(60);
+      if (rocketY < random(8))
+      {
+        rocketLaunched = true;
+        explode(rocketX, rocketY);
+      }
+    }
   }
-
-  explode(rocketX, r);
-
-  delay(500);
+  else
+  {
+    if (currentMillis - previousMillis >= explosionDuration)
+    {
+      rocketY = 16;
+      rocketX = random(16);
+      rocketLaunched = false;
+      previousMillis = currentMillis;
+    }
+  }
 }
 
 const char *FireworkPlugin::getName() const
