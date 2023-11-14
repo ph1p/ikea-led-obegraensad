@@ -18,6 +18,7 @@
 #include "plugins/LinesPlugin.h"
 #include "plugins/CirclePlugin.h"
 #include "plugins/RainPlugin.h"
+#include "plugins/FireworkPlugin.h"
 
 #ifdef ENABLE_SERVER
 #include "plugins/BigClockPlugin.h"
@@ -129,6 +130,7 @@ void setup()
   pluginManager.addPlugin(new LinesPlugin());
   pluginManager.addPlugin(new CirclePlugin());
   pluginManager.addPlugin(new RainPlugin());
+  pluginManager.addPlugin(new FireworkPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());

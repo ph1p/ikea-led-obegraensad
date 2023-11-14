@@ -31,6 +31,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Weather
   - Rain
   - Animation with the "Creator"
+  - Firework
 
 # Control the board
 
