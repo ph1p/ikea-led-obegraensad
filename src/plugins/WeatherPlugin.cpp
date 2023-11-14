@@ -1,20 +1,6 @@
 #include "plugins/WeatherPlugin.h"
 
 // https://github.com/chubin/wttr.in/blob/master/share/translations/en.txt
-std::vector<int> thunderCodes = {200, 386, 389, 392, 395};
-std::vector<int> cloudyCodes = {119, 122};
-std::vector<int> partyCloudyCodes = {116};
-std::vector<int> clearCodes = {113};
-std::vector<int> fogCodes = {143, 248, 260};
-std::vector<int> rainCodes = {
-    176, 293, 296, 299, 302,
-    305, 308, 311, 314, 353,
-    356, 359, 386, 389, 263,
-    266, 281, 284, 185};
-std::vector<int> snowCodes = {
-    179, 227, 323, 326, 329,
-    332, 335, 338, 368, 371,
-    392, 395, 230, 350};
 
 void WeatherPlugin::setup()
 {
@@ -45,13 +31,13 @@ void WeatherPlugin::loop()
 void WeatherPlugin::update()
 {
     String weatherApiString = "https://wttr.in/" + String(WEATHER_LOCATION) + "?format=j2&lang=en";
-    this->http.begin(weatherApiString);
-    int code = this->http.GET();
+    http.begin(weatherApiString);
+    int code = http.GET();
 
     if (code == HTTP_CODE_OK)
     {
         DynamicJsonDocument doc(2048);
-        deserializeJson(doc, this->http.getString());
+        deserializeJson(doc, http.getString());
 
         int temperature = round(doc["current_condition"][0]["temp_C"].as<float>());
         int weatherCode = doc["current_condition"][0]["weatherCode"].as<int>();

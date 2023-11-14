@@ -31,7 +31,7 @@ void BreakoutPlugin::newLevel()
   {
     this->paddle[i].x = (this->X_MAX / 2) - (this->PADDLE_WIDTH / 2) + i;
     this->paddle[i].y = this->Y_MAX - 1;
-    Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + paddle[i].x, this->LED_TYPE_ON, 50);
+    Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + this->paddle[i].x, this->LED_TYPE_ON, 50);
   }
   this->ball.x = this->paddle[1].x;
   this->ball.y = this->paddle[1].y - 1;
@@ -155,21 +155,12 @@ void BreakoutPlugin::checkPaddleCollision()
 
 void BreakoutPlugin::updatePaddle()
 {
-  byte direction = random(0, 2) > 0 ? 1 : 2;
+  static int moveDirection = 1;
 
-  uint8_t moveDirection = 0;
-  if (direction == this->DIRECTION_LEFT && this->paddle[0].x > 0)
-  {
-    moveDirection = -1;
-  }
-  if (direction == this->DIRECTION_RIGHT && this->paddle[this->PADDLE_WIDTH - 1].x < (this->X_MAX - 1))
-  {
-    moveDirection = 1;
-  }
+  int newPaddlePosition = this->paddle[0].x + moveDirection;
 
-  if (moveDirection != 0)
+  if (newPaddlePosition >= 0 && newPaddlePosition + this->PADDLE_WIDTH <= this->X_MAX)
   {
-    // turn off paddle LEDs
     for (byte i = 0; i < this->PADDLE_WIDTH; i++)
     {
       Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + this->paddle[i].x, this->LED_TYPE_OFF);
@@ -182,6 +173,10 @@ void BreakoutPlugin::updatePaddle()
     {
       Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + this->paddle[i].x, this->LED_TYPE_ON);
     }
+  }
+  else
+  {
+    moveDirection *= -1;
   }
 }
 
@@ -206,7 +201,7 @@ void BreakoutPlugin::loop()
   case this->GAME_STATE_RUNNING:
     this->updateBall();
     this->updatePaddle();
-    delay(300);
+    delay(random(100, 200));
     break;
   case this->GAME_STATE_END:
     this->initGame();

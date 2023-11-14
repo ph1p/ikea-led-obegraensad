@@ -10,8 +10,8 @@ private:
   static const uint8_t GAME_STATE_RUNNING = 1;
   static const uint8_t GAME_STATE_END = 2;
 
-  byte gameState;
-  byte lastDirection = 0; // 0=unset 1=up 2=right 3=down 4 =left
+  unsigned char gameState;
+  unsigned char lastDirection = 0; // 0=unset 1=up 2=right 3=down 4 =left
 
   std::vector<uint> position = {240,241,242};
 

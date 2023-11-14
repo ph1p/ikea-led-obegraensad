@@ -145,10 +145,10 @@ void ICACHE_RAM_ATTR Screen_::_render()
 {
   const auto buf = this->getRotatedRenderBuffer();
 
-  static byte bits[ROWS * COLS / 8] = {0};
+  static unsigned char bits[ROWS * COLS / 8] = {0};
   memset(bits, 0, ROWS * COLS / 8);
 
-  static byte counter = 0;
+  static unsigned char counter = 0;
 
   for (int idx = 0; idx < ROWS * COLS; idx++)
   {

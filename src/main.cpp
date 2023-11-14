@@ -1,11 +1,11 @@
 #include <Arduino.h>
 #include <SPI.h>
-#ifdef ESP32
-#include <WiFi.h>
-#endif
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
+#endif
+#ifdef ESP32
+#include <WiFi.h>
 #endif
 
 #include "PluginManager.h"
@@ -40,6 +40,29 @@ SYSTEM_STATUS currentStatus = NONE;
 
 unsigned long lastConnectionAttempt = 0;
 const unsigned long connectionInterval = 10000;
+
+TaskHandle_t buttonTask;
+
+void buttonTaskFunction(void *pvParameters)
+{
+  int modeButtonState = 0;
+  int lastModeButtonState = 1;
+
+  while (1)
+  {
+    if (currentStatus != LOADING)
+    {
+      modeButtonState = digitalRead(PIN_BUTTON);
+      if (modeButtonState != lastModeButtonState && modeButtonState == HIGH)
+      {
+        pluginManager.activateNextPlugin();
+      }
+      lastModeButtonState = modeButtonState;
+      currentStatus = NONE;
+    }
+    vTaskDelay(10);
+  }
+}
 
 void connectToWiFi()
 {
@@ -120,6 +143,8 @@ void setup()
   {
     Screen.loadFromStorage();
   }
+
+  xTaskCreate(buttonTaskFunction, "ButtonTask", 4096, NULL, 1, &buttonTask);
 }
 
 void loop()

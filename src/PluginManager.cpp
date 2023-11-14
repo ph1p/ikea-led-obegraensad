@@ -1,8 +1,5 @@
 #include "PluginManager.h"
 
-int modeButtonState = 0;
-int lastModeButtonState = 1;
-
 Plugin::Plugin() : id(-1) {}
 
 void Plugin::setId(int id)
@@ -113,17 +110,6 @@ void PluginManager::setupActivePlugin()
 
 void PluginManager::runActivePlugin()
 {
-    if (currentStatus != LOADING)
-    {
-        modeButtonState = digitalRead(PIN_BUTTON);
-        if (modeButtonState != lastModeButtonState && modeButtonState == HIGH)
-        {
-            pluginManager.activateNextPlugin();
-        }
-        lastModeButtonState = modeButtonState;
-        currentStatus = NONE;
-    }
-
     if (activePlugin)
     {
         if (currentStatus != UPDATE && currentStatus != LOADING && currentStatus != WSBINARY)
@@ -152,6 +138,7 @@ void PluginManager::activateNextPlugin()
 {
     Serial.print("next plugin: ");
     Serial.println(activePlugin->getId() + 1);
+    Screen.clear();
 
     if (activePlugin)
     {

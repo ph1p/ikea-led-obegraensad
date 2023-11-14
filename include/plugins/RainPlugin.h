@@ -12,8 +12,8 @@ private:
   static const uint8_t LED_TYPE_ON = 1;
   struct Drop
   {
-    byte x;
-    byte y;
+    unsigned char x;
+    unsigned char y;
     bool visible;
   };
 

@@ -52,6 +52,4 @@ public:
     size_t getNumPlugins();
 };
 
-extern int modeButtonState;
-extern int lastModeButtonState;
 extern PluginManager pluginManager;
