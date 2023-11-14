@@ -71,7 +71,6 @@ export const Creator = () => {
           plugin: id,
         })
       );
-      store?.setPlugin(id);
     }
   };
 

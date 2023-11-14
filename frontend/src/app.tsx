@@ -129,11 +129,6 @@ export const App: Component = () => {
                 onInput={(e) => {
                   const currentPlugin = +e.currentTarget.value;
                   sendPlugin(currentPlugin);
-
-                  batch(() => {
-                    store?.setPlugin(currentPlugin);
-                    store?.toast('Mode changed', 1000);
-                  });
                 }}
                 value={store?.plugin()}
               >

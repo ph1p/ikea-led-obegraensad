@@ -1,14 +1,4 @@
 #include "plugins/StarsPlugin.h"
-struct Star
-{
-  int x;
-  int y;
-  int brightness;
-  unsigned long lastUpdateTime;
-};
-
-const int numStars = 25;
-Star stars[numStars];
 
 void StarsPlugin::setup()
 {

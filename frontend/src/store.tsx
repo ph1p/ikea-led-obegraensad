@@ -72,6 +72,8 @@ export const StoreProvider: ParentComponent = (props) => {
 
           if (json.plugin) {
             setPlugin(json.plugin as number);
+
+            toast('Mode changed', 1000);
           }
 
           if (plugin() === 1) {
