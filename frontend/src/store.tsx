@@ -1,17 +1,29 @@
-import createWebsocket from '@solid-primitives/websocket';
+import { createEventSignal } from '@solid-primitives/event-listener';
 import {
-  createContext,
-  createSignal,
-  onCleanup,
-  onMount,
+  createReconnectingWS,
+  createWSState,
+} from '@solid-primitives/websocket';
+import {
   ParentComponent,
   Show,
+  batch,
+  createContext,
+  createEffect,
+  createSignal,
   useContext,
 } from 'solid-js';
 import { toastNotificationStyle } from './index.css';
-import { MODE, Store } from './types';
+import { SYSTEM_STATUS, Store } from './types';
 
 const StoreContext = createContext<Store>();
+
+const ws = createReconnectingWS(
+  `${
+    import.meta.env.PROD
+      ? `ws://${window.location.host}/`
+      : import.meta.env.VITE_WS_URL
+  }ws`
+);
 
 export const StoreProvider: ParentComponent = (props) => {
   const [toastNotification, setToastNotification] = createSignal<{
@@ -19,57 +31,63 @@ export const StoreProvider: ParentComponent = (props) => {
     duration: number;
   } | null>(null);
   const [rotation, setRotation] = createSignal(0);
+  const [plugins, setPlugins] = createSignal([]);
+  const [plugin, setPlugin] = createSignal(1);
   const [brightness, setBrightness] = createSignal(0);
   const [indexMatrix, setIndexMatrix] = createSignal(
     [...new Array(256)].map((_, i) => i)
   );
   const [leds, setLeds] = createSignal([...new Array(256)].fill(0));
-  const [mode, setMode] = createSignal<MODE>(MODE.NONE);
-
-  const [connect, disconnect, send, connectionState] = createWebsocket(
-    `${
-      import.meta.env.PROD
-        ? `ws://${window.location.host}/`
-        : import.meta.env.VITE_WS_URL
-    }ws`,
-    (event) => {
-      try {
-        const json = JSON.parse(event.data);
-
-        switch (json.event) {
-          case 'mode':
-            setMode(Object.values(MODE)[json.mode as number]);
-            break;
-          case 'info':
-            setMode(Object.values(MODE)[json.mode as number]);
-            setRotation(json.rotation);
-            setBrightness(json.brightness);
-
-            setIndexMatrix([...new Array(256)].map((_, i) => i));
-
-            if (json.data) {
-              setLeds(json.data);
-            }
-
-            break;
-        }
-      } catch {}
-    },
-    () => {},
-    [],
-    3,
-    5000
+  const [systemStatus, setSystemStatus] = createSignal<SYSTEM_STATUS>(
+    SYSTEM_STATUS.NONE
   );
 
-  onMount(() => connect());
-  onCleanup(() => disconnect());
+  const state = createWSState(ws);
 
-  const connectionStatus = {
-    0: 'Connecting',
-    1: 'Open',
-    2: 'Closing',
-    3: 'Try to reconnect',
-  }[connectionState()];
+  const connectionStatus = [
+    'Connecting',
+    'Connected',
+    'Disconnecting',
+    'Disconnected',
+  ];
+
+  const messageEvent = createEventSignal<{ message: MessageEvent }>(
+    ws,
+    'message'
+  );
+
+  createEffect(() => {
+    const json = JSON.parse(messageEvent()?.data || '{}');
+
+    switch (json.event) {
+      case 'info':
+        batch(() => {
+          setSystemStatus(Object.values(SYSTEM_STATUS)[json.status as number]);
+          setRotation(json.rotation);
+          setBrightness(json.brightness);
+
+          if (!plugins().length) {
+            setPlugins(json.plugins);
+          }
+
+          if (json.plugin) {
+            setPlugin(json.plugin as number);
+
+            toast('Mode changed', 1000);
+          }
+
+          if (plugin() === 1) {
+            setIndexMatrix([...new Array(256)].map((_, i) => i));
+          }
+
+          if (json.data) {
+            setLeds(json.data);
+          }
+        });
+
+        break;
+    }
+  });
 
   const toast = (text: string, duration: number) => {
     setToastNotification({
@@ -79,25 +97,28 @@ export const StoreProvider: ParentComponent = (props) => {
     setTimeout(() => setToastNotification(null), duration);
   };
 
-  const store = {
-    rotation,
-    brightness,
-    indexMatrix,
-    leds,
-    mode,
-    setRotation,
-    setBrightness,
-    setIndexMatrix,
-    setLeds,
-    setMode,
-    send,
-    connectionState,
-    connectionStatus,
-    toast,
-  };
-
   return (
-    <StoreContext.Provider value={store}>
+    <StoreContext.Provider
+      value={{
+        rotation,
+        brightness,
+        indexMatrix,
+        leds,
+        plugins,
+        plugin,
+        setRotation,
+        setBrightness,
+        setIndexMatrix,
+        setLeds,
+        setPlugin,
+        systemStatus,
+        setSystemStatus,
+        send: ws.send,
+        connectionState: state,
+        connectionStatus: connectionStatus[state()],
+        toast,
+      }}
+    >
       <Show when={!!toastNotification()}>
         <div class={toastNotificationStyle}>{toastNotification()?.text}</div>
       </Show>

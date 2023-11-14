@@ -53,7 +53,7 @@ export const Creator = () => {
     setScreens((state) => state.filter((_, i) => i !== index));
   };
 
-  const uploadData = () =>
+  const uploadData = () => {
     store!.send(
       JSON.stringify({
         event: 'upload',
@@ -61,6 +61,18 @@ export const Creator = () => {
         data: screens().map((screen) => matrixToHexArray(screen)),
       })
     );
+
+    const id = store?.plugins().find((p) => p.name.includes('Animation'))?.id;
+
+    if (id) {
+      store!.send(
+        JSON.stringify({
+          event: 'plugin',
+          plugin: id,
+        })
+      );
+    }
+  };
 
   const exportData = () => {
     const animation = [];
@@ -146,7 +158,9 @@ if (size > 0)
         <Layout
           content={
             <div class={wrapper}>
-              <div class={connectionInformation}>{store?.connectionStatus}...</div>
+              <div class={connectionInformation}>
+                {store?.connectionStatus}...
+              </div>
             </div>
           }
           footer={

@@ -8,7 +8,7 @@
 #include <AsyncElegantOTA.h>
 
 #include "screen.h"
-#include "mode/mode.h"
+#include "PluginManager.h"
 #include "secrets.h"
 #include "signs.h"
 

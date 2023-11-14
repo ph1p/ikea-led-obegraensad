@@ -1,11 +1,17 @@
 import { loadImageAndGetDataArray, rotateArray } from './helpers';
-import { MODE } from './types';
 import { controlColumn, wrapper } from './app.css';
 import { LedMatrix } from './components/LedMatrix';
 import { Button } from './components/Button';
 import { Layout } from './components/Layout';
 import { connectionInformation } from './index.css';
-import { Component, createMemo, createSignal, Show } from 'solid-js';
+import {
+  batch,
+  Component,
+  createMemo,
+  createSignal,
+  For,
+  Show,
+} from 'solid-js';
 import { useStore } from './store';
 
 export const App: Component = () => {
@@ -21,10 +27,10 @@ export const App: Component = () => {
       | 'persist'
       | 'load'
       | 'clear'
-      | 'mode'
+      | 'plugin'
       | 'screen'
       | 'led'
-      | 'persist-mode'
+      | 'persist-plugin'
       | 'brightness',
     data?: any
   ) =>
@@ -58,8 +64,8 @@ export const App: Component = () => {
         ? 1
         : currentRotation + 1
       : currentRotation <= 0
-        ? 3
-        : currentRotation - 1;
+      ? 3
+      : currentRotation - 1;
 
     store?.setRotation(currentRotation);
 
@@ -71,9 +77,10 @@ export const App: Component = () => {
     );
   };
 
-  const sendMode = (mode: MODE) => wsMessage('mode', { mode });
+  const sendPlugin = (plugin: number) => wsMessage('plugin', { plugin });
 
-  const sendBrightness = (brightness: number) => wsMessage('brightness', { brightness });
+  const sendBrightness = (brightness: number) =>
+    wsMessage('brightness', { brightness });
 
   return (
     <Show
@@ -99,17 +106,19 @@ export const App: Component = () => {
         content={
           <div class={wrapper}>
             <div>
-              <LedMatrix
-                disabled={store?.mode() !== MODE.NONE}
-                data={store?.leds() || []}
-                indexData={rotatedMatrix()}
-                onSetLed={(data) => {
-                  wsMessage('led', data);
-                }}
-                onSetMatrix={(data) => {
-                  store?.setLeds([...data]);
-                }}
-              />
+              <Show when={store?.plugin() === 1}>
+                <LedMatrix
+                  disabled={store?.plugin() !== 1}
+                  data={store?.leds() || []}
+                  indexData={rotatedMatrix()}
+                  onSetLed={(data) => {
+                    wsMessage('led', data);
+                  }}
+                  onSetMatrix={(data) => {
+                    store?.setLeds([...data]);
+                  }}
+                />
+              </Show>
             </div>
           </div>
         }
@@ -117,32 +126,20 @@ export const App: Component = () => {
           <>
             <div class={controlColumn}>
               <select
-                onChange={(e) => {
-                  const currentMode = e.currentTarget.value as MODE;
-                  store?.setMode(currentMode);
-                  sendMode(currentMode === 'draw' ? MODE.NONE : currentMode);
-
-                  store?.toast('Mode changed', 1000);
+                onInput={(e) => {
+                  const currentPlugin = +e.currentTarget.value;
+                  sendPlugin(currentPlugin);
                 }}
-                value={store?.mode()}
+                value={store?.plugin()}
               >
-                <option value={MODE.NONE}>draw</option>
-                <option value={MODE.STARS}>stars</option>
-                <option value={MODE.LINES}>lines</option>
-                <option value={MODE.BREAKOUT}>breakout</option>
-                <option value={MODE.SNAKE}>snake</option>
-                <option value={MODE.GAMEOFLIFE}>game of life</option>
-                <option value={MODE.CIRCLE}>circle</option>
-                <option value={MODE.CLOCK}>clock</option>
-                <option value={MODE.BIGCLOCK}>big clock</option>
-                <option value={MODE.WEATHER}>weather</option>
-                <option value={MODE.RAIN}>rain</option>
-                <option value={MODE.CUSTOM}>custom</option>
+                <For each={store?.plugins()}>
+                  {(plugin) => <option value={plugin.id}>{plugin.name}</option>}
+                </For>
               </select>
 
               <Button
                 onClick={() => {
-                  wsMessage('persist-mode');
+                  wsMessage('persist-plugin');
                   store?.toast(`Current mode set as default`, 1500);
                 }}
               >
@@ -160,40 +157,44 @@ export const App: Component = () => {
             </div>
 
             <div class={controlColumn}>
-              <input type="range" min="0" max="255" value={store?.brightness()} onInput={(e) => {
-                const brightness = parseInt(e.currentTarget.value);
-                store?.setBrightness(brightness);
-                sendBrightness(brightness);
-              }} />
+              <input
+                type="range"
+                min="0"
+                max="255"
+                value={store?.brightness()}
+                onInput={(e) => {
+                  const brightness = parseInt(e.currentTarget.value);
+                  store?.setBrightness(brightness);
+                  sendBrightness(brightness);
+                }}
+              />
             </div>
 
             <div class={controlColumn}>
-              {store?.mode() === MODE.NONE && (
-                <>
-                  <Button onClick={() => loadImage()}>
-                    <i class="fa-solid fa-file-import"></i>
-                  </Button>
-                  <Button onClick={clear}>
-                    <i class="fa-solid fa-trash"></i>
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      store?.toast(`Saved current state`, 1500);
-                      wsMessage('persist');
-                    }}
-                  >
-                    <i class="fa-solid fa-floppy-disk"></i>
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      store?.toast(`Saved state loaded`, 1500);
-                      wsMessage('load');
-                    }}
-                  >
-                    <i class="fa-solid fa-refresh"></i>
-                  </Button>
-                </>
-              )}
+              <Show when={store?.plugin() === 1}>
+                <Button onClick={() => loadImage()}>
+                  <i class="fa-solid fa-file-import"></i>
+                </Button>
+                <Button onClick={clear}>
+                  <i class="fa-solid fa-trash"></i>
+                </Button>
+                <Button
+                  onClick={() => {
+                    store?.toast(`Saved current state`, 1500);
+                    wsMessage('persist');
+                  }}
+                >
+                  <i class="fa-solid fa-floppy-disk"></i>
+                </Button>
+                <Button
+                  onClick={() => {
+                    store?.toast(`Saved state loaded`, 1500);
+                    wsMessage('load');
+                  }}
+                >
+                  <i class="fa-solid fa-refresh"></i>
+                </Button>
+              </Show>
 
               <a href="#/creator">creator</a>
             </div>

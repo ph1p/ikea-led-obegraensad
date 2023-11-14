@@ -1,8 +1,8 @@
 #pragma once
 
-#include "mode/mode.h"
+#include "PluginManager.h"
 
-class Rain
+class RainPlugin: public Plugin
 {
 private:
   static const uint8_t NUM_DROPS = 10;
@@ -12,14 +12,15 @@ private:
   static const uint8_t LED_TYPE_ON = 1;
   struct Drop
   {
-    byte x;
-    byte y;
+    unsigned char x;
+    unsigned char y;
     bool visible;
   };
 
-  Drop drops[Rain::NUM_DROPS];
+  Drop drops[RainPlugin::NUM_DROPS];
 
 public:
-  void loop();
-  void setup();
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
 };

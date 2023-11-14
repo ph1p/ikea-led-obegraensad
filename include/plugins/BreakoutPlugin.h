@@ -1,20 +1,18 @@
 #pragma once
 
-#include <Arduino.h>
-#include "mode/mode.h"
-#include "screen.h"
+#include "PluginManager.h"
 
-class Breakout
+class BreakoutPlugin : public Plugin
 {
 private:
   static const uint8_t DEBOUNCE_TIME = 100;
   static const uint8_t X_MAX = 16;
   static const uint8_t Y_MAX = 16;
   static const uint8_t BRICK_AMOUNT = X_MAX * 4;
-  static const uint8_t BALL_DELAY_MAX = 250;
+  static const uint8_t BALL_DELAY_MAX = 200;
   static const uint8_t BALL_DELAY_MIN = 100;
   static const uint8_t BALL_DELAY_STEP = 5;
-  static const uint8_t PADDLE_WIDTH = 4;
+  static const uint8_t PADDLE_WIDTH = 5;
   static const uint8_t DIRECTION_NONE = 0;
   static const uint8_t DIRECTION_LEFT = 1;
   static const uint8_t DIRECTION_RIGHT = 2;
@@ -25,15 +23,15 @@ private:
   static const uint8_t GAME_STATE_LEVEL = 3;
   struct Coords
   {
-    byte x;
-    byte y;
+    unsigned char x;
+    unsigned char y;
   };
 
-  byte gameState;
-  byte level;
-  byte destroyedBricks;
-  Coords paddle[Breakout::PADDLE_WIDTH];
-  Coords bricks[Breakout::BRICK_AMOUNT];
+  unsigned char gameState;
+  unsigned char level;
+  unsigned char destroyedBricks;
+  Coords paddle[BreakoutPlugin::PADDLE_WIDTH];
+  Coords bricks[BreakoutPlugin::BRICK_AMOUNT];
   Coords ball;
 
   int ballMovement[2];
@@ -46,12 +44,13 @@ private:
   void initBricks();
   void newLevel();
   void updateBall();
-  void hitBrick(byte i);
+  void hitBrick(unsigned char i);
   void checkPaddleCollision();
   void updatePaddle();
   void end();
 
 public:
-  void setup();
-  void loop();
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
 };

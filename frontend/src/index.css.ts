@@ -60,4 +60,5 @@ export const toastNotificationStyle = style({
   borderRadius: '0',
   boxShadow: 'rgb(0 0 0 / 20%) 0 15px 15px',
   zIndex: 99,
+  color: '#000'
 });

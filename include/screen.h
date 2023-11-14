@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <vector>
-#include "mode/mode.h"
+#include "PluginManager.h"
 #include "signs.h"
 #include "constants.h"
 #include "storage.h"
@@ -42,7 +42,7 @@ public:
   Screen_(const Screen_ &) = delete;
   Screen_ &operator=(const Screen_ &) = delete;
 
-public:
+  bool isCacheEmpty();
   int currentRotation;
 
   uint8_t getCurrentBrightness() const;
