@@ -132,4 +132,5 @@ void loop()
 #ifdef ENABLE_SERVER
   cleanUpClients();
 #endif
+  delay(1);
 }
