@@ -85,6 +85,10 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
+#ifdef FREKVENS
+  pinMode(PIN_POWER, INPUT_PULLUP);
+#endif
+
 // server
 #ifdef ENABLE_SERVER
   connectToWiFi();

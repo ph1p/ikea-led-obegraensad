@@ -15,6 +15,10 @@
 #define PIN_BUTTON 16
 #endif
 
+#ifdef FREKVENS
+#define PIN_POWER 18
+#endif
+
 #ifdef ESP8266
 #define PIN_ENABLE 16
 #define PIN_DATA 13
