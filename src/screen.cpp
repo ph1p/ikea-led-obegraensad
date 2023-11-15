@@ -376,6 +376,26 @@ void Screen_::scrollGraph(std::vector<int> graph, int miny, int maxy, int delayT
   }
 }
 
+void Screen_::test()
+{
+  int currentBrightness = Screen.getCurrentBrightness();
+  this->setBrightness(255);
+
+  for (int i = 0; i < ROWS * COLS; i++) {
+    // need to call this with 1, see https://github.com/ph1p/ikea-led-obegraensad/issues/52
+    this->setPixelAtIndex(i, 255, 1);
+
+    delay(10);
+  }
+
+  for (int i = 0; i < ROWS * COLS; i++) {
+    this->setPixelAtIndex(i, 0);
+    delay(10);
+  }
+
+  this->setBrightness(currentBrightness);
+}
+
 Screen_ &Screen_::getInstance()
 {
   static Screen_ instance;

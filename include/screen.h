@@ -61,6 +61,7 @@ public:
   void persist();
   void cacheCurrent();
   void restoreCache();
+  void test();
   uint8_t getBufferIndex(int index);
 
   void drawLine(int x1, int y1, int x2, int y2, int ledStatus, uint8_t brightness = 255);
