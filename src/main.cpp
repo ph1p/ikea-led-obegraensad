@@ -6,6 +6,7 @@
 #endif
 #ifdef ESP32
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #endif
 
 #include "PluginManager.h"
@@ -66,6 +67,15 @@ void connectToWiFi()
   {
     Serial.print("Connected to WiFi network with IP Address: ");
     Serial.println(WiFi.localIP());
+
+#ifdef ESP32
+    if(MDNS.begin(WIFI_HOSTNAME)) {
+      MDNS.addService("http", "tcp", 80);
+      MDNS.setInstanceName(WIFI_HOSTNAME);
+    } else {
+      Serial.println("Could not start mDNS!");
+    }
+#endif
   }
   else
   {
