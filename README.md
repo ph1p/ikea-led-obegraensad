@@ -190,9 +190,9 @@ pluginManager.addPlugin(new MyPlugin());
 
 # Ideas
 
-[] gifs
-[] animation upload
-[] use `<canvas />`
+- [ ] gifs
+- [ ] animation upload
+- [ ] use `<canvas />`
 
 ## Credits
 
