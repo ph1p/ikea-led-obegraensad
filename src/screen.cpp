@@ -299,6 +299,29 @@ void Screen_::drawWeather(int x, int y, int weather, uint8_t brightness)
   this->drawCharacter(x, y, this->readBytes(weatherIcons[weather]), 16, brightness);
 }
 
+void Screen_::scrollText(std::string text,  int delayTime, uint8_t brightness)
+{
+  int textWidth = text.length() * 6 ;  // Assuming 6 pixels width for each character + space
+
+  for (int i = -16; i < textWidth; i++) { // start with negarive screen size, so out of screen to the right
+
+    this->clear();
+    
+    for (std::size_t strPos = 0; strPos < text.length(); strPos++) { // since i need the pos to calculate, this is the best way to iterate here
+      
+      int xPos = strPos * 6 - i;
+
+      if (xPos > -6 && xPos < 16) { //so are we somewhere on screen with the char?
+        // yes tsystem6x7 charset starts wis space (char32)
+        Screen.drawCharacter(xPos,4, Screen.readBytes(system6x7[text[strPos]-32]), 8); 
+     
+      }
+    }
+
+    delay(delayTime);
+  }
+}
+
 Screen_ &Screen_::getInstance()
 {
   static Screen_ instance;

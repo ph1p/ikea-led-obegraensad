@@ -70,6 +70,8 @@ public:
   void drawBigNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness = 255);
   void drawWeather(int x, int y, int weather, uint8_t brightness = 255);
   std::vector<int> readBytes(std::vector<int> bytes);
+
+  void scrollText(std::string text, int delayTime = 30, uint8_t brightness = 255 );
 };
 
 extern Screen_ &Screen;
