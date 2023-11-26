@@ -6,5 +6,5 @@
 
 #include <ESPAsyncWebServer.h>
 void startGui(AsyncWebServerRequest *request);
-
+void handleMessage(AsyncWebServerRequest *request);
 #endif

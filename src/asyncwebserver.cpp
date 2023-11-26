@@ -14,6 +14,9 @@ void initWebServer()
   server.onNotFound([](AsyncWebServerRequest *request)
                     { request->send(404, "text/plain", "Page not found!"); });
 
+   // Route to handle "/message?text=" URL
+  server.on("/message", HTTP_GET, handleMessage);                  
+
   server.begin();
 }
 
