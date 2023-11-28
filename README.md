@@ -69,7 +69,7 @@ Above is a microcontroller. You have to remove it, because it contains the stand
 - Open folder with VSCode
 - Install platformIO (https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide)
 - Set all variables
-  - Wifi
+  - Wifi (on ESP8266)
   - Upload
   - Your Pins
   - Latitude, Longitude, City etc. (https://github.com/chubin/wttr.in)
@@ -81,15 +81,29 @@ Variables can be found inside `include/constants.h`.
 ```cpp
 #pragma once
 
+#define WIFI_HOSTNAME ""
+
+#ifdef ESP8266
 #define WIFI_SSID ""
 #define WIFI_PASSWORD ""
-#define WIFI_HOSTNAME ""
+#endif
 
 #define OTA_USERNAME ""
 #define OTA_PASSWORD ""
 ```
 
 also set username and password inside `upload.py`, if you want to use OTA Updates.
+
+### Configuring WiFi with WiFi manager
+
+_Note:_ The WiFi manager only works on ESP32. For ESP8266, `WIFI_SSID` and `WIFI_PASSWORD` need to be provided in `secrets.h`.
+
+This project uses [tzapu's WiFiManager](https://github.com/tzapu/WiFiManager). After booting up, the device will try
+to connect to known access points. If no known access point is available, the device will create a network called
+`Ikea Display Setup WiFi`. Connect to this network on any device. A captive portal will pop up and will take you
+through the configuration process. After a successful connection, the device will reboot and is ready to go.
+
+The name of the created network can be changed by modifying `WIFI_MANAGER_SSID` in `include/constants.h`.
 
 ### PINS
 
