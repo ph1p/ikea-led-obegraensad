@@ -37,6 +37,7 @@
 #include "screen.h"
 #include "secrets.h"
 #include "websocket.h"
+#include "messages.h"
 
 unsigned long previousMillis = 0;
 unsigned long interval = 30000;
@@ -186,6 +187,9 @@ void setup()
 
 void loop()
 {
+
+  Messages.scrollMessageEveryMinute();
+
   pluginManager.runActivePlugin();
 
   if (WiFi.status() != WL_CONNECTED && millis() - lastConnectionAttempt > connectionInterval)

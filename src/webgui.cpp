@@ -407,18 +407,6 @@ void startGui(AsyncWebServerRequest *request)
   request->send(response);
 }
 
-void handleMessage(AsyncWebServerRequest *request){
 
-  Screen.persist();     
-
-  // Print the received text 
-  Screen.scrollText(request->arg("text").c_str());
-
-  // Send a response to the client
-  request->send(200, "text/plain", "Message received");
-
-  //restore old screen
-  Screen.loadFromStorage();
-}
     
 #endif

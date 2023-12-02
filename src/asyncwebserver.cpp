@@ -1,4 +1,5 @@
 #include "asyncwebserver.h"
+#include "messages.h"
 
 #ifdef ENABLE_SERVER
 
@@ -14,9 +15,10 @@ void initWebServer()
   server.onNotFound([](AsyncWebServerRequest *request)
                     { request->send(404, "text/plain", "Page not found!"); });
 
-   // Route to handle "/message?text=" URL
-  server.on("/message", HTTP_GET, handleMessage);                  
+  // Route to handle  http://your-server/message?text=Hello&repeat=3&id=42&graph=1,2,3,4
+  server.on("/message", HTTP_GET, handleMessage);
 
+  server.on("/removemessage", HTTP_GET, handleRemove);
   server.begin();
 }
 
