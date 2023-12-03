@@ -21,6 +21,7 @@
 #include "plugins/CirclePlugin.h"
 #include "plugins/RainPlugin.h"
 #include "plugins/FireworkPlugin.h"
+#include "plugins/BlankPlugin.h"
 
 #ifdef ENABLE_SERVER
 #include "plugins/BigClockPlugin.h"
@@ -115,6 +116,10 @@ void setup()
   pinMode(PIN_ENABLE, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
+#ifdef FREKVENS
+  pinMode(PIN_POWER, INPUT_PULLUP);
+#endif
+
 // server
 #ifdef ENABLE_SERVER
   connectToWiFi();
@@ -138,6 +143,7 @@ void setup()
   pluginManager.addPlugin(new CirclePlugin());
   pluginManager.addPlugin(new RainPlugin());
   pluginManager.addPlugin(new FireworkPlugin());
+  pluginManager.addPlugin(new BlankPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
