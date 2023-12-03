@@ -133,7 +133,7 @@ void PluginManager::runActivePlugin()
         pwrButtonState = digitalRead(PIN_POWER);
         if (pwrButtonState != lastPwrButtonState && pwrButtonState == HIGH)
         {
-            pluginManager.setActivePlugin("Draw");
+            pluginManager.setActivePlugin("Blank");
             pluginManager.runActivePlugin();
         }
         lastPwrButtonState = pwrButtonState;
