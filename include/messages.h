@@ -1,12 +1,5 @@
 #pragma once
 
-/*
-#include <Arduino.h>
-
-#include "PluginManager.h"
-#include "signs.h"
-#include "constants.h"
-#include "storage.h"*/
 #include <vector>
 #include "screen.h"
 

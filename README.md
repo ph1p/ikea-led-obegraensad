@@ -201,7 +201,44 @@ void MyPlugin::websocketHook(DynamicJsonDocument &request) {
 
 pluginManager.addPlugin(new MyPlugin());
 ```
+# External Call
 
+The LED Display service provides a simple yet powerful external interface that allows users to display messages and graphs on a 16x16 LED display. This functionality can be accessed through HTTP calls to the service endpoint.
+
+## Message Display
+
+To display a message on the LED display, users can make an HTTP GET request to the following endpoint:
+```
+http://your-server/message
+```
+### Parameters
+
+- `text` (optional): The text message to be displayed on the LED display.
+- `graph` (optional): A comma-separated list of integers representing a graph. The values should be in the range of 0 to 15 and will be visualized as a graph on the LED display.
+- `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1.
+- `id` (optional): A unique identifier for the message. This can be used for later removal or modification of the message.
+
+#### Example
+
+```
+GET http://your-server/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1
+```
+This example will display the message "Hello" on the LED display with a corresponding graph, repeat it three times, and assign it the identifier 1.
+
+## Message Removal
+To remove a message from the display, users can make an HTTP GET request to the following endpoint:
+
+```
+http://your-server/removemessage
+```
+###Parameters
+- `id` (required): The unique identifier of the message to be removed.
+####Example
+
+```
+GET http://your-server/removemessage?id=1
+```
+This example will remove the message with the identifier 1 from the LED display.
 # Ideas
 
 - [ ] gifs
