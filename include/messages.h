@@ -25,9 +25,11 @@ class Messages_
 {
 
  private:
+  
   Messages_() = default;
   std::vector<Message> messages;
- public:
+  int previousMinute;
+public:
   static Messages_ &getInstance();
 
   Messages_(const Screen_ &) = delete;

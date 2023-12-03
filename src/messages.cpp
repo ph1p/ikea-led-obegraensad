@@ -13,7 +13,8 @@ Messages_ &Messages_::getInstance()
 void Messages_::add(std::string text, int repeat, int id, std::vector<int> graph)
 {
     messages.emplace_back(Message{id, repeat, text, graph});
-    scroll();
+    //scroll();
+    previousMinute=-1; // force to show message imedeately in next loop. Apparently http handlers cant run to long
 }
 
 void Messages_::remove(int id)
@@ -33,9 +34,10 @@ void Messages_::scroll()
 
     for (auto it = messages.begin(); it != messages.end();)
     {
-        // Print the text for each message
-        Screen.scrollText(it->text.c_str());
 
+        // Print the text for each message
+        if(it->text.length()>0)  Screen.scrollText(it->text.c_str());
+        if(it->graph.size()>0) Screen.scrollGraph(it->graph);
         // Decrease repeat and remove if it becomes less than 0
         if (--(it->repeat) < 0)
         {
@@ -46,7 +48,6 @@ void Messages_::scroll()
             ++it;
         }
 
-        // You might want to consider adding some delay or other logic here
     }
 
     // restore old screen
@@ -55,8 +56,7 @@ void Messages_::scroll()
 
 void Messages_::scrollMessageEveryMinute()
 {
-    // Static variable to remember the previous minute
-    static int previousMinute;
+
 
     // Structure to hold time information
     struct tm timeinfo;
