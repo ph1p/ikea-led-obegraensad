@@ -340,9 +340,16 @@ void Screen_::scrollGraph(std::vector<int> graph, int miny, int maxy, int delayT
       
       if (index >= 0 && index < graph.size())
       {      
-        int y = ROWS-((graph[index] - miny+1) * ROWS) / (maxy - miny +1) ;
-      
-        this->setPixel(x, y, 1, brightness);
+        int y2 = ROWS-((graph[index] - miny+1) * ROWS) / (maxy - miny +1) ;
+        if(x>0 && index>0) //if we are not first pixel on screen
+        {  
+          int y1 = ROWS-((graph[index-1] - miny+1) * ROWS) / (maxy - miny +1) ; 
+          this->drawLine(x-1,y1,x,y2,1,brightness);
+        }
+        else //first pixel on graph/on screen
+        {
+          this->setPixel(x, y2, 1, brightness);
+        }
       }
     }
     delay(delayTime);

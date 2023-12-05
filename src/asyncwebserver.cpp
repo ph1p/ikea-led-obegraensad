@@ -15,9 +15,8 @@ void initWebServer()
   server.onNotFound([](AsyncWebServerRequest *request)
                     { request->send(404, "text/plain", "Page not found!"); });
 
-  // Route to handle  http://your-server/message?text=Hello&repeat=3&id=42&graph=1,2,3,4
+  // Route to handle  http://your-server/message?text=Hello&repeat=3&id=42&delay=30&graph=1,2,3,4&miny=0&maxy=15
   server.on("/message", HTTP_GET, handleMessage);
-
   server.on("/removemessage", HTTP_GET, handleRemove);
   server.begin();
 }

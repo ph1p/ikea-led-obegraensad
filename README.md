@@ -215,15 +215,18 @@ http://your-server/message
 
 - `text` (optional): The text message to be displayed on the LED display.
 - `graph` (optional): A comma-separated list of integers representing a graph. The values should be in the range of 0 to 15 and will be visualized as a graph on the LED display.
+- `miny` (optional):  scaling for lower end of the graph, defaults to 0
+- `maxy` (optional):  scaling for upper end of the graph, defaults to 15
 - `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1.
 - `id` (optional): A unique identifier for the message. This can be used for later removal or modification of the message.
+- `delay` (optional): The number of ms of delay between every scroll move. Default is 50 ms.
 
 #### Example
 
 ```
-GET http://your-server/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1
+GET http://your-server/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1;delay=60
 ```
-This example will display the message "Hello" on the LED display with a corresponding graph, repeat it three times, and assign it the identifier 1.
+This example will display the message "Hello" on the LED display with a corresponding graph, repeat it three times, and assign it the identifier 1, waits 60ms while scrolling.
 
 ## Message Removal
 To remove a message from the display, users can make an HTTP GET request to the following endpoint:
