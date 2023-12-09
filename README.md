@@ -95,16 +95,16 @@ also set username and password inside `upload.py`, if you want to use OTA Update
 
 Connect them like this and remember to set them in `include/constants.h` according to your board.
 
-| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 |
-| :--------------- | :----: | :---------: | :-------: |
-| GND              |  GND   |     GND     |    GND    |
-| VCC              |   5V   |     5V      |    VIN    |
-| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 |
-| IN (PIN_DATA)    | GPIO27 |    IO23     | GPIO13 D7 |
-| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |
-| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  |
-| BUTTON one end   | GPIO16 |    IO21     | GPIO2 D4  |
-| BUTTON other end |  GND   |     GND     |    GND    |
+| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 |Lolin D32 (Pro) |
+| :--------------: | :----: | :---------: | :-------: | :------------: |
+| GND              |  GND   |     GND     |    GND    | GND            |
+| VCC              |   5V   |     5V      |    VIN    | USB            |
+| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 | GPIO26         |
+| IN (PIN_DATA)    | GPIO27 |    IO23     | GPIO13 D7 | GPIO27         |
+| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 | GPIO14         |
+| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  | GPIO12         |
+| BUTTON one end   | GPIO16 |    IO21     | GPIO2 D4  | GPIO25         |
+| BUTTON other end |  GND   |     GND     |    GND    | GND            |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
@@ -190,9 +190,9 @@ pluginManager.addPlugin(new MyPlugin());
 
 # Ideas
 
-[] gifs
-[] animation upload
-[] use `<canvas />`
+- [ ] gifs
+- [ ] animation upload
+- [ ] use `<canvas />`
 
 ## Credits
 
