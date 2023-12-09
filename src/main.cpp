@@ -13,21 +13,21 @@
 
 #include "PluginManager.h"
 
-#include "plugins/DrawPlugin.h"
 #include "plugins/BreakoutPlugin.h"
-#include "plugins/SnakePlugin.h"
-#include "plugins/GameOfLifePlugin.h"
-#include "plugins/StarsPlugin.h"
-#include "plugins/LinesPlugin.h"
 #include "plugins/CirclePlugin.h"
-#include "plugins/RainPlugin.h"
+#include "plugins/DrawPlugin.h"
 #include "plugins/FireworkPlugin.h"
+#include "plugins/GameOfLifePlugin.h"
+#include "plugins/LinesPlugin.h"
+#include "plugins/RainPlugin.h"
+#include "plugins/SnakePlugin.h"
+#include "plugins/StarsPlugin.h"
 
 #ifdef ENABLE_SERVER
+#include "plugins/AnimationPlugin.h"
 #include "plugins/BigClockPlugin.h"
 #include "plugins/ClockPlugin.h"
 #include "plugins/WeatherPlugin.h"
-#include "plugins/AnimationPlugin.h"
 #endif
 
 #include "asyncwebserver.h"
