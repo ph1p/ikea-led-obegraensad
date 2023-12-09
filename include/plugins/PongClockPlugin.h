@@ -21,7 +21,7 @@ private:
   ballIndex = 216,
   secondCounter = 0,
   ballBrightness = 255,
-  ballBrightnessStep = -1,
+  ballBrightnessStep = -20,
   
   pongPaddleLeftY = 0,
   pongPaddleRightY = 0,
@@ -40,9 +40,7 @@ private:
 
   unsigned long
   pongCelebrationEnd = 0,
-  pongShowtime = 0;
-
-  unsigned long
+  pongShowtime = 0,
   nextUpdateMillis = 0;
 
   int
@@ -52,6 +50,7 @@ private:
   fadeLength = 0,
   current_minute = 0,
   current_hour = 0;
+
 
   void drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness = 255);
   byte getScreenIndex(byte x, byte y);
