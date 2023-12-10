@@ -316,7 +316,7 @@ void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness)
       if (xPos > -6 && xPos < ROWS)
       { // so are we somewhere on screen with the char?
         // yes tsystem6x7 charset starts wis space (char32)
-        Screen.drawCharacter(xPos, 4, Screen.readBytes(system6x7[text[strPos] - 32]), 8);
+        Screen.drawCharacter(xPos, 4, Screen.readBytes(system6x7[text[strPos]]), 8);
       }
     }
 
