@@ -35,10 +35,10 @@ void TickingClockPlugin::loop()
      
       Screen.clear();
      
-      Screen.drawCharacter(2,0, Screen.readBytes(system6x7[hh[0]+16]), 8);
-      Screen.drawCharacter(9,0, Screen.readBytes(system6x7[hh[1]+16]), 8);
-      Screen.drawCharacter(2,9, Screen.readBytes(system6x7[mm[0]+16]), 8);
-      Screen.drawCharacter(9,9, Screen.readBytes(system6x7[mm[1]+16]), 8);
+      Screen.drawCharacter(2,0, Screen.readBytes(system6x7[hh[0]+16]), 8, Screen.getCurrentBrightness());
+      Screen.drawCharacter(9,0, Screen.readBytes(system6x7[hh[1]+16]), 8, Screen.getCurrentBrightness());
+      Screen.drawCharacter(2,9, Screen.readBytes(system6x7[mm[0]+16]), 8, Screen.getCurrentBrightness());
+      Screen.drawCharacter(9,9, Screen.readBytes(system6x7[mm[1]+16]), 8, Screen.getCurrentBrightness());
       previousMinutes = timeinfo.tm_min;
       previousHour = timeinfo.tm_hour;    
     }
@@ -48,9 +48,9 @@ void TickingClockPlugin::loop()
       Screen.drawRectangle(0,7,16,2,true,0);
       // alternating second pixel
       if ((timeinfo.tm_sec * 32 / 60) % 2 == 0)      
-         Screen.setPixel(timeinfo.tm_sec*16/60,7,1);
+         Screen.setPixel(timeinfo.tm_sec*16/60,7,1, Screen.getCurrentBrightness());
       else 
-         Screen.setPixel(timeinfo.tm_sec*16/60,8,1);
+         Screen.setPixel(timeinfo.tm_sec*16/60,8,1 Screen.getCurrentBrightness());
 
       previousSecond =  timeinfo.tm_sec;
     }
