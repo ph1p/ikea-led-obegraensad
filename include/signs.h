@@ -15,4 +15,4 @@ extern std::vector<std::vector<int>> bigNumbers;
 extern std::vector<std::vector<int>> lineAnimation;
 extern std::vector<std::vector<int>> weatherIcons;
 
-extern std::vector<std::vector<int>> system6x7; 
+extern std::vector<std::vector<int>> system6x7;

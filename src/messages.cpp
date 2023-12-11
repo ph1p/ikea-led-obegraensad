@@ -9,12 +9,11 @@ Messages_ &Messages_::getInstance()
     return instance;
 }
 
-// std::string text, int repeat = 0, int id = 0; int delay = 50, std::vector<int> graph = {}, int miny=0, int maxy=15
 void Messages_::add(std::string text, int repeat, int id, int delay, std::vector<int> graph, int miny, int maxy)
 {
     remove(id); // there should be only one message by id
     messages.emplace_back(Message{id, repeat, delay, text, graph, miny, maxy});
-    previousMinute = -1; // force the message to be displayed immediately in the next loop. Apparently http handler cannot run for too long
+    previousMinute = -1; // force the message to be displayed immediately in the next loop. The http handler cannot run for too long
 }
 
 void Messages_::remove(int id)

@@ -109,16 +109,16 @@ The name of the created network can be changed by modifying `WIFI_MANAGER_SSID` 
 
 Connect them like this and remember to set them in `include/constants.h` according to your board.
 
-| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 |Lolin D32 (Pro) |
-| :--------------: | :----: | :---------: | :-------: | :------------: |
-| GND              |  GND   |     GND     |    GND    | GND            |
-| VCC              |   5V   |     5V      |    VIN    | USB            |
-| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 | GPIO26         |
-| IN (PIN_DATA)    | GPIO27 |    IO23     | GPIO13 D7 | GPIO27         |
-| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 | GPIO14         |
-| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  | GPIO12         |
-| BUTTON one end   | GPIO16 |    IO21     | GPIO2 D4  | GPIO25         |
-| BUTTON other end |  GND   |     GND     |    GND    | GND            |
+|       LCD        | ESP32  | TTGO LoRa32 | NodeMCUv2 | Lolin D32 (Pro) |
+| :--------------: | :----: | :---------: | :-------: | :-------------: |
+|       GND        |  GND   |     GND     |    GND    |       GND       |
+|       VCC        |   5V   |     5V      |    VIN    |       USB       |
+| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 |     GPIO26      |
+|  IN (PIN_DATA)   | GPIO27 |    IO23     | GPIO13 D7 |     GPIO27      |
+| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |     GPIO14      |
+| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  |     GPIO12      |
+|  BUTTON one end  | GPIO16 |    IO21     | GPIO2 D4  |     GPIO25      |
+| BUTTON other end |  GND   |     GND     |    GND    |       GND       |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
@@ -201,6 +201,7 @@ void MyPlugin::websocketHook(DynamicJsonDocument &request) {
 
 pluginManager.addPlugin(new MyPlugin());
 ```
+
 # External Call
 
 The LED Display service provides a simple yet powerful external interface that allows users to display messages and graphs on a 16x16 LED display. This functionality can be accessed through HTTP calls to the service endpoint.
@@ -208,16 +209,18 @@ The LED Display service provides a simple yet powerful external interface that a
 ## Message Display
 
 To display a message on the LED display, users can make an HTTP GET request to the following endpoint:
+
 ```
 http://your-server/message
 ```
+
 ### Parameters
 
 - `text` (optional): The text message to be displayed on the LED display.
 - `graph` (optional): A comma-separated list of integers representing a graph. The values should be in the range of 0 to 15 and will be visualized as a graph on the LED display.
-- `miny` (optional):  scaling for lower end of the graph, defaults to 0
-- `maxy` (optional):  scaling for upper end of the graph, defaults to 15
-- `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1. Set this value to -1 to repeat infinitely. 
+- `miny` (optional): scaling for lower end of the graph, defaults to 0
+- `maxy` (optional): scaling for upper end of the graph, defaults to 15
+- `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1. Set this value to -1 to repeat infinitely.
 - `id` (optional): A unique identifier for the message. This can be used for later removal or modification of the message.
 - `delay` (optional): The number of ms of delay between every scroll move. Default is 50 ms.
 
@@ -226,22 +229,29 @@ http://your-server/message
 ```
 GET http://your-server/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1;delay=60
 ```
+
 This example will display the message "Hello" on the LED display with a corresponding graph, repeat it three times, and assign it the identifier 1, waits 60ms while scrolling.
 
 ## Message Removal
+
 To remove a message from the display, users can make an HTTP GET request to the following endpoint:
 
 ```
 http://your-server/removemessage
 ```
-###Parameters
+
+### Parameters
+
 - `id` (required): The unique identifier of the message to be removed.
-####Example
+
+#### Example
 
 ```
 GET http://your-server/removemessage?id=1
 ```
+
 This example will remove the message with the identifier 1 from the LED display.
+
 # Ideas
 
 - [ ] gifs
