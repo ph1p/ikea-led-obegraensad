@@ -4,12 +4,12 @@ void RainPlugin::setup()
 {
   Screen.clear();
   for (byte i = 0; i < RainPlugin::RainPlugin::NUM_DROPS; i++)
-  for (unsigned char i = 0; i < RainPlugin::RainPlugin::NUM_DROPS; i++)
-  {
-    this->drops[i].x = 0;
-    this->drops[i].y = 0;
-    this->drops[i].visible = false;
-  }
+    for (unsigned char i = 0; i < RainPlugin::RainPlugin::NUM_DROPS; i++)
+    {
+      this->drops[i].x = 0;
+      this->drops[i].y = 0;
+      this->drops[i].visible = false;
+    }
 }
 
 void RainPlugin::loop()
@@ -39,7 +39,8 @@ void RainPlugin::loop()
   {
     if (!drops[i].visible)
     {
-      if (random(10) > 1) continue;
+      if (random(10) > 1)
+        continue;
 
       this->drops[i].x = random(RainPlugin::X_MAX);
       this->drops[i].y = 0;

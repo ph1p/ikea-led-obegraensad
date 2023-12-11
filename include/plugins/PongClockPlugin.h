@@ -14,12 +14,10 @@ private:
   struct tm timeinfo;
 
   uint8_t
-  lastSecond = 255,
   paddleIndex = 230,
   ballX = 112,
   ballY = 208,
   ballIndex = 216,
-  secondCounter = 0,
   ballBrightness = 255,
   ballBrightnessStep = -20,
   

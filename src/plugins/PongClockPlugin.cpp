@@ -194,8 +194,6 @@ void PongClockPlugin::reset()
 void PongClockPlugin::setup()
 {
   Screen.clear();
-  secondCounter = 0;
-  lastSecond = 255;
   if (getLocalTime(&timeinfo))
   {
     current_hour = timeinfo.tm_hour;
@@ -290,7 +288,7 @@ void PongClockPlugin::loop()
   else if (currentMillis > pongCelebrationEnd)
   {
     pongReset = true;
-    // Switch to new minute after celebration ends
+    // Switch to new minute after celebration ends so score is updated afterwards
     current_hour = timeinfo.tm_hour;
     current_minute = timeinfo.tm_min;
   }
@@ -300,6 +298,7 @@ void PongClockPlugin::loop()
     reset();
   }
 
+  // Blink the ball
   if (pongCelebrate)
   { 
     if (currentMillis > nextUpdateMillis) {
@@ -337,7 +336,7 @@ void PongClockPlugin::loop()
     pongPaddleRightY = map(ballX, 256 - Y_MAX, Y_MAX, pongPaddleRightStart, pongPaddleRightTarget + offset);
   }
 
-  // Draw everything
+  // clear screen and draw time
   Screen.clear();
   drawDigits();
 
@@ -350,6 +349,7 @@ void PongClockPlugin::loop()
   Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, 255);
   Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX + 1, PongClockPlugin::LED_TYPE_ON, 255);
 
+  // draw ball
   Screen.setPixel(ballX / PongClockPlugin::X_MAX, ballY / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, ballBrightness);
 }
 
