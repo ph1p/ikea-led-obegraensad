@@ -24,5 +24,5 @@ void CirclePlugin::loop()
 
 const char *CirclePlugin::getName() const
 {
-  return "Circle";
+    return "Circle";
 }
