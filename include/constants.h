@@ -29,17 +29,15 @@
 #ifdef ENABLE_SERVER
 // https://github.com/nayarsystems/posix_tz_db/blob/master/zones.json
 #define NTP_SERVER "de.pool.ntp.org"
-#define TZ_INFO "CET-1CEST,M3.5.0,M10.5.0/3"
+#define TZ_INFO "GMT0BST,M3.5.0/1,M10.5.0"
 #endif
 
 #define COLS 16
 #define ROWS 16
 
-// set your city or coords (https://github.com/chubin/wttr.in)
-#define WEATHER_LOCATION "Hamburg"
+// weather update frequency (minutes)
+#define WEATHER_UPDATE_FREQ 10
 
-// name of WiFi created by the device if no known WiFi is available
-#define WIFI_MANAGER_SSID "Ikea Display Setup WiFi"
 
 // use ALL of the following to use static IP config
 /*
