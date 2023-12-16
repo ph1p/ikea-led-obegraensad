@@ -85,7 +85,7 @@ void WeatherPlugin::getUpdate()
 
 void WeatherPlugin::parseUpdate()
 {
-    DynamicJsonDocument doc(8096);
+    DynamicJsonDocument doc(10144);
     deserializeJson(doc, http.getString());
 
     int currentTime = doc["current"]["time"].as<int>();
