@@ -21,6 +21,7 @@ public:
 
     virtual void teardown();
     virtual void websocketHook(DynamicJsonDocument &request);
+    virtual void mqttHook(String topic, int message);
     virtual void setup() = 0;
     virtual void loop();
     virtual const char *getName() const = 0;
