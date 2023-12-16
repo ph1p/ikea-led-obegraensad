@@ -81,15 +81,17 @@ Variables can be found inside `include/constants.h`.
 ```cpp
 #pragma once
 
-#define WIFI_HOSTNAME ""
-
-#ifdef ESP8266
 #define WIFI_SSID ""
 #define WIFI_PASSWORD ""
-#endif
+#define WIFI_HOSTNAME ""
 
 #define OTA_USERNAME ""
 #define OTA_PASSWORD ""
+
+#define LATITUDE ""
+#define LONGITUDE ""
+
+#define MQTTSERVERIP ""
 ```
 
 also set username and password inside `upload.py`, if you want to use OTA Updates.
