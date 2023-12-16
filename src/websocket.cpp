@@ -19,7 +19,14 @@ void sendInfo()
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
-
+#ifdef ENABLE_STORAGE
+  storage.begin("weather", false);
+    int weatherTime = storage.getInt("weatherTime");
+    int weatherMode = storage.getInt("weatherMode");
+  storage.end();
+  jsonDocument["weatherMode"] = weatherMode;
+  jsonDocument["weatherTime"] = weatherTime;
+#endif
   JsonArray plugins = jsonDocument.createNestedArray("plugins");
 
   std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
