@@ -69,7 +69,7 @@ Above is a microcontroller. You have to remove it, because it contains the stand
 - Open folder with VSCode
 - Install platformIO (https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide)
 - Set all variables
-  - Wifi
+  - Wifi (on ESP8266)
   - Upload
   - Your Pins
   - Latitude, Longitude, City etc. (https://github.com/chubin/wttr.in)
@@ -81,9 +81,12 @@ Variables can be found inside `include/constants.h`.
 ```cpp
 #pragma once
 
+#define WIFI_HOSTNAME ""
+
+#ifdef ESP8266
 #define WIFI_SSID ""
 #define WIFI_PASSWORD ""
-#define WIFI_HOSTNAME ""
+#endif
 
 #define OTA_USERNAME ""
 #define OTA_PASSWORD ""
@@ -91,20 +94,31 @@ Variables can be found inside `include/constants.h`.
 
 also set username and password inside `upload.py`, if you want to use OTA Updates.
 
+### Configuring WiFi with WiFi manager
+
+_Note:_ The WiFi manager only works on ESP32. For ESP8266, `WIFI_SSID` and `WIFI_PASSWORD` need to be provided in `secrets.h`.
+
+This project uses [tzapu's WiFiManager](https://github.com/tzapu/WiFiManager). After booting up, the device will try
+to connect to known access points. If no known access point is available, the device will create a network called
+`Ikea Display Setup WiFi`. Connect to this network on any device. A captive portal will pop up and will take you
+through the configuration process. After a successful connection, the device will reboot and is ready to go.
+
+The name of the created network can be changed by modifying `WIFI_MANAGER_SSID` in `include/constants.h`.
+
 ### PINS
 
 Connect them like this and remember to set them in `include/constants.h` according to your board.
 
-| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 |
-| :--------------- | :----: | :---------: | :-------: |
-| GND              |  GND   |     GND     |    GND    |
-| VCC              |   5V   |     5V      |    VIN    |
-| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 |
-| IN (PIN_DATA)    | GPIO27 |    IO23     | GPIO13 D7 |
-| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |
-| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  |
-| BUTTON one end   | GPIO16 |    IO21     | GPIO2 D4  |
-| BUTTON other end |  GND   |     GND     |    GND    |
+| LCD              | ESP32  | TTGO LoRa32 | NodeMCUv2 |Lolin D32 (Pro) |
+| :--------------: | :----: | :---------: | :-------: | :------------: |
+| GND              |  GND   |     GND     |    GND    | GND            |
+| VCC              |   5V   |     5V      |    VIN    | USB            |
+| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 | GPIO26         |
+| IN (PIN_DATA)    | GPIO27 |    IO23     | GPIO13 D7 | GPIO27         |
+| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 | GPIO14         |
+| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  | GPIO12         |
+| BUTTON one end   | GPIO16 |    IO21     | GPIO2 D4  | GPIO25         |
+| BUTTON other end |  GND   |     GND     |    GND    | GND            |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
@@ -190,9 +204,9 @@ pluginManager.addPlugin(new MyPlugin());
 
 # Ideas
 
-[] gifs
-[] animation upload
-[] use `<canvas />`
+- [ ] gifs
+- [ ] animation upload
+- [ ] use `<canvas />`
 
 ## Credits
 
