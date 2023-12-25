@@ -24,6 +24,7 @@
 
 #ifdef ENABLE_SERVER
 #include "plugins/BigClockPlugin.h"
+#include "plugins/BinaryClockPlugin.h"
 #include "plugins/ClockPlugin.h"
 #include "plugins/WeatherPlugin.h"
 #include "plugins/AnimationPlugin.h"
@@ -141,6 +142,7 @@ void setup()
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
+  pluginManager.addPlugin(new BinaryClockPlugin());
   pluginManager.addPlugin(new ClockPlugin());
   pluginManager.addPlugin(new WeatherPlugin());
   pluginManager.addPlugin(new AnimationPlugin());
