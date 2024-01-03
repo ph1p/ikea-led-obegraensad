@@ -3,6 +3,11 @@
 // disable if you do not want to have online functionality
 #define ENABLE_SERVER
 
+#ifdef ENABLE_SERVER
+// enable to use REST interface
+#define ENABLE_REST
+#endif
+
 #ifdef ESP32
 #define PIN_ENABLE 26
 #define PIN_DATA 27

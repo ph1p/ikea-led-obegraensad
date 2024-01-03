@@ -216,6 +216,15 @@ void Screen_::drawLine(int x1, int y1, int x2, int y2, int ledStatus, uint8_t br
   };
 };
 
+void Screen_::invertBuffer()
+{
+  int bufferSize = COLS * ROWS;
+  for (int i = 0; i < bufferSize; i++)
+  {
+    this->renderBuffer_[i] = 255 - this->renderBuffer_[i];
+  }
+}
+
 void Screen_::drawRectangle(int x, int y, int width, int height, bool fill, int ledStatus, uint8_t brightness)
 {
   if (!fill)
