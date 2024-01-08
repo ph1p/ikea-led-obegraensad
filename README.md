@@ -127,7 +127,7 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 - `src` contains the arduino code.
 
   - Run it with platform io
-  - You can uncomment the OTA lines in `platform.ini` if you want. Replace the IP with your device IP.
+  - You can uncomment the OTA lines in `platformio.ini` if you want. Replace the IP with your device IP.
 
 - `frontend` contains the web code.
 
