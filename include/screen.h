@@ -54,6 +54,7 @@ public:
 
   void clear();
   void drawLine(uint8_t line, bool isHorizontal);
+  void invertBuffer();
   void setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness = 255);
   void setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness = 255);
   void setup();
