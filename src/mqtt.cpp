@@ -46,7 +46,11 @@ void mqttReconnect() {
     String clientId = "ESPClient-";
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
+#ifdef MQTT_AUTH
+    if (MQTTclient.connect(clientId.c_str(),MQTT_USER,MQTT_PASS)) {
+#else
     if (MQTTclient.connect(clientId.c_str())) {
+#endif
       Serial.println("connected");
       MQTTclient.subscribe("Obegraensad/mode");
       MQTTclient.subscribe("Obegraensad/weatherMode");
