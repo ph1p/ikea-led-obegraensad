@@ -117,10 +117,9 @@ void handleMessage(AsyncWebServerRequest *request)
         graph.push_back(std::stoi(token));
         token = strtok(nullptr, ",");
     }
-
     // Call the add function with the extracted parameters
     Messages.add(text, repeat, id, delay, graph, miny, maxy);
-
+    
     // Send a response to the client
     request->send(200, "text/plain", "Message received");
 }
