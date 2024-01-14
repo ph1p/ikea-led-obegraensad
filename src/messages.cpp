@@ -81,6 +81,22 @@ void Messages_::scrollMessageEveryMinute()
             // Update the previous minute to the current minute
             previousMinute = timeinfo.tm_min;
         }
+
+        if (timeinfo.tm_sec != previousSecond){
+            if(messages.size()>0){
+                indicatorPixel = previousSecond&0b00000001; //every other second, bit of a geek style
+                 Screen.setPixel(0,0,indicatorPixel);
+            } else
+            {   // if the indicator pixel was set, but no message exisits, reset it
+                if(indicatorPixel>0){
+                   indicatorPixel = 0;
+                   Screen.setPixel(0,0,indicatorPixel);  
+                }
+            }
+
+            previousSecond = timeinfo.tm_sec;
+        }
+
     }
 }
 

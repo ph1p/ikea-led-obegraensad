@@ -22,6 +22,9 @@ private:
   Messages_() = default;
   std::vector<Message> messages;
   int previousMinute;
+  int previousSecond;
+  int indicatorPixel;
+
 
 public:
   static Messages_ &getInstance();

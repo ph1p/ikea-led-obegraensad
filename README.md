@@ -220,7 +220,7 @@ http://your-server/message
 - `graph` (optional): A comma-separated list of integers representing a graph. The values should be in the range of 0 to 15 and will be visualized as a graph on the LED display.
 - `miny` (optional): scaling for lower end of the graph, defaults to 0
 - `maxy` (optional): scaling for upper end of the graph, defaults to 15
-- `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1. Set this value to -1 to repeat infinitely.
+- `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1. Set this value to -1 to repeat infinitely. While messages ar pending for display an indicator led in the upper left corner will flash.
 - `id` (optional): A unique identifier for the message. This can be used for later removal or modification of the message.
 - `delay` (optional): The number of ms of delay between every scroll move. Default is 50 ms.
 
