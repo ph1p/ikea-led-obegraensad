@@ -117,6 +117,10 @@ void handleMessage(AsyncWebServerRequest *request)
         graph.push_back(std::stoi(token));
         token = strtok(nullptr, ",");
     }
+
+    //Uncomment this to thee what charcode comes in 
+    // for(int i = 0;i<text.size();i++)Screen.scrollText(std::to_string(text[i]));
+
     // Call the add function with the extracted parameters
     Messages.add(text, repeat, id, delay, graph, miny, maxy);
     

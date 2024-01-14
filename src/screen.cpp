@@ -326,9 +326,9 @@ void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness, ui
         if (xPos > -6 && xPos < ROWS)
         { // so are we somewhere on screen with the char?
           // ensure that we have a defined char, lets take the first
-          uint8_t currentChar =  ( (text[strPos]<currentFont.data.size()) && (text[strPos] >= currentFont.offset)) ? text[strPos] : currentFont.offset; 
+          uint8_t currentChar =  ( ((text[strPos]-currentFont.offset)<currentFont.data.size()) && (text[strPos] >= currentFont.offset)) ? text[strPos] : currentFont.offset; 
           // draw it
-          Screen.drawCharacter(xPos, 4, Screen.readBytes(currentFont.data[currentChar-currentFont.offset]), 8);
+          Screen.drawCharacter(xPos, 4, Screen.readBytes(currentFont.data[currentChar-currentFont.offset]), 8);         
         }
       }
     }
