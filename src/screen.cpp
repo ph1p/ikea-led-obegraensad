@@ -301,34 +301,35 @@ void Screen_::drawWeather(int x, int y, int weather, uint8_t brightness)
 
 void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness, uint8_t fontid)
 {
-  // lets determine the current font 
+  // lets determine the current font
   font currentFont = (fontid < fonts.size()) ? fonts[fontid] : fonts[0];
 
-  int textWidth = text.length() * (currentFont.sizeX+1); // charsize + space
+  int textWidth = text.length() * (currentFont.sizeX + 1); // charsize + space
 
   for (int i = -ROWS; i < textWidth; i++)
-  { // start with negarive screen size, so out of screen to the right
-   
+  { // start with negative screen size, so out of screen to the right
+
     int skippedChars = 0;
 
     this->clear();
-    
+
     for (std::size_t strPos = 0; strPos < text.length(); strPos++)
     { // since i need the pos to calculate, this is the best way to iterate here
-      if(text[strPos] == 195){
-        // we skipp the unicode char idicating german umlauts. yes, this is not a real unicode implementation. however. 
-        skippedChars++;   
-      } 
-        else
+      if (text[strPos] == 195)
       {
-        int xPos = (strPos-skippedChars) * (currentFont.sizeX+1) - i;
+        // we skip the unicode char indicating special characters
+        skippedChars++;
+      }
+      else
+      {
+        int xPos = (strPos - skippedChars) * (currentFont.sizeX + 1) - i;
 
         if (xPos > -6 && xPos < ROWS)
         { // so are we somewhere on screen with the char?
           // ensure that we have a defined char, lets take the first
-          uint8_t currentChar =  ( ((text[strPos]-currentFont.offset)<currentFont.data.size()) && (text[strPos] >= currentFont.offset)) ? text[strPos] : currentFont.offset; 
+          uint8_t currentChar = (((text[strPos] - currentFont.offset) < currentFont.data.size()) && (text[strPos] >= currentFont.offset)) ? text[strPos] : currentFont.offset;
           // draw it
-          Screen.drawCharacter(xPos, 4, Screen.readBytes(currentFont.data[currentChar-currentFont.offset]), 8);         
+          Screen.drawCharacter(xPos, 4, Screen.readBytes(currentFont.data[currentChar - currentFont.offset]), 8);
         }
       }
     }

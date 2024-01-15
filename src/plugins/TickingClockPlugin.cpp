@@ -25,11 +25,11 @@ void TickingClockPlugin::loop()
       std::vector<int> mm = {(timeinfo.tm_min - timeinfo.tm_min % 10) / 10, timeinfo.tm_min % 10};
 
       Screen.clear();
-   
-      Screen.drawCharacter(2, 0, Screen.readBytes(fonts[1].data[hh[0] ]), 8, Screen.getCurrentBrightness());
-      Screen.drawCharacter(9, 0, Screen.readBytes(fonts[1].data[hh[1] ]), 8, Screen.getCurrentBrightness());
-      Screen.drawCharacter(2, 9, Screen.readBytes(fonts[1].data[mm[0] ]), 8, Screen.getCurrentBrightness());
-      Screen.drawCharacter(9, 9, Screen.readBytes(fonts[1].data[mm[1] ]), 8, Screen.getCurrentBrightness());
+
+      Screen.drawCharacter(2, 0, Screen.readBytes(fonts[1].data[hh[0]]), 8, Screen.getCurrentBrightness());
+      Screen.drawCharacter(9, 0, Screen.readBytes(fonts[1].data[hh[1]]), 8, Screen.getCurrentBrightness());
+      Screen.drawCharacter(2, 9, Screen.readBytes(fonts[1].data[mm[0]]), 8, Screen.getCurrentBrightness());
+      Screen.drawCharacter(9, 9, Screen.readBytes(fonts[1].data[mm[1]]), 8, Screen.getCurrentBrightness());
       previousMinutes = timeinfo.tm_min;
       previousHour = timeinfo.tm_hour;
     }
