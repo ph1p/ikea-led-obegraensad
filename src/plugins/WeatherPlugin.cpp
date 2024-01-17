@@ -164,6 +164,7 @@ void WeatherPlugin::parseUpdate()
     }
     else if (temperature <= -10)
     {
+        temperature = abs(temperature);
         Screen.drawCharacter(0, tempY, Screen.readBytes(minusSymbol), 4);
         Screen.drawCharacter(11, tempY, Screen.readBytes(degreeSymbol), 4);
         Screen.drawNumbers(3, tempY, {(temperature - temperature % 10) / 10, temperature % 10});
@@ -175,9 +176,10 @@ void WeatherPlugin::parseUpdate()
     }
     else
     {
-        Screen.drawCharacter(0, tempY, Screen.readBytes(minusSymbol), 4);
+        temperature = abs(temperature);
+        Screen.drawCharacter(3, tempY, Screen.readBytes(minusSymbol), 4);
         Screen.drawCharacter(9, tempY, Screen.readBytes(degreeSymbol), 4);
-        Screen.drawNumbers(3, tempY, {temperature});
+        Screen.drawNumbers(6, tempY, {temperature});
     }
     tick=true;
 }
