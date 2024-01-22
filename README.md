@@ -122,6 +122,9 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
+Alternative button wiring:
+If you want to keep the wiring of the OBEGRÄNSAD, you can connect Pin 7 on the board (from the unsoldered original microcontroller) to GPIO16 of your ESP. Thanks to [RBEGamer](https://github.com/ph1p/ikea-led-obegraensad/issues/79) who also has a picture of the wiring in the link.
+
 # Development
 
 - `src` contains the arduino code.
