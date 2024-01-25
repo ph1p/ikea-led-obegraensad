@@ -64,8 +64,7 @@ void connectToWiFi()
 
   wifiManager.setHostname(WIFI_HOSTNAME);
 
-#if defined(IP_ADDRESS) && defined(GWY) && defined(SUBNET) && defined(DNS1) && \
-    defined(DNS2)
+#if defined(IP_ADDRESS) && defined(GWY) && defined(SUBNET) && defined(DNS1)
   auto ip = IPAddress();
   ip.fromString(IP_ADDRESS);
 
