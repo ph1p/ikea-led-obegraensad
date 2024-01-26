@@ -63,6 +63,23 @@ void connectToWiFi()
       { wifiWebServerStarted = true; });
 
   wifiManager.setHostname(WIFI_HOSTNAME);
+
+#if defined(IP_ADDRESS) && defined(GWY) && defined(SUBNET) && defined(DNS1)
+  auto ip = IPAddress();
+  ip.fromString(IP_ADDRESS);
+
+  auto gwy = IPAddress();
+  gwy.fromString(GWY);
+
+  auto subnet = IPAddress();
+  subnet.fromString(SUBNET);
+
+  auto dns = IPAddress();
+  dns.fromString(DNS1);
+
+  wifiManager.setSTAStaticIPConfig(ip, gwy, subnet, dns);
+#endif
+
   wifiManager.autoConnect(WIFI_MANAGER_SSID);
 
   if (MDNS.begin(WIFI_HOSTNAME))
