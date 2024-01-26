@@ -277,7 +277,6 @@ void PongClockPlugin::loop()
           pongCelebrationEnd = currentMillis + 2000;
         }
       }
-      // if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 < 0)
       if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 < (Y_MIN * Y_MAX)) // Avoid mixing ball with the Clock Digits
         swapYdirection();
       else if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 > 256)
