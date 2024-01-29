@@ -19,77 +19,6 @@ void initWebServer()
   server.on("/message", HTTP_GET, handleMessage);
   server.on("/removemessage", HTTP_GET, handleRemove);
 
-  /*
-  # Plugin Management API
-
-  This API provides endpoints to manage plugins through an AsyncWebServer. Two main endpoints are available:
-
-  1. **Get Plugin List:**
-     - Endpoint: `/getpluginlist`
-     - Method: `HTTP_GET`
-     - Description: Retrieves a list of available plugins in JSON format.
-
-  2. **Set Active Plugin:**
-     - Endpoint: `/setplugin`
-     - Method: `HTTP_GET`
-     - Parameters:
-        - `id` (integer): ID of the plugin to set as active.
-     - Description: Sets an active plugin based on the provided ID.
-
-  ## How to Use
-
-  1. **Get Plugin List:**
-     - Endpoint: `/getpluginlist`
-     - Method: `HTTP_GET`
-     - Example:
-       ```javascript
-       server.on("/getpluginlist", HTTP_GET, handleApiGetPluginList);
-       ```
-
-     - Response Format:
-       ```json
-       [
-         {"id": 1, "name": "Plugin A"},
-         {"id": 2, "name": "Plugin B"},
-         // ... other plugins
-       ]
-       ```
-
-  2. **Set Active Plugin:**
-     - Endpoint: `/setplugin`
-     - Method: `HTTP_GET`
-     - Parameters:
-       - `id` (integer): ID of the plugin to set as active.
-     - Example:
-       ```javascript
-       server.on("/setplugin", HTTP_GET, handleApiSetPlugin);
-       ```
-
-     - Response Format:
-       - Success (200):
-         ```
-         Plugin Set
-         ```
-       - Not Found (404):
-         ```
-         Plugin not found
-         ```
-
-  ## Important Notes
-
-  - Ensure that the appropriate routes and handler functions are registered with your `AsyncWebServer`.
-
-  - The `handleApiSetPlugin` endpoint requires the `id` parameter to be passed in the request URL.
-
-  - The response for the "Get Plugin List" endpoint is a JSON array containing objects with `id` and `name` properties for each plugin.
-
-  - Make sure to customize the code and endpoints according to your project requirements.
-
-  ## Dependencies
-
-  - [AsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Ensure that you have this library installed to handle asynchronous HTTP requests on your server.
-
-  */
 
   // Handle API request to retrieve plugin list
   server.on("/getpluginlist", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -139,6 +68,25 @@ void initWebServer()
       request->send(404, "text/plain", "Plugin not found");
     }
   });
+
+    // Handle API request to set the brightness (0..255);
+  server.on("/setbrightness", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+    // Extract the 'value' parameter from the request
+    int value = request->arg("value").toInt();
+
+    if(value < 0 || value > 255){
+      // Send a error response to the client
+      request->send(404, "text/plain", "Invalid Brightness Value");
+      return;
+    }
+
+    Screen.setBrightness(value);
+    Screen.currentRotation
+    request->send(200, "text/plain", "Ok");
+
+  });
+
   server.begin();
 }
 

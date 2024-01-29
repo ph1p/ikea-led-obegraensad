@@ -252,6 +252,46 @@ GET http://your-server/removemessage?id=1
 
 This example will remove the message with the identifier 1 from the LED display.
 
+## Get Plugin List
+
+To retrieve a list of available plugins in JSON format, make an HTTP GET request to the following endpoint:
+
+```
+GET http://your-server/getpluginlist
+```
+
+## Set Active Plugin by ID
+To set an active plugin by ID, make an HTTP GET request to the following endpoint:
+
+```
+http://your-server/setplugin
+```
+### Parameters
+
+- `id` (required): The ID of the plugin to set as active.
+
+### Response
+
+- Success: `200 OK` with the message "Plugin Set".
+- Not Found: `404 Not Found` with the message "Plugin not found".
+
+### Set Brightness
+To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
+
+```
+http://your-server/setbrightness
+```
+
+### Parameters
+
+- `value` (required): The brightness value (0..255).
+
+### Response
+
+- Success: `200 OK` with the message "Ok".
+- Invalid Value: `404 Not Found` with the message "Invalid Brightness Value".
+
+
 # Ideas
 
 - [ ] gifs
