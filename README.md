@@ -276,8 +276,8 @@ http://your-server/setplugin
 
 ### Response
 
-- Success: `200 OK` with the message "Plugin Set".
-- Not Found: `404 Not Found` with the message "Plugin not found".
+- Success: `200 OK` 
+- Not Found: `422 Unprocessable Content`
 
 ## Set Brightness
 To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
@@ -292,8 +292,9 @@ http://your-server/setbrightness
 
 ### Response
 
-- Success: `200 OK` with the message "Ok".
-- Invalid Value: `404 Not Found` with the message "Invalid Brightness Value".
+- Success: `200 OK` 
+- Invalid Value: `422 Unprocessable Content`
+
 
 # Troubleshooting
 
