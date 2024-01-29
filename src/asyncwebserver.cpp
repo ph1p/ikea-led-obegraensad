@@ -82,7 +82,7 @@ void initWebServer()
     }
 
     Screen.setBrightness(value);
-    Screen.currentRotation
+ 
     request->send(200, "text/plain", "Ok");
 
   });
