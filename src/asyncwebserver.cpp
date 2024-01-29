@@ -60,12 +60,12 @@ void initWebServer()
     if (pluginManager.getActivePlugin() && pluginManager.getActivePlugin()->getId() == id)
     {
       // Send a success response to the client
-      request->send(200, "text/plain", "Plugin Set");
+      request->send(200, "application/json", R"({"success": "Plugin Set"})");
     }
     else
     {
       // Send a not found response to the client
-      request->send(404, "text/plain", "Plugin not found");
+      request->send(422, "application/json", R"({"error": "Plugin Not Found"})");
     }
   });
 
@@ -77,13 +77,13 @@ void initWebServer()
 
     if(value < 0 || value > 255){
       // Send a error response to the client
-      request->send(404, "text/plain", "Invalid Brightness Value");
+      request->send(422, "application/json", R"({"error": "Invalid Brightness Value"})");
       return;
     }
 
     Screen.setBrightness(value);
  
-    request->send(200, "text/plain", "Ok");
+    request->send(200, "application/json", R"({"success": "Brightness Set"})");
 
   });
 
