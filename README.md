@@ -279,7 +279,7 @@ http://your-server/setplugin
 - Success: `200 OK` with the message "Plugin Set".
 - Not Found: `404 Not Found` with the message "Plugin not found".
 
-### Set Brightness
+## Set Brightness
 To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
 
 ```
