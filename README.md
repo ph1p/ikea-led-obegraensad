@@ -252,11 +252,12 @@ GET http://your-server/removemessage?id=1
 
 This example will remove the message with the identifier 1 from the LED display.
 
-# Ideas
+# Troubleshooting
 
-- [ ] gifs
-- [ ] animation upload
-- [ ] use `<canvas />`
+## Flickering panel
+
+- Check all soldering points, especially VCC
+- Check if the board gets enough power
 
 ## Credits
 
