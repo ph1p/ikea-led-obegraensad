@@ -295,7 +295,6 @@ http://your-server/setbrightness
 - Success: `200 OK` with the message "Ok".
 - Invalid Value: `404 Not Found` with the message "Invalid Brightness Value".
 
-
 # Troubleshooting
 
 ## Flickering panel
