@@ -7,6 +7,8 @@
   https://github.com/Jerware/GameFrameV2
   LEDSEQ.COM
 *************************************************/
+static const uint8_t Y_MIN = 6;
+
 void PongClockPlugin::drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness)
 {
   for (int i = 0; i < bits.size(); i += bitCount)
@@ -81,7 +83,7 @@ int PongClockPlugin::pong_predict_y(int x, int y, int angle)
 {
   while (x >= X_MAX && x <= 256 - X_MAX)
   {
-    if ((y + cos(degToRad(angle)) * X_MAX) + .5 < 0)
+    if ((y + cos(degToRad(angle)) * X_MAX) + .5 < (X_MAX * Y_MIN)) //Limit gamefield not to mix up wit clock digits
     {
       if (angle > 90 && angle < 270)
       {
@@ -244,7 +246,7 @@ void PongClockPlugin::loop()
             ballAngle = realRandom(315 - 25, 315 + 25);
           pongBallDirection = 1;
           pongPaddleRightStart = pongPaddleRightY;
-          pongPaddleRightTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), Y_MAX, 255 - Y_MAX);
+          pongPaddleRightTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), (Y_MAX * Y_MIN), 255 - Y_MAX); // Restrict paddle from mixin with digits
         }
         else
         {
@@ -267,7 +269,7 @@ void PongClockPlugin::loop()
             ballAngle = realRandom(45 - 25, 45 + 25);
           pongBallDirection = 0;
           pongPaddleLeftStart = pongPaddleLeftY;
-          pongPaddleLeftTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), Y_MAX, 255 - Y_MAX);
+          pongPaddleLeftTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), (Y_MAX * Y_MIN), 255 - Y_MAX); // Restrict paddle from mixin with digits
         }
         else
         {
@@ -275,8 +277,7 @@ void PongClockPlugin::loop()
           pongCelebrationEnd = currentMillis + 2000;
         }
       }
-
-      if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 < 0)
+      if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 < (Y_MIN * Y_MAX)) // Avoid mixing ball with the Clock Digits
         swapYdirection();
       else if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 > 256)
         swapYdirection();
