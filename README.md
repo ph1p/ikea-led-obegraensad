@@ -256,13 +256,34 @@ GET http://your-server/removemessage?id=1
 
 This example will remove the message with the identifier 1 from the LED display.
 
-## Get Plugin List
+## Get Status
 
-To retrieve a list of available plugins in JSON format, make an HTTP GET request to the following endpoint:
+To retrieve current status, data, brighness, orientation:
 
 ```
-GET http://your-server/getpluginlist
+GET http://your-server/getstatus
 ```
+### Response
+
+```
+{
+   "data":[0, 255,...],
+   "status":0,
+   "plugin":15,
+   "rotation":0,
+   "brightness":255,
+   "plugins":[
+      {
+         "id":1,
+         "name":"Draw"
+      },
+...
+      {
+         "id":15,
+         "name":"Ticking Clock"
+      }
+   ]
+}```
 
 ## Set Active Plugin by ID
 To set an active plugin by ID, make an HTTP GET request to the following endpoint:
