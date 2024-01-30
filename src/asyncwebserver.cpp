@@ -19,33 +19,52 @@ void initWebServer()
   server.on("/message", HTTP_GET, handleMessage);
   server.on("/removemessage", HTTP_GET, handleRemove);
 
-
-  // Handle API request to retrieve plugin list
-  server.on("/getpluginlist", HTTP_GET, [](AsyncWebServerRequest *request)
+  // Handle API request to retrieve system status and plugin list
+  server.on("/getstatus", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    // Create a JSON document with sufficient capacity
+    // Create a dynamic JSON document with a maximum size of 6144 bytes
     DynamicJsonDocument jsonDocument(6144);
 
-    // Get a reference to all plugins
-    std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
+    // Check the current status and include additional data if needed
+    if (currentStatus == NONE)
+    {
+      // If the current status is NONE, add the content of the Screen's render buffer to the JSON document
+      for (int j = 0; j < ROWS * COLS; j++)
+      {
+        jsonDocument["data"][j] = Screen.getRenderBuffer()[j];
+      }
+    }
 
-    // Loop through each plugin and add its details to the JSON document
+    // General status information
+    jsonDocument["status"] = currentStatus;
+    jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
+    jsonDocument["rotation"] = Screen.currentRotation;
+    jsonDocument["brightness"] = Screen.getCurrentBrightness();
+
+    // Create a nested array for plugin information
+    JsonArray plugins = jsonDocument.createNestedArray("plugins");
+
+    // Get all available plugins and add their information to the nested array
+    std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
     for (Plugin *plugin : allPlugins)
     {
-      JsonObject object = jsonDocument.createNestedObject();
+      // Create a nested object for each plugin
+      JsonObject object = plugins.createNestedObject();
 
-      // Add plugin details to the JSON object
+      // Add plugin ID and name to the nested object
       object["id"] = plugin->getId();
       object["name"] = plugin->getName();
     }
 
-    // Serialize JSON document to a string
+    // Serialize the JSON document to a string
     String output;
     serializeJson(jsonDocument, output);
 
-    // Send the JSON response to the client
+    // Send the HTTP response with a status code of 200 (OK), content type as JSON, and the serialized JSON data
     request->send(200, "application/json", output);
   });
+
+
 
   // Handle API request to set an active plugin by ID
   server.on("/setplugin", HTTP_GET, [](AsyncWebServerRequest *request)
