@@ -1,5 +1,6 @@
 #include "asyncwebserver.h"
 #include "messages.h"
+#include "webhandler.h"
 
 #ifdef ENABLE_SERVER
 
