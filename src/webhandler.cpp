@@ -4,7 +4,6 @@
 // http://your-server/message?text=Hello&repeat=3&id=42&graph=1,2,3,4
 void handleMessage(AsyncWebServerRequest *request)
 {
-
     // Extracting parameters from the URL
     std::string text = request->arg("text").c_str();
     int repeat = request->arg("repeat").toInt();
