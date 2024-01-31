@@ -172,17 +172,16 @@ void handleSetPlugin(AsyncWebServerRequest *request)
     if (pluginManager.getActivePlugin() && pluginManager.getActivePlugin()->getId() == id)
     {
       // Send a success response to the client
-      request->send(200, "text/plain", "Plugin Set");
+      request->send(200, "text/plain");
     }
     else
     {
       StaticJsonDocument<256> jsonDocument;
       jsonDocument["error"] = true;
-      jsonDocument["errormessage"] = "error setting plugin with id " + id;
+      jsonDocument["errormessage"] = "could not set plugin to id " + to_string(id);
 
       String output;
       serializeJson(jsonDocument, output);
-      // Send a not found response to the client
       request->send(422, "application/json", output);
     }
 }
@@ -194,13 +193,19 @@ void handleSetBrightness(AsyncWebServerRequest *request)
 
     if(value < 0 || value > 255){
       // Send a error response to the client
-      request->send(404, "text/plain", "Invalid Brightness Value");
+      StaticJsonDocument<256> jsonDocument;
+      jsonDocument["error"] = true;
+      jsonDocument["errormessage"] = "invalid brightness value: " + to_string(value) + " - must be between 0 and 255.";
+
+      String output;
+      serializeJson(jsonDocument, output);
+      request->send(422, "application/json", output);
       return;
     }
 
     Screen.setBrightness(value);
  
-    request->send(200, "text/plain", "Ok");
+    request->send(200, "text/plain");
 }
 
 void handleGetData(AsyncWebServerRequest *request)
