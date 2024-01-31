@@ -159,3 +159,101 @@ void handleRemove(AsyncWebServerRequest *request)
     // Send a response to the client
     request->send(200, "text/plain", "Message received");
 }
+
+void handleSetPlugin(AsyncWebServerRequest *request)
+{
+    // Extract the 'id' parameter from the request
+    int id = request->arg("id").toInt();
+
+    // Set the active plugin based on the provided ID
+    pluginManager.setActivePluginById(id);
+
+    // Check if the active plugin has been successfully set
+    if (pluginManager.getActivePlugin() && pluginManager.getActivePlugin()->getId() == id)
+    {
+      // Send a success response to the client
+      request->send(200, "text/plain", "Plugin Set");
+    }
+    else
+    {
+      StaticJsonDocument<256> jsonDocument;
+      jsonDocument["error"] = true;
+      jsonDocument["errormessage"] = "error setting plugin with id " + id;
+
+      String output;
+      serializeJson(jsonDocument, output);
+      // Send a not found response to the client
+      request->send(422, "application/json", output);
+    }
+}
+
+void handleSetBrightness(AsyncWebServerRequest *request)
+{
+        // Extract the 'value' parameter from the request
+    int value = request->arg("value").toInt();
+
+    if(value < 0 || value > 255){
+      // Send a error response to the client
+      request->send(404, "text/plain", "Invalid Brightness Value");
+      return;
+    }
+
+    Screen.setBrightness(value);
+ 
+    request->send(200, "text/plain", "Ok");
+}
+
+void handleGetData(AsyncWebServerRequest *request)
+{
+    try
+    {
+        AsyncResponseStream *response = request->beginResponseStream("application/octet-stream");
+
+        int currentpos_src = 0;
+        for (int row = 0; row < ROWS; row++)
+        {
+            for (int col = 0; col < COLS; col++)
+            {
+                response->print(Screen.getRenderBuffer()[currentpos_src]);
+                currentpos_src += 1;
+            }
+        }
+
+        // Send the raw data response to the client
+        request->send(response);
+    }
+    catch (const std::exception& e) 
+    {
+        request->send(500, "text/plain", e.what());
+    }
+}
+
+void handleGetStatus(AsyncWebServerRequest *request)
+{
+    DynamicJsonDocument jsonDocument(6144);
+    jsonDocument["status"] = currentStatus;
+    jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
+    jsonDocument["event"] = "info";
+    jsonDocument["rotation"] = Screen.currentRotation;
+    jsonDocument["brightness"] = Screen.getCurrentBrightness();
+    jsonDocument["rows"] = ROWS;
+    jsonDocument["cols"] = COLS;
+
+    std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
+
+    // Loop through each plugin and add its details to the JSON document
+    for (Plugin *plugin : allPlugins)
+    {
+      JsonObject object = jsonDocument.createNestedObject();
+
+      // Add plugin details to the JSON object
+      object["id"] = plugin->getId();
+      object["name"] = plugin->getName();
+    }
+
+    String output;
+    serializeJson(jsonDocument, output);
+
+    // Send the JSON response to the client
+    request->send(200, "application/json", output);
+}
