@@ -238,18 +238,31 @@ void handleGetStatus(AsyncWebServerRequest *request)
     DynamicJsonDocument jsonDocument(6144);
     jsonDocument["status"] = currentStatus;
     jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
-    jsonDocument["event"] = "info";
     jsonDocument["rotation"] = Screen.currentRotation;
     jsonDocument["brightness"] = Screen.getCurrentBrightness();
+
+
+    String output;
+    serializeJson(jsonDocument, output);
+
+    // Send the JSON response to the client
+    request->send(200, "application/json", output);
+}
+
+void handleGetMetadata(AsyncWebServerRequest *request)
+{
+    DynamicJsonDocument jsonDocument(6144);
     jsonDocument["rows"] = ROWS;
     jsonDocument["cols"] = COLS;
+    
+    JsonArray plugins = jsonDocument.createNestedArray("plugins");
 
     std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
 
     // Loop through each plugin and add its details to the JSON document
     for (Plugin *plugin : allPlugins)
     {
-      JsonObject object = jsonDocument.createNestedObject();
+      JsonObject object = plugins.createNestedObject();
 
       // Add plugin details to the JSON object
       object["id"] = plugin->getId();

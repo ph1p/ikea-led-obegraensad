@@ -22,6 +22,9 @@ void initWebServer()
   // Handle API request to get status
   server.on("/getStatus", HTTP_GET, handleGetStatus);
 
+  // Handle API request to get status
+  server.on("/getMetadata", HTTP_GET, handleGetMetadata);
+
   // Handle API request to set an active plugin by ID
   server.on("/setplugin", HTTP_PATCH, handleSetPlugin);
 
