@@ -160,10 +160,11 @@ export const App: Component = () => {
               <input
                 type="range"
                 min="0"
-                max="255"
+                max="65025"
                 value={store?.brightness()}
                 onInput={(e) => {
-                  const brightness = parseInt(e.currentTarget.value);
+                  //brightness by square root 65025; min is 0 and max is 255
+                  const brightness = Math.sqrt(parseInt(e.currentTarget.value));
                   store?.setBrightness(brightness);
                   sendBrightness(brightness);
                 }}
