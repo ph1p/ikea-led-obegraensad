@@ -8,10 +8,10 @@ uint8_t GameOfLifePlugin::countNeighbours(int row, int col)
   {
     for (j = col - 1; j <= col + 1; j++)
     {
-      count += this->buffer[i * 16 + j];
+      count += this->buffer[i * COLS + j];
     }
   }
-  count -= this->buffer[row * 16 + col];
+  count -= this->buffer[row * COLS + col];
   return count;
 };
 
@@ -22,13 +22,13 @@ uint8_t GameOfLifePlugin::updateCell(int row, int col)
   {
     return 0;
   }
-  else if (this->buffer[row * 16 + col] == 0 && total == 3)
+  else if (this->buffer[row * COLS + col] == 0 && total == 3)
   {
     return 1;
   }
   else
   {
-    return this->buffer[row * 16 + col];
+    return this->buffer[row * COLS + col];
   }
 };
 
@@ -51,7 +51,7 @@ void GameOfLifePlugin::next()
   {
     for (int j = 0; j < COLS; j++)
     {
-      this->buffer[i * 16 + j] = this->updateCell(i, j);
+      this->buffer[i * COLS + j] = this->updateCell(i, j);
     }
   }
 }
@@ -66,7 +66,7 @@ void GameOfLifePlugin::loop()
   {
     for (int j = 0; j < COLS; j++)
     {
-      Screen.setPixelAtIndex(i * 16 + j, this->buffer[i * 16 + j]);
+      Screen.setPixelAtIndex(i * COLS + j, this->buffer[i * COLS + j]);
     }
   }
   delay(150);

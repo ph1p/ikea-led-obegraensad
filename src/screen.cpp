@@ -117,9 +117,9 @@ void Screen_::setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness)
 
 void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
 {
-  if (x >= 0 && y >= 0 && x < 16 && y < 16)
+  if (x >= 0 && y >= 0 && x < COLS && y < ROWS)
   {
-    this->renderBuffer_[y * 16 + x] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
+    this->renderBuffer_[y * COLS + x] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
   }
 }
 
