@@ -157,7 +157,9 @@ void ICACHE_RAM_ATTR Screen_::_render()
 {
   const auto buf = this->getRotatedRenderBuffer();
 
-  static unsigned char bits[ROWS * COLS / 8] = {0};
+  // SPI data needs to be 32-bit aligned, round up before divide
+  static unsigned long spi_bits[(ROWS * COLS + 8 * sizeof(unsigned long) - 1) / 8 / sizeof(unsigned long)] = {0};
+  unsigned char *bits = (unsigned char *)spi_bits;
   memset(bits, 0, ROWS * COLS / 8);
 
   static unsigned char counter = 0;
@@ -170,7 +172,7 @@ void ICACHE_RAM_ATTR Screen_::_render()
   counter += (256 / GRAY_LEVELS);
 
   digitalWrite(PIN_LATCH, LOW);
-  SPI.writeBytes(bits, sizeof(bits));
+  SPI.writeBytes(bits, sizeof(spi_bits));
   digitalWrite(PIN_LATCH, HIGH);
 #ifdef ESP8266
   timer1_write(100);
