@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <vector>
 #include "constants.h"
+#include <string>
 
 extern std::vector<int> letterU;
 extern std::vector<int> letterR;
