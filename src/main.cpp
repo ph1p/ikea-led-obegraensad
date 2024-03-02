@@ -181,6 +181,7 @@ void setup()
 #endif
 
   Screen.setup();
+  Screen.test();
 
   pluginManager.addPlugin(new DrawPlugin());
   pluginManager.addPlugin(new BreakoutPlugin());
