@@ -256,6 +256,60 @@ GET http://your-server/removemessage?id=1
 
 This example will remove the message with the identifier 1 from the LED display.
 
+## Get Status
+
+To retrieve the current status of the server.
+
+```
+GET http://your-server/getStatus
+```
+
+## Get Metadata
+To get the (fixed) metadata, like number of rows and columns and a list of available plugins.
+
+```
+GET http://your-server/getMetadata
+```
+
+## Set Active Plugin by ID
+To set an active plugin by ID, make an HTTP PATCH request to the following endpoint:
+
+```
+PATCH http://your-server/setplugin
+```
+### Parameters
+
+- `id` (required): The ID of the plugin to set as active.
+
+### Response
+
+- Success: `200 OK` with the message "Plugin Set".
+- Not Found: `404 Not Found` with the message "Plugin not found".
+
+## Set Brightness
+To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
+
+```
+PATCH http://your-server/setbrightness
+```
+
+### Parameters
+
+- `value` (required): The brightness value (0..255).
+
+### Response
+
+- Success: `200 OK` with the message "Ok".
+- Invalid Value: `404 Not Found` with the message "Invalid Brightness Value".
+
+## Get current display data
+To get the current displayed data as an byte-array, each byte representing the brightness value.
+Be aware that the global brightness value gets applied AFTER these values, so if you set the global brightness to 16, you will still get values of 255 this way.
+
+```
+GET http://your-server/getData
+```
+
 # Troubleshooting
 
 ## Flickering panel
