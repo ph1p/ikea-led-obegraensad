@@ -23,6 +23,7 @@
 #include "plugins/SnakePlugin.h"
 #include "plugins/StarsPlugin.h"
 #include "plugins/PongClockPlugin.h"
+#include "plugins/DDPPlugin.h"
 
 #ifdef ENABLE_SERVER
 #include "plugins/AnimationPlugin.h"
@@ -199,6 +200,7 @@ void setup()
   pluginManager.addPlugin(new WeatherPlugin());
   pluginManager.addPlugin(new AnimationPlugin());
   pluginManager.addPlugin(new TickingClockPlugin());
+  pluginManager.addPlugin(new DDPPlugin());
 #endif
 
   pluginManager.init();
