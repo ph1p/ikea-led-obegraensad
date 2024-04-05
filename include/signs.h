@@ -16,8 +16,8 @@ extern std::vector<std::vector<int>> bigNumbers;
 extern std::vector<std::vector<int>> lineAnimation;
 extern std::vector<std::vector<int>> weatherIcons;
 
-
-struct font {
+struct font
+{
     std::string name;
     int sizeX;
     int sizeY;

@@ -330,7 +330,7 @@ void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness, ui
         { // so are we somewhere on screen with the char?
           // ensure that we have a defined char, lets take the first
           uint8_t currentChar = (((text[strPos] - currentFont.offset) < currentFont.data.size()) && (text[strPos] >= currentFont.offset)) ? text[strPos] : currentFont.offset;
-          // draw it
+
           Screen.drawCharacter(xPos, 4, Screen.readBytes(currentFont.data[currentChar - currentFont.offset]), 8);
         }
       }
@@ -344,7 +344,6 @@ void Screen_::scrollGraph(std::vector<int> graph, int miny, int maxy, int delayT
 {
   if (graph.size() <= 0)
   {
-    // Handle empty graph
     return;
   }
 
@@ -352,7 +351,7 @@ void Screen_::scrollGraph(std::vector<int> graph, int miny, int maxy, int delayT
   {
     this->clear();
 
-    int y1 = -999; // previous point.
+    int y1 = -999;
 
     for (int x = 0; x < ROWS; x++)
     {
@@ -367,7 +366,7 @@ void Screen_::scrollGraph(std::vector<int> graph, int miny, int maxy, int delayT
         {
           this->drawLine(x - 1, y1, x, y2, 1, brightness);
         }
-        else // first pixel on graph/on screen
+        else
         {
           this->setPixel(x, y2, 1, brightness);
         }

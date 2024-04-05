@@ -3,13 +3,15 @@
 void DDPPlugin::setup()
 {
     udp = new AsyncUDP();
-    if (udp->listen(4048)) {
+    if (udp->listen(4048))
+    {
         Serial.print("DDP server at IP: ");
         Serial.print(WiFi.localIP());
         Serial.println(" port: 4048");
 
         // Network runs on Core 0, renderBuffer writes are thus concurrent with onScreenTimer's SPI writing.
-        udp->onPacket([](AsyncUDPPacket packet) {
+        udp->onPacket([](AsyncUDPPacket packet)
+                      {
             // We could check the protocol but there is no real harm if not, display might look funny that's all.
 /*
             // Check header flags
@@ -67,8 +69,7 @@ void DDPPlugin::setup()
                     // uint8_t brightness = std::max(data[i * 3], std::max(data[i * 3 + 1], data[i * 3 + 2])); // maximum brightness
                     Screen.setPixelAtIndex(i, brightness > 4, brightness);
                 }
-            }
-        });
+            } });
     }
 }
 

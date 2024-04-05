@@ -43,7 +43,7 @@ void handleMessage(AsyncWebServerRequest *request)
 }
 
 // http://your-server/removemessage?id=42
-void handleRemove(AsyncWebServerRequest *request)
+void handleMessageRemove(AsyncWebServerRequest *request)
 {
 
     int id = request->arg("id").toInt();
@@ -57,49 +57,43 @@ void handleRemove(AsyncWebServerRequest *request)
 
 void handleSetPlugin(AsyncWebServerRequest *request)
 {
-    // Extract the 'id' parameter from the request
     int id = request->arg("id").toInt();
-
-    // Set the active plugin based on the provided ID
     pluginManager.setActivePluginById(id);
 
-    // Check if the active plugin has been successfully set
     if (pluginManager.getActivePlugin() && pluginManager.getActivePlugin()->getId() == id)
     {
-      // Send a success response to the client
-      request->send(200, "text/plain");
+        request->send(200, "text/plain");
     }
     else
     {
-      StaticJsonDocument<256> jsonDocument;
-      jsonDocument["error"] = true;
-      jsonDocument["errormessage"] = "could not set plugin to id " + std::to_string(id);
+        StaticJsonDocument<256> jsonDocument;
+        jsonDocument["error"] = true;
+        jsonDocument["errormessage"] = "could not set plugin to id " + std::to_string(id);
 
-      String output;
-      serializeJson(jsonDocument, output);
-      request->send(422, "application/json", output);
+        String output;
+        serializeJson(jsonDocument, output);
+        request->send(422, "application/json", output);
     }
 }
 
 void handleSetBrightness(AsyncWebServerRequest *request)
 {
-        // Extract the 'value' parameter from the request
     int value = request->arg("value").toInt();
 
-    if(value < 0 || value > 255){
-      // Send a error response to the client
-      StaticJsonDocument<256> jsonDocument;
-      jsonDocument["error"] = true;
-      jsonDocument["errormessage"] = "invalid brightness value: " + std::to_string(value) + " - must be between 0 and 255.";
+    if (value < 0 || value > 255)
+    {
+        StaticJsonDocument<256> jsonDocument;
+        jsonDocument["error"] = true;
+        jsonDocument["errormessage"] = "invalid brightness value: " + std::to_string(value) + " - must be between 0 and 255.";
 
-      String output;
-      serializeJson(jsonDocument, output);
-      request->send(422, "application/json", output);
-      return;
+        String output;
+        serializeJson(jsonDocument, output);
+        request->send(422, "application/json", output);
+        return;
     }
 
     Screen.setBrightness(value);
- 
+
     request->send(200, "text/plain");
 }
 
@@ -119,10 +113,9 @@ void handleGetData(AsyncWebServerRequest *request)
             }
         }
 
-        // Send the raw data response to the client
         request->send(response);
     }
-    catch (const std::exception& e) 
+    catch (const std::exception &e)
     {
         request->send(500, "text/plain", e.what());
     }
@@ -136,7 +129,6 @@ void handleGetStatus(AsyncWebServerRequest *request)
     jsonDocument["rotation"] = Screen.currentRotation;
     jsonDocument["brightness"] = Screen.getCurrentBrightness();
 
-
     String output;
     serializeJson(jsonDocument, output);
 
@@ -149,7 +141,7 @@ void handleGetMetadata(AsyncWebServerRequest *request)
     DynamicJsonDocument jsonDocument(6144);
     jsonDocument["rows"] = ROWS;
     jsonDocument["cols"] = COLS;
-    
+
     JsonArray plugins = jsonDocument.createNestedArray("plugins");
 
     std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
@@ -157,11 +149,11 @@ void handleGetMetadata(AsyncWebServerRequest *request)
     // Loop through each plugin and add its details to the JSON document
     for (Plugin *plugin : allPlugins)
     {
-      JsonObject object = plugins.createNestedObject();
+        JsonObject object = plugins.createNestedObject();
 
-      // Add plugin details to the JSON object
-      object["id"] = plugin->getId();
-      object["name"] = plugin->getName();
+        // Add plugin details to the JSON object
+        object["id"] = plugin->getId();
+        object["name"] = plugin->getName();
     }
 
     String output;

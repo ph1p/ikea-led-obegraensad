@@ -54,11 +54,13 @@ WiFiManager wifiManager;
 unsigned long lastConnectionAttempt = 0;
 const unsigned long connectionInterval = 10000;
 
-void connectToWiFi() {
+void connectToWiFi()
+{
   // if a WiFi setup AP was started, reboot is required to clear routes
   bool wifiWebServerStarted = false;
   wifiManager.setWebServerCallback(
-      [&wifiWebServerStarted]() { wifiWebServerStarted = true; });
+      [&wifiWebServerStarted]()
+      { wifiWebServerStarted = true; });
 
   wifiManager.setHostname(WIFI_HOSTNAME);
 
@@ -80,16 +82,20 @@ void connectToWiFi() {
 
   wifiManager.autoConnect(WIFI_MANAGER_SSID);
 
-  #ifdef ESP32
-  if (MDNS.begin(WIFI_HOSTNAME)) {
+#ifdef ESP32
+  if (MDNS.begin(WIFI_HOSTNAME))
+  {
     MDNS.addService("http", "tcp", 80);
     MDNS.setInstanceName(WIFI_HOSTNAME);
-  } else {
+  }
+  else
+  {
     Serial.println("Could not start mDNS!");
   }
-  #endif
+#endif
 
-  if (wifiWebServerStarted) {
+  if (wifiWebServerStarted)
+  {
     // Reboot required, otherwise wifiManager server interferes with our server
     Serial.println("Done running WiFi Manager webserver - rebooting");
     ESP.restart();
@@ -98,7 +104,8 @@ void connectToWiFi() {
   lastConnectionAttempt = millis();
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
 
   pinMode(PIN_LATCH, OUTPUT);

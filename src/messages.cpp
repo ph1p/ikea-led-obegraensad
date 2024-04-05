@@ -22,7 +22,6 @@ void Messages_::remove(int id)
     auto it = std::remove_if(messages.begin(), messages.end(), [id](const Message &msg)
                              { return msg.id == id; });
 
-    // Erase the messages marked for removal
     messages.erase(it, messages.end());
 }
 
@@ -59,14 +58,11 @@ void Messages_::scroll()
         }
     }
 
-    // restore old screen
     Screen.loadFromStorage();
 }
 
 void Messages_::scrollMessageEveryMinute()
 {
-
-    // Structure to hold time information
     struct tm timeinfo;
 
     // Check if the local time can be obtained
@@ -75,10 +71,8 @@ void Messages_::scrollMessageEveryMinute()
         // Check if the current minute is different from the previous minute
         if (timeinfo.tm_min != previousMinute)
         {
-            // Call the scroll function to display messages
             scroll();
 
-            // Update the previous minute to the current minute
             previousMinute = timeinfo.tm_min;
         }
 

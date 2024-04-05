@@ -25,7 +25,6 @@ private:
   int previousSecond;
   int indicatorPixel;
 
-
 public:
   static Messages_ &getInstance();
 

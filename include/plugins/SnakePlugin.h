@@ -13,7 +13,7 @@ private:
   unsigned char gameState;
   unsigned char lastDirection = 0; // 0=unset 1=up 2=right 3=down 4 =left
 
-  std::vector<uint> position = {240,241,242};
+  std::vector<uint> position = {240, 241, 242};
 
   uint8_t dot;
 

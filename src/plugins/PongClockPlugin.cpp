@@ -15,9 +15,10 @@ void PongClockPlugin::drawCharacter(int x, int y, std::vector<int> bits, int bit
   {
     for (int j = 0; j < bitCount; j++)
     {
-      int xPos = (x+j-1);
+      int xPos = (x + j - 1);
       int yPos = y + (i / bitCount);
-      if (xPos >= 0 && xPos < X_MAX && yPos >= 0 && yPos < Y_MAX) {
+      if (xPos >= 0 && xPos < X_MAX && yPos >= 0 && yPos < Y_MAX)
+      {
         Screen.setPixel(xPos, yPos, bits[i + j], brightness);
       }
     }
@@ -83,7 +84,7 @@ int PongClockPlugin::pong_predict_y(int x, int y, int angle)
 {
   while (x >= X_MAX && x <= 256 - X_MAX)
   {
-    if ((y + cos(degToRad(angle)) * X_MAX) + .5 < (X_MAX * Y_MIN)) //Limit gamefield not to mix up wit clock digits
+    if ((y + cos(degToRad(angle)) * X_MAX) + .5 < (X_MAX * Y_MIN)) // Limit gamefield not to mix up wit clock digits
     {
       if (angle > 90 && angle < 270)
       {
@@ -301,8 +302,9 @@ void PongClockPlugin::loop()
 
   // Blink the ball
   if (pongCelebrate)
-  { 
-    if (currentMillis > nextUpdateMillis) {
+  {
+    if (currentMillis > nextUpdateMillis)
+    {
       if (ballBrightness == 255)
         ballBrightness = 0;
       else

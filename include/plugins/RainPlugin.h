@@ -2,7 +2,7 @@
 
 #include "PluginManager.h"
 
-class RainPlugin: public Plugin
+class RainPlugin : public Plugin
 {
 private:
   static const uint8_t NUM_DROPS = 10;

@@ -215,7 +215,7 @@ The LED Display service provides a simple yet powerful external interface that a
 To display a message on the LED display, users can make an HTTP GET request to the following endpoint:
 
 ```
-http://your-server/message
+http://your-server/api/message
 ```
 
 ### Parameters
@@ -231,7 +231,7 @@ http://your-server/message
 #### Example
 
 ```
-GET http://your-server/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1&delay=60
+GET http://your-server/api/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1&delay=60
 ```
 
 This example will display the message "Hello" on the LED display with a corresponding graph, repeat it three times, and assign it the identifier 1, waits 60ms while scrolling.
@@ -241,7 +241,7 @@ This example will display the message "Hello" on the LED display with a correspo
 To remove a message from the display, users can make an HTTP GET request to the following endpoint:
 
 ```
-http://your-server/removemessage
+http://your-server/api/removemessage
 ```
 
 ### Parameters
@@ -251,7 +251,7 @@ http://your-server/removemessage
 #### Example
 
 ```
-GET http://your-server/removemessage?id=1
+GET http://your-server/api/removemessage?id=1
 ```
 
 This example will remove the message with the identifier 1 from the LED display.
@@ -261,21 +261,21 @@ This example will remove the message with the identifier 1 from the LED display.
 To retrieve the current status of the server.
 
 ```
-GET http://your-server/getStatus
+GET http://your-server/api/status
 ```
 
 ## Get Metadata
 To get the (fixed) metadata, like number of rows and columns and a list of available plugins.
 
 ```
-GET http://your-server/getMetadata
+GET http://your-server/api/metadata
 ```
 
 ## Set Active Plugin by ID
 To set an active plugin by ID, make an HTTP PATCH request to the following endpoint:
 
 ```
-PATCH http://your-server/setplugin
+PATCH http://your-server/api/plugin
 ```
 ### Parameters
 
@@ -290,7 +290,7 @@ PATCH http://your-server/setplugin
 To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
 
 ```
-PATCH http://your-server/setbrightness
+PATCH http://your-server/api/brightness
 ```
 
 ### Parameters
@@ -307,7 +307,7 @@ To get the current displayed data as an byte-array, each byte representing the b
 Be aware that the global brightness value gets applied AFTER these values, so if you set the global brightness to 16, you will still get values of 255 this way.
 
 ```
-GET http://your-server/getData
+GET http://your-server/api/data
 ```
 
 # Troubleshooting
