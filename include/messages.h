@@ -41,6 +41,3 @@ public:
 };
 
 extern Messages_ &Messages;
-
-void handleMessage(AsyncWebServerRequest *request);
-void handleRemove(AsyncWebServerRequest *request);
