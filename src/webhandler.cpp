@@ -4,7 +4,6 @@
 // http://your-server/message?text=Hello&repeat=3&id=42&graph=1,2,3,4
 void handleMessage(AsyncWebServerRequest *request)
 {
-    // Extracting parameters from the URL
     std::string text = request->arg("text").c_str();
     int repeat = request->arg("repeat").toInt();
     int id = request->arg("id").toInt();
@@ -12,13 +11,15 @@ void handleMessage(AsyncWebServerRequest *request)
     int miny = request->arg("miny").toInt();
     int maxy = request->arg("maxy").toInt();
 
-    // if no delay has been passed, use 50 ms
     if (delay <= 0)
+    {
         delay = 50;
+    }
 
-    // default maxy to 15
     if (maxy == 0)
+    {
         maxy = 15;
+    }
 
     // Extracting the 'graph' parameter as a comma-separated list of integers
     std::string graphParam = request->arg("graph").c_str();
@@ -35,23 +36,16 @@ void handleMessage(AsyncWebServerRequest *request)
     // Uncomment this to thee what charcode comes in
     //  for(int i = 0;i<text.size();i++)Screen.scrollText(std::to_string(text[i]));
 
-    // Call the add function with the extracted parameters
     Messages.add(text, repeat, id, delay, graph, miny, maxy);
 
-    // Send a response to the client
     request->send(200, "text/plain", "Message received");
 }
 
 // http://your-server/removemessage?id=42
 void handleMessageRemove(AsyncWebServerRequest *request)
 {
-
     int id = request->arg("id").toInt();
-
-    // Call the add function with the extracted parameters
     Messages.remove(id);
-
-    // Send a response to the client
     request->send(200, "text/plain", "Message received");
 }
 
@@ -151,7 +145,6 @@ void handleGetMetadata(AsyncWebServerRequest *request)
     {
         JsonObject object = plugins.createNestedObject();
 
-        // Add plugin details to the JSON object
         object["id"] = plugin->getId();
         object["name"] = plugin->getName();
     }
@@ -159,6 +152,5 @@ void handleGetMetadata(AsyncWebServerRequest *request)
     String output;
     serializeJson(jsonDocument, output);
 
-    // Send the JSON response to the client
     request->send(200, "application/json", output);
 }

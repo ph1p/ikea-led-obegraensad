@@ -32,6 +32,8 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Rain
   - Animation with the "Creator"
   - Firework
+  - DDP
+  - Pong Clock
 
 # Control the board
 
@@ -206,6 +208,16 @@ void MyPlugin::websocketHook(DynamicJsonDocument &request) {
 pluginManager.addPlugin(new MyPlugin());
 ```
 
+# DDP (Distributed Display Protocol)
+
+You can set the panel to DDP using the button or via the web interface.
+This Protocol uses **UDP** and listens on Port **4048**.
+
+## Helpful Links
+
+- https://kno.wled.ge/interfaces/ddp/
+- http://www.3waylabs.com/ddp/
+
 # External Call
 
 The LED Display service provides a simple yet powerful external interface that allows users to display messages and graphs on a 16x16 LED display. This functionality can be accessed through HTTP calls to the service endpoint.
@@ -265,6 +277,7 @@ GET http://your-server/api/status
 ```
 
 ## Get Metadata
+
 To get the (fixed) metadata, like number of rows and columns and a list of available plugins.
 
 ```
@@ -272,11 +285,13 @@ GET http://your-server/api/metadata
 ```
 
 ## Set Active Plugin by ID
+
 To set an active plugin by ID, make an HTTP PATCH request to the following endpoint:
 
 ```
 PATCH http://your-server/api/plugin
 ```
+
 ### Parameters
 
 - `id` (required): The ID of the plugin to set as active.
@@ -287,6 +302,7 @@ PATCH http://your-server/api/plugin
 - Not Found: `404 Not Found` with the message "Plugin not found".
 
 ## Set Brightness
+
 To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
 
 ```
@@ -303,6 +319,7 @@ PATCH http://your-server/api/brightness
 - Invalid Value: `404 Not Found` with the message "Invalid Brightness Value".
 
 ## Get current display data
+
 To get the current displayed data as an byte-array, each byte representing the brightness value.
 Be aware that the global brightness value gets applied AFTER these values, so if you set the global brightness to 16, you will still get values of 255 this way.
 
@@ -316,7 +333,3 @@ GET http://your-server/api/data
 
 - Check all soldering points, especially VCC
 - Check if the board gets enough power
-
-## Credits
-
-Breakout game https://elektro.turanis.de/html/prj104/index.html
