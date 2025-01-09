@@ -76,8 +76,6 @@ export const chunkArray = (input: number[], size: number) =>
   }, []);
 
 export const matrixToHexArray = (matrix: number[]) =>
-  chunkArray(matrix, 8).map(
-    (chunk) => parseInt(parseInt(chunk.join(''), 2).toString(), 10)
-    // (chunk) => parseInt(chunk.join(''), 2).toString(16)
-    //.padStart(4, '0x')
+  chunkArray(matrix, 8).map((chunk) =>
+    parseInt(parseInt(chunk.join(''), 2).toString(), 10)
   );

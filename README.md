@@ -30,14 +30,14 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Big Clock
   - Weather
   - Rain
-  - Animation with the "Creator"
+  - Animation with the "Animation Creator in Web UI"
   - Firework
   - DDP
   - Pong Clock
 
 # Control the board
 
-https://user-images.githubusercontent.com/15351728/202763445-3275e4e9-d976-4e35-b0cf-9550b8561b4c.mp4
+https://github.com/user-attachments/assets/25e34d4c-5178-4dbe-bf53-cdce52fa3e27
 
 You can control the lamp with a supplied web GUI.
 You can get the IP via serial output or you can search it in your router settings.
@@ -137,10 +137,10 @@ Thanks to [RBEGamer](https://github.com/RBEGamer) who is showing in this [issue]
 
 - `frontend` contains the web code.
 
-  - First run `npm i`
+  - First run `pnpm install`
   - Set your device IP inside the `.env` file
-  - Start the server with `npm run dev`
-  - Build it with `npm run build`. This command creates the `webgui.cpp` for you.
+  - Start the server with `pnpm dev`
+  - Build it with `pnpm build`. This command creates the `webgui.cpp` for you.
 
 - Build frontend using `Docker`
   - From the root of the repo, run `docker compose run node`

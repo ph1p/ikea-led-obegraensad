@@ -1,6 +1,7 @@
 .pio
 .vscode
 .DS_Store
+.pnpm-store
 secrets.h
 
 # Logs

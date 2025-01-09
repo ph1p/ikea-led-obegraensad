@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --multiplier: 1.5;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #app {
+    @apply h-full w-full m-0 p-0;
+  }
+
+  body {
+    @apply font-sans text-base font-normal bg-[#9b8d82];
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  select {
+    @apply px-2.5 py-2.5 text-base;
+  }
+}
+
+@keyframes toastSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-toast-slide-up {
+  animation: toastSlideUp 0.2s ease-out forwards;
+}

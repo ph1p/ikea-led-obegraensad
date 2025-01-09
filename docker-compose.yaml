@@ -1,13 +1,14 @@
-version: '2.0'
-
 services:
   node:
     image: "node:alpine"
-    user: "node"
     volumes:
       - ./:/home/node/app
     working_dir: /home/node/app/frontend
     stdin_open: true
     tty: true
     command: >
-      ash -c "npm i && npm run build"
+      sh -c "
+      apk add --no-cache --no-progress libc6-compat &&
+      corepack enable &&
+      corepack prepare pnpm@latest --activate &&
+      pnpm install --frozen-lockfile && pnpm run build"

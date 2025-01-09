@@ -10,19 +10,26 @@
   "license": "MIT",
   "devDependencies": {
     "@gfx/zopfli": "^1.0.15",
+    "@types/node": "^22.10.5",
     "@types/offscreencanvas": "^2019.7.3",
-    "@vanilla-extract/css": "^1.14.2",
-    "@vanilla-extract/vite-plugin": "^4.0.7",
-    "typescript": "^5.4.4",
-    "vite": "^5.2.8",
-    "vite-plugin-singlefile": "^2.0.1",
-    "vite-plugin-solid": "^2.10.2"
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vite-plugin-singlefile": "^2.1.0",
+    "vite-plugin-solid": "^2.11.0"
   },
   "dependencies": {
+    "@radix-ui/react-separator": "^1.1.1",
+    "@radix-ui/react-slot": "^1.1.1",
     "@solid-primitives/event-listener": "^2.3.3",
     "@solid-primitives/intersection-observer": "^2.1.6",
-    "@solid-primitives/timer": "^1.3.9",
+    "@solid-primitives/timer": "^1.3.10",
     "@solid-primitives/websocket": "^1.2.2",
-    "solid-js": "^1.8.16"
-  }
+    "solid-js": "^1.9.4",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
 }
