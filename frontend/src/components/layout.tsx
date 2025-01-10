@@ -16,19 +16,25 @@ export const Layout: Component<{
   ref?: any;
 }> = (props) => {
   return (
-    <div class="h-full grid grid-cols-[320px_1fr]">
-      <Show when={!props.sidebarContent} fallback={props.sidebarContent}>
-        <Sidebar
-          store={props.store!}
-          onRotate={props.onRotate!}
-          onLoadImage={props.onLoadImage!}
-          onClear={props.onClear!}
-          onPersist={props.onPersist!}
-          onLoad={props.onLoad!}
-          onPluginChange={props.onPluginChange!}
-          onBrightnessChange={props.onBrightnessChange!}
-          onPersistPlugin={props.onPersistPlugin!}
-        />
+    <div
+      class={`h-full ${
+        props.store?.connectionState() === 1 ? 'grid grid-cols-[320px_1fr]' : ''
+      }`}
+    >
+      <Show when={props.store?.connectionState() === 1}>
+        <Show when={!props.sidebarContent} fallback={props.sidebarContent}>
+          <Sidebar
+            store={props.store!}
+            onRotate={props.onRotate!}
+            onLoadImage={props.onLoadImage!}
+            onClear={props.onClear!}
+            onPersist={props.onPersist!}
+            onLoad={props.onLoad!}
+            onPluginChange={props.onPluginChange!}
+            onBrightnessChange={props.onBrightnessChange!}
+            onPersistPlugin={props.onPersistPlugin!}
+          />
+        </Show>
       </Show>
       <main class="h-full overflow-auto" ref={props.ref}>
         {props.content}

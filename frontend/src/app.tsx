@@ -3,14 +3,7 @@ import { Layout } from "./components/layout";
 import { LedMatrix } from "./components/led-matrix";
 import { loadImageAndGetDataArray, rotateArray } from "./helpers";
 import { useStore } from "./store";
-
-const ScreenInfo: Component<ParentProps> = (props) => (
-  <div class="grid p-8 h-full justify-center items-center">
-    <div class="text-center text-white h-full flex justify-center items-center">
-      <div>{props.children}</div>
-    </div>
-  </div>
-);
+import { ScreenInfo } from "./components/screen-info";
 
 export const App: Component = () => {
   const store = useStore();
@@ -138,7 +131,7 @@ export const App: Component = () => {
         <Layout
           content={
             <ScreenInfo>
-              <h2 class="text-4xl">{store?.connectionStatus}</h2>
+              <h2 class="text-4xl">{store?.connectionStatus}...</h2>
             </ScreenInfo>
           }
           sidebarContent={

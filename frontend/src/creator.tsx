@@ -6,6 +6,7 @@ import { LedMatrix } from './components/led-matrix';
 import { Tooltip } from './components/tooltip';
 import { chunkArray, matrixToHexArray } from './helpers';
 import { useStore } from './store';
+import { ScreenInfo } from './components/screen-info';
 
 export const Creator: Component = () => {
   const store = useStore();
@@ -234,11 +235,9 @@ if (size > 0)
       fallback={
         <Layout
           content={
-            <div class="h-full relative">
-              <div class="text-center text-2xl text-white h-full flex justify-center items-center animate-fade-in">
-                {store?.connectionStatus}...
-              </div>
-            </div>
+            <ScreenInfo>
+              <h2 class="text-4xl">{store?.connectionStatus}...</h2>
+            </ScreenInfo>
           }
           sidebarContent={
             <div class="bg-white p-6">
@@ -251,14 +250,15 @@ if (size > 0)
       }
     >
       <Layout
+        store={store}
         content={
           <div class="h-full relative">
             {screenSignals().length ? (
               renderFrames()
             ) : (
-              <div class="text-center text-2xl text-white h-full flex justify-center items-center animate-fade-in">
-                Create something awesome! 🙌
-              </div>
+              <ScreenInfo>
+                <h2 class="text-4xl">Create something awesome! 🙌.</h2>
+              </ScreenInfo>
             )}
           </div>
         }
