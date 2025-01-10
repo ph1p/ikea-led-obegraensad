@@ -213,6 +213,15 @@ pluginManager.addPlugin(new MyPlugin());
 You can set the panel to DDP using the button or via the web interface.
 This Protocol uses **UDP** and listens on Port **4048**.
 
+**Info**: The DDP Header is 10 Bytes!
+
+In the repository you will find an `ddp.py` as an example.
+
+Change the plugin to `DDP` and run following command with your IP:
+```bash
+./ddp.py --ip x.x.x.x --pixel 2 2 200 --pixel 0 0 255
+```
+
 ## Helpful Links
 
 - https://kno.wled.ge/interfaces/ddp/
@@ -268,20 +277,12 @@ GET http://your-server/api/removemessage?id=1
 
 This example will remove the message with the identifier 1 from the LED display.
 
-## Get Status
+## Get Information
 
-To retrieve the current status of the server.
-
-```
-GET http://your-server/api/status
-```
-
-## Get Metadata
-
-To get the (fixed) metadata, like number of rows and columns and a list of available plugins.
+Get current values and the (fixed) metadata, like number of rows and columns and a list of available plugins.
 
 ```
-GET http://your-server/api/metadata
+GET http://your-server/api/info
 ```
 
 ## Set Active Plugin by ID
