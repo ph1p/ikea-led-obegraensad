@@ -14,6 +14,7 @@ void sendInfo()
       jsonDocument["data"][j] = Screen.getRenderBuffer()[j];
     }
   }
+
   jsonDocument["status"] = currentStatus;
   jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
   jsonDocument["event"] = "info";
@@ -30,10 +31,10 @@ void sendInfo()
     object["id"] = plugin->getId();
     object["name"] = plugin->getName();
   }
-
   String output;
   serializeJson(jsonDocument, output);
   ws.textAll(output);
+  jsonDocument.clear();
 }
 
 void sendMinimalInfo()

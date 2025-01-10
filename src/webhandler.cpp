@@ -115,26 +115,15 @@ void handleGetData(AsyncWebServerRequest *request)
     }
 }
 
-void handleGetStatus(AsyncWebServerRequest *request)
-{
-    DynamicJsonDocument jsonDocument(6144);
-    jsonDocument["status"] = currentStatus;
-    jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
-    jsonDocument["rotation"] = Screen.currentRotation;
-    jsonDocument["brightness"] = Screen.getCurrentBrightness();
-
-    String output;
-    serializeJson(jsonDocument, output);
-
-    // Send the JSON response to the client
-    request->send(200, "application/json", output);
-}
-
-void handleGetMetadata(AsyncWebServerRequest *request)
+void handleGetInfo(AsyncWebServerRequest *request)
 {
     DynamicJsonDocument jsonDocument(6144);
     jsonDocument["rows"] = ROWS;
     jsonDocument["cols"] = COLS;
+    jsonDocument["status"] = currentStatus;
+    jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
+    jsonDocument["rotation"] = Screen.currentRotation;
+    jsonDocument["brightness"] = Screen.getCurrentBrightness();
 
     JsonArray plugins = jsonDocument.createNestedArray("plugins");
 

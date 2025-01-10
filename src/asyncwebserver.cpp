@@ -20,8 +20,7 @@ void initWebServer()
   server.on("/api/message", HTTP_GET, handleMessage);
   server.on("/api/removemessage", HTTP_GET, handleMessageRemove);
 
-  server.on("/api/status", HTTP_GET, handleGetStatus);
-  server.on("/api/metadata", HTTP_GET, handleGetMetadata);
+  server.on("/api/info", HTTP_GET, handleGetInfo);
 
   // Handle API request to set an active plugin by ID
   server.on("/api/plugin", HTTP_PATCH, handleSetPlugin);
