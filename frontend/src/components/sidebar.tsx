@@ -57,7 +57,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
       <div class="my-6 border-t border-gray-200" />
 
-      <SidebarSection title="Rotation">
+      <SidebarSection title={`Rotation (${[0, 90, 180, 270][props.store.rotation()]}°)`}>
         <div class="flex gap-2.5">
           <Tooltip text="Rotate display counter-clockwise">
             <button

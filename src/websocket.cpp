@@ -108,8 +108,7 @@ void onWsEvent(
           else if (!strcmp(event, "rotate"))
           {
             bool isRight = (bool)!strcmp(wsRequest["direction"], "right");
-
-            Screen.currentRotation = isRight ? (Screen.currentRotation > 3 ? 1 : Screen.currentRotation + 1) : (Screen.currentRotation <= 0 ? 3 : Screen.currentRotation - 1);
+            Screen.currentRotation = (Screen.currentRotation + (isRight ? 1 : 3)) % 4;
           }
           else if (!strcmp(event, "info"))
           {

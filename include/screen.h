@@ -10,12 +10,10 @@ class Screen_
 {
 private:
   Screen_() = default;
-  int findPosition(uint8_t count);
-  void rotate();
-  uint8_t brightness = 255;
+
+  uint8_t brightness_ = 255;
   uint8_t renderBuffer_[ROWS * COLS];
-  uint8_t rotatedRenderBuffer_[ROWS * COLS];
-  uint8_t cache[ROWS * COLS];
+  uint8_t cache_[ROWS * COLS];
   uint8_t positions[ROWS * COLS] = {
       0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
       0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
@@ -33,8 +31,11 @@ private:
       0xc7, 0xc6, 0xc5, 0xc4, 0xc3, 0xc2, 0xc1, 0xc0, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7,
       0xe7, 0xe6, 0xe5, 0xe4, 0xe3, 0xe2, 0xe1, 0xe0, 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
       0xef, 0xee, 0xed, 0xec, 0xeb, 0xea, 0xe9, 0xe8, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+
   static void onScreenTimer();
-  void _render();
+  IRAM_ATTR void _render();
+  uint8_t getTransformedBit(int bitIndex);
+  void transformCoordinates(int x, int y, int &outX, int &outY);
 
 public:
   static Screen_ &getInstance();
@@ -42,7 +43,6 @@ public:
   Screen_(const Screen_ &) = delete;
   Screen_ &operator=(const Screen_ &) = delete;
 
-  bool isCacheEmpty();
   int currentRotation;
 
   uint8_t getCurrentBrightness() const;
@@ -50,15 +50,17 @@ public:
 
   void setRenderBuffer(const uint8_t *renderBuffer, bool grays = false);
   uint8_t *getRenderBuffer();
-  uint8_t *getRotatedRenderBuffer();
 
   void clear();
-  void drawLine(uint8_t line, bool isHorizontal);
+
   void setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness = 255);
   void setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness = 255);
+
   void setup();
+
   void loadFromStorage();
   void persist();
+  bool isCacheEmpty() const;
   void cacheCurrent();
   void restoreCache();
   uint8_t getBufferIndex(int index);
