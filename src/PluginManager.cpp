@@ -113,22 +113,29 @@ int lastModeButtonState = 1;
 
 void PluginManager::runActivePlugin()
 {
-    if (currentStatus != LOADING)
+    static unsigned long lastButtonCheck = 0;
+    const unsigned long buttonInterval = 20;
+    unsigned long currentMillis = millis();
+
+    if (currentStatus != LOADING &&
+        currentMillis - lastButtonCheck >= buttonInterval)
     {
+
+        lastButtonCheck = currentMillis;
         modeButtonState = digitalRead(PIN_BUTTON);
+
         if (modeButtonState != lastModeButtonState && modeButtonState == HIGH)
         {
-            pluginManager.activateNextPlugin();
+            activateNextPlugin();
         }
         lastModeButtonState = modeButtonState;
         currentStatus = NONE;
     }
-    if (activePlugin)
+
+    if (activePlugin && currentStatus != UPDATE &&
+        currentStatus != LOADING && currentStatus != WSBINARY)
     {
-        if (currentStatus != UPDATE && currentStatus != LOADING && currentStatus != WSBINARY)
-        {
-            activePlugin->loop();
-        }
+        activePlugin->loop();
     }
 }
 

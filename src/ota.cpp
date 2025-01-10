@@ -26,9 +26,8 @@ void onOTAEnd()
     Screen.setPixelAtIndex(i, bits[i]);
   }
 
-  currentStatus = NONE;
-
   delay(1000);
+  currentStatus = NONE;
   Screen.loadFromStorage();
 }
 

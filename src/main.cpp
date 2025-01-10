@@ -157,19 +157,30 @@ void setup()
 
 void loop()
 {
+  static uint8_t taskCounter = 0;
+  const unsigned long currentMillis = millis();
 
-  Messages.scrollMessageEveryMinute();
-
-  pluginManager.runActivePlugin();
-
-  if (WiFi.status() != WL_CONNECTED && millis() - lastConnectionAttempt > connectionInterval)
+  if (currentStatus == NONE)
   {
-    Serial.println("Lost connection to Wi-Fi. Reconnecting...");
-    connectToWiFi();
+    pluginManager.runActivePlugin();
+
+    if (taskCounter % 4 == 0)
+    {
+      Messages.scrollMessageEveryMinute();
+    }
   }
 
+  if (taskCounter % 16 == 0)
+  {
+    if (WiFi.status() != WL_CONNECTED)
+    {
+      connectToWiFi();
+    }
 #ifdef ENABLE_SERVER
-  cleanUpClients();
+    cleanUpClients();
 #endif
+  }
+
+  taskCounter++;
   delay(1);
 }
