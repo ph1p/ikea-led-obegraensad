@@ -166,7 +166,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
         </div>
 
         <div class="pt-6">
-          <Tooltip text="Create and edit animations">
+          <Tooltip text="Schedule multiple plugins">
             <a
               href="#/scheduler"
               class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"

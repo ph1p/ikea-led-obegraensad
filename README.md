@@ -38,7 +38,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
 # Control the board
 
-https://github.com/user-attachments/assets/25e34d4c-5178-4dbe-bf53-cdce52fa3e27
+https://github.com/user-attachments/assets/ddf91be1-2c95-4adc-b178-05b0781683cc
 
 You can control the lamp with a supplied web GUI.
 You can get the IP via serial output or you can search it in your router settings.
