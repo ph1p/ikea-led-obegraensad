@@ -1,5 +1,7 @@
 #include "webhandler.h"
 #include "messages.h"
+#include "scheduler.h"
+#include "websocket.h"
 
 // http://your-server/message?text=Hello&repeat=3&id=42&graph=1,2,3,4
 void handleMessage(AsyncWebServerRequest *request)
@@ -125,6 +127,17 @@ void handleGetInfo(AsyncWebServerRequest *request)
     jsonDocument["rotation"] = Screen.currentRotation;
     jsonDocument["brightness"] = Screen.getCurrentBrightness();
 
+    if (Scheduler.isActive)
+    {
+        JsonArray scheduleArray = jsonDocument.createNestedArray("schedule");
+        for (const auto &item : Scheduler.schedule)
+        {
+            JsonObject scheduleItem = scheduleArray.createNestedObject();
+            scheduleItem["pluginId"] = item.pluginId;
+            scheduleItem["duration"] = item.duration / 1000; // Convert milliseconds to seconds
+        }
+    }
+
     JsonArray plugins = jsonDocument.createNestedArray("plugins");
 
     std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
@@ -140,6 +153,54 @@ void handleGetInfo(AsyncWebServerRequest *request)
 
     String output;
     serializeJson(jsonDocument, output);
+    jsonDocument.clear();
 
     request->send(200, "application/json", output);
+}
+
+void handleSetSchedule(AsyncWebServerRequest *request)
+{
+    String scheduleJson = request->arg("schedule");
+
+    if (scheduleJson.length() == 0)
+    {
+        request->send(400, "text/plain", "Schedule parameter is required");
+        return;
+    }
+
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, scheduleJson);
+
+    if (error)
+    {
+        request->send(400, "text/plain", "Invalid JSON format");
+        return;
+    }
+
+    Scheduler.clearSchedule();
+
+    JsonArray schedule = doc.as<JsonArray>();
+    for (JsonObject item : schedule)
+    {
+        if (!item.containsKey("pluginId") || !item.containsKey("duration"))
+        {
+            request->send(400, "text/plain", "Each schedule item must have pluginId and duration");
+            return;
+        }
+
+        int pluginId = item["pluginId"].as<int>();
+        unsigned long duration = item["duration"].as<unsigned long>();
+        Scheduler.addItem(pluginId, duration);
+    }
+
+    Scheduler.start();
+    sendInfo();
+    request->send(200, "text/plain", "Schedule updated");
+}
+
+void handleClearSchedule(AsyncWebServerRequest *request)
+{
+    Scheduler.clearSchedule();
+    sendInfo();
+    request->send(200, "text/plain", "Schedule cleared");
 }

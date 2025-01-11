@@ -1,30 +1,33 @@
-import { Component, createMemo, ParentProps, Show } from "solid-js";
-import { Layout } from "./components/layout";
-import { LedMatrix } from "./components/led-matrix";
-import { loadImageAndGetDataArray, rotateArray } from "./helpers";
-import { useStore } from "./store";
-import { ScreenInfo } from "./components/screen-info";
+import { Component, createMemo, Show } from 'solid-js';
+import { Layout } from './components/layout/layout';
+import Sidebar from './components/layout/sidebar';
+import { LedMatrix } from './components/led-matrix';
+import { ScreenInfo } from './components/screen-info';
+import { useStore } from './contexts/store';
+import { useToast } from './contexts/toast';
+import { loadImageAndGetDataArray, rotateArray } from './helpers';
 
 export const App: Component = () => {
-  const store = useStore();
+  const [store, actions] = useStore();
+  const { toast } = useToast();
 
   const rotatedMatrix = createMemo(() =>
-    rotateArray(store!.indexMatrix(), store!.rotation()),
+    rotateArray(store.indexMatrix, store.rotation),
   );
 
   const wsMessage = (
     event:
-      | "persist"
-      | "load"
-      | "clear"
-      | "plugin"
-      | "screen"
-      | "led"
-      | "persist-plugin"
-      | "brightness",
+      | 'persist'
+      | 'load'
+      | 'clear'
+      | 'plugin'
+      | 'screen'
+      | 'led'
+      | 'persist-plugin'
+      | 'brightness',
     data?: any,
   ) =>
-    store?.send(
+    actions.send(
       JSON.stringify({
         event,
         ...data,
@@ -32,7 +35,7 @@ export const App: Component = () => {
     );
 
   const handleRotate = (turnRight = false) => {
-    let currentRotation = store?.rotation() || 0;
+    let currentRotation = store?.rotation || 0;
     currentRotation = turnRight
       ? currentRotation > 3
         ? 1
@@ -41,82 +44,91 @@ export const App: Component = () => {
         ? 3
         : currentRotation - 1;
 
-    store?.setRotation(currentRotation);
-    store?.send(
+    actions?.setRotation(currentRotation);
+    actions?.send(
       JSON.stringify({
-        event: "rotate",
-        direction: turnRight ? "right" : "left",
+        event: 'rotate',
+        direction: turnRight ? 'right' : 'left',
       }),
     );
   };
 
   const handleLoadImage = () => {
     loadImageAndGetDataArray((data) => {
-      store?.setLeds(() =>
-        store?.indexMatrix().map((index) => (data[index] ? 255 : 0)),
+      actions?.setLeds(
+        store?.indexMatrix.map((index) => (data[index] ? 255 : 0)),
       );
-      wsMessage("screen", { data });
+      wsMessage('screen', { data });
     });
   };
 
   const handleClear = () => {
-    store?.setLeds([...new Array(256).fill(0)]);
-    wsMessage("clear");
-    store?.toast(`Canvas cleared`, 1000);
+    actions?.setLeds([...new Array(256).fill(0)]);
+    wsMessage('clear');
+    toast(`Canvas cleared`, 1000);
   };
 
   const handlePersist = () => {
-    wsMessage("persist");
-    store?.toast(`Saved current state`, 1500);
+    wsMessage('persist');
+    toast(`Saved current state`, 1500);
   };
 
   const handleLoad = () => {
-    wsMessage("load");
-    store?.toast(`Saved state loaded`, 1500);
+    wsMessage('load');
+    toast(`Saved state loaded`, 1500);
   };
 
   const handlePluginChange = (pluginId: number) => {
-    wsMessage("plugin", { plugin: pluginId });
-    store?.toast("Mode changed", 1000);
+    wsMessage('plugin', { plugin: pluginId });
+    toast('Mode changed', 1000);
   };
 
   const handleBrightnessChange = (value: number) => {
-    store?.setBrightness(value);
-    wsMessage("brightness", { brightness: value });
+    actions?.setBrightness(value);
+    wsMessage('brightness', { brightness: value });
   };
 
   const handlePersistPlugin = () => {
-    wsMessage("persist-plugin");
-    store?.toast(`Current mode set as default`, 1500);
+    wsMessage('persist-plugin');
+    toast(`Current mode set as default`, 1500);
   };
 
   const renderLedMatrix = () => (
     <div class="grid p-8 h-full justify-center items-center sm:p-4 sm:m-0">
       <Show
-        when={store?.plugin() === 1}
+        when={store?.plugin === 1 && !store.isActiveScheduler}
         fallback={
-          <ScreenInfo>
-            <h2 class="text-4xl">A Plugin currently running</h2>
-            <p class="text-xl mt-2 text-gray-300">
-              Select "Draw" to show the canvas.
-            </p>
-          </ScreenInfo>
+          <Show
+            when={!store?.isActiveScheduler}
+            fallback={
+              <ScreenInfo>
+                <h2 class="text-4xl">Scheduler is running</h2>
+              </ScreenInfo>
+            }
+          >
+            <ScreenInfo>
+              <h2 class="text-4xl">A Plugin currently running</h2>
+              <p class="text-xl mt-2 text-gray-300">
+                Select "Draw" to show the canvas.
+              </p>
+            </ScreenInfo>
+          </Show>
         }
       >
         <div
           style={{
-            opacity: (store?.brightness() || 255) / 255,
+            opacity: (store?.brightness || 255) / 255,
           }}
         >
           <LedMatrix
-            disabled={store?.plugin() !== 1}
-            data={store?.leds || (() => [])}
-            indexData={rotatedMatrix}
+            disabled={store?.plugin !== 1}
+            data={store?.leds || []}
+            indexData={rotatedMatrix()}
             onSetLed={(data) => {
-              wsMessage("led", data);
+              wsMessage('led', data);
             }}
             onSetMatrix={(data) => {
-              store?.setLeds([...data]);
+              actions?.setLeds([...data]);
             }}
           />
         </div>
@@ -125,37 +137,20 @@ export const App: Component = () => {
   );
 
   return (
-    <Show
-      when={store?.connectionState() === 1}
-      fallback={
-        <Layout
-          content={
-            <ScreenInfo>
-              <h2 class="text-4xl">{store?.connectionStatus}...</h2>
-            </ScreenInfo>
-          }
-          sidebarContent={
-            <div class="bg-white p-6">
-              <a href="#/creator" class="text-gray-700 hover:text-gray-900">
-                Creator
-              </a>
-            </div>
-          }
+    <Layout
+      content={renderLedMatrix()}
+      sidebar={
+        <Sidebar
+          onRotate={handleRotate}
+          onLoadImage={handleLoadImage}
+          onClear={handleClear}
+          onPersist={handlePersist}
+          onLoad={handleLoad}
+          onPluginChange={handlePluginChange}
+          onBrightnessChange={handleBrightnessChange}
+          onPersistPlugin={handlePersistPlugin}
         />
       }
-    >
-      <Layout
-        content={renderLedMatrix()}
-        store={store}
-        onRotate={handleRotate}
-        onLoadImage={handleLoadImage}
-        onClear={handleClear}
-        onPersist={handlePersist}
-        onLoad={handleLoad}
-        onPluginChange={handlePluginChange}
-        onBrightnessChange={handleBrightnessChange}
-        onPersistPlugin={handlePersistPlugin}
-      />
-    </Show>
+    />
   );
 };

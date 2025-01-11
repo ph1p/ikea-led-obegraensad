@@ -73,6 +73,7 @@ private:
   Messages_() = default;
   MessagePool messagePool;
   std::vector<Message *> activeMessages;
+
   int previousMinute = -1;
   int previousSecond = -1;
   int indicatorPixel = 0;

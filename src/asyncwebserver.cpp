@@ -29,6 +29,10 @@ void initWebServer()
   server.on("/api/brightness", HTTP_PATCH, handleSetBrightness);
   server.on("/api/data", HTTP_GET, handleGetData);
 
+  // Scheduler
+  server.on("/api/schedule", HTTP_POST, handleSetSchedule);
+  server.on("/api/schedule/clear", HTTP_GET, handleClearSchedule);
+
   server.begin();
 }
 

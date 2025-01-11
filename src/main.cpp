@@ -15,6 +15,7 @@
 #endif
 
 #include "PluginManager.h"
+#include "scheduler.h"
 
 #include "plugins/BreakoutPlugin.h"
 #include "plugins/CirclePlugin.h"
@@ -162,6 +163,7 @@ void loop()
 
   if (currentStatus == NONE)
   {
+    Scheduler.update();
     pluginManager.runActivePlugin();
 
     if (taskCounter % 4 == 0)

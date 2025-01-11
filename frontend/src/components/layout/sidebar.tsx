@@ -1,6 +1,7 @@
-import { Component, For, Show, JSX } from "solid-js";
-import { Store } from "../types";
-import { Tooltip } from "./tooltip";
+import { Component, For, JSX, Show } from 'solid-js';
+import { useStore } from '../../contexts/store';
+import { Tooltip } from '../tooltip';
+import { ResetScheduleButton } from '../../scheduler';
 
 interface SidebarSectionProps {
   title: string;
@@ -17,7 +18,6 @@ const SidebarSection: Component<SidebarSectionProps> = (props) => (
 );
 
 interface SidebarProps {
-  store: Store;
   onRotate: (turnRight: boolean) => void;
   onLoadImage: () => void;
   onClear: () => void;
@@ -29,35 +29,41 @@ interface SidebarProps {
 }
 
 export const Sidebar: Component<SidebarProps> = (props) => {
+  const [store] = useStore();
+
   return (
-    <aside class="bg-white p-6 flex flex-col h-full">
-      <SidebarSection title="Display Mode">
-        <div class="flex flex-col gap-2.5">
-          <select
-            class="flex-1 px-2.5 py-2.5 bg-gray-50 border border-gray-200 rounded"
-            onChange={(e) =>
-              props.onPluginChange(parseInt(e.currentTarget.value))
-            }
-            value={props.store.plugin()}
-          >
-            <For each={props.store.plugins()}>
-              {(plugin) => <option value={plugin.id}>{plugin.name}</option>}
-            </For>
-          </select>
-          <Tooltip text="Save current display mode as default startup mode">
-            <button
-              onClick={props.onPersistPlugin}
-              class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+    <>
+      <Show when={!store?.isActiveScheduler} fallback={<ResetScheduleButton />}>
+        <SidebarSection title="Display Mode">
+          <div class="flex flex-col gap-2.5">
+            <select
+              class="flex-1 px-2.5 py-2.5 bg-gray-50 border border-gray-200 rounded"
+              onChange={(e) =>
+                props.onPluginChange(parseInt(e.currentTarget.value))
+              }
+              value={store?.plugin}
             >
-              Set Default
-            </button>
-          </Tooltip>
-        </div>
-      </SidebarSection>
+              <For each={store?.plugins}>
+                {(plugin) => <option value={plugin.id}>{plugin.name}</option>}
+              </For>
+            </select>
+            <Tooltip text="Save current display mode as default startup mode">
+              <button
+                onClick={props.onPersistPlugin}
+                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+              >
+                Set Default
+              </button>
+            </Tooltip>
+          </div>
+        </SidebarSection>
+      </Show>
 
       <div class="my-6 border-t border-gray-200" />
 
-      <SidebarSection title={`Rotation (${[0, 90, 180, 270][props.store.rotation()]}°)`}>
+      <SidebarSection
+        title={`Rotation (${[0, 90, 180, 270][store?.rotation || 0]}°)`}
+      >
         <div class="flex gap-2.5">
           <Tooltip text="Rotate display counter-clockwise">
             <button
@@ -86,19 +92,19 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             type="range"
             min="0"
             max="255"
-            value={props.store.brightness()}
+            value={store?.brightness}
             class="w-full"
             onInput={(e) =>
               props.onBrightnessChange(parseInt(e.currentTarget.value))
             }
           />
           <div class="text-sm text-gray-600 text-right">
-            {Math.round((props.store.brightness() / 255) * 100)}%
+            {Math.round(((store?.brightness || 255) / 255) * 100)}%
           </div>
         </div>
       </SidebarSection>
 
-      <Show when={props.store.plugin() === 1}>
+      <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
         <div class="my-6 border-t border-gray-200" />
 
         <SidebarSection title="Matrix Controls">
@@ -139,18 +145,32 @@ export const Sidebar: Component<SidebarProps> = (props) => {
         </SidebarSection>
       </Show>
 
-      <div class="mt-auto pt-6 border-t border-gray-200">
-        <Tooltip text="Create and edit animations">
-          <a
-            href="#/creator"
-            class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-          >
-            <i class="fa-solid fa-pencil mr-2" />
-            Animation Creator
-          </a>
-        </Tooltip>
+      <div class="mt-auto">
+        <div class="mt-auto pt-6 border-t border-gray-200">
+          <Tooltip text="Create and edit animations">
+            <a
+              href="#/creator"
+              class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+            >
+              <i class="fa-solid fa-pencil mr-2" />
+              Animation Creator
+            </a>
+          </Tooltip>
+        </div>
+
+        <div class="pt-6">
+          <Tooltip text="Create and edit animations">
+            <a
+              href="#/scheduler"
+              class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+            >
+              <i class="fa-regular fa-clock fa- mr-2" />
+              Plugin Scheduler
+            </a>
+          </Tooltip>
+        </div>
       </div>
-    </aside>
+    </>
   );
 };
 

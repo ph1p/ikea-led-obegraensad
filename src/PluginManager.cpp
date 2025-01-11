@@ -1,4 +1,5 @@
 #include "PluginManager.h"
+#include "scheduler.h"
 
 Plugin::Plugin() : id(-1) {}
 
@@ -121,12 +122,12 @@ void PluginManager::runActivePlugin()
     if (currentStatus != LOADING &&
         currentMillis - lastButtonCheck >= buttonInterval)
     {
-
         lastButtonCheck = currentMillis;
         modeButtonState = digitalRead(PIN_BUTTON);
 
         if (modeButtonState != lastModeButtonState && modeButtonState == HIGH)
         {
+            Scheduler.clearSchedule();
             activateNextPlugin();
         }
         lastModeButtonState = modeButtonState;

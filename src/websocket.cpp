@@ -1,4 +1,5 @@
 #include "PluginManager.h"
+#include "scheduler.h"
 
 #ifdef ENABLE_SERVER
 
@@ -20,6 +21,17 @@ void sendInfo()
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
+
+  if (Scheduler.isActive)
+  {
+    JsonArray scheduleArray = jsonDocument.createNestedArray("schedule");
+    for (const auto &item : Scheduler.schedule)
+    {
+      JsonObject scheduleItem = scheduleArray.createNestedObject();
+      scheduleItem["pluginId"] = item.pluginId;
+      scheduleItem["duration"] = item.duration / 1000; // Convert milliseconds to seconds
+    }
+  }
 
   JsonArray plugins = jsonDocument.createNestedArray("plugins");
 
@@ -43,13 +55,15 @@ void sendMinimalInfo()
 
   jsonDocument["status"] = currentStatus;
   jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
-  jsonDocument["event"] = "info";
+  jsonDocument["event"] = "minimal-info";
   jsonDocument["rotation"] = Screen.currentRotation;
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
+  jsonDocument["scheduleActive"] = Scheduler.isActive;
 
   String output;
   serializeJson(jsonDocument, output);
   ws.textAll(output);
+  jsonDocument.clear();
 }
 
 void onWsEvent(
@@ -96,7 +110,7 @@ void onWsEvent(
           if (!strcmp(event, "plugin"))
           {
             int pluginId = wsRequest["plugin"];
-
+            Scheduler.clearSchedule();
             pluginManager.setActivePluginById(pluginId);
 
             sendMinimalInfo();
