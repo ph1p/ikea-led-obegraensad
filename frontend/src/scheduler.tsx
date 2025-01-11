@@ -6,32 +6,32 @@ import { useStore } from './contexts/store';
 import { useToast } from './contexts/toast';
 
 export const ResetScheduleButton = () => {
+  const [_, actions] = useStore();
   const { toast } = useToast();
   return (
-    <Tooltip text="Save current display mode as default startup mode">
-      <button
-        onClick={async () => {
-          try {
-            const response = await fetch(
-              `${
-                import.meta.env.PROD
-                  ? `ws://${window.location.host}/`
-                  : import.meta.env.VITE_BASE_URL
-              }api/schedule/clear`,
-            );
+    <button
+      onClick={async () => {
+        try {
+          const response = await fetch(
+            `${
+              import.meta.env.PROD
+                ? `ws://${window.location.host}/`
+                : import.meta.env.VITE_BASE_URL
+            }api/schedule/clear`
+          );
 
-            if (response.ok) {
-              toast('Reset schedule successfully', 2000);
-            }
-          } catch {
-            toast('Failed to reset schedule', 2000);
+          if (response.ok) {
+            actions.setSchedule([]);
+            toast('Reset schedule successfully', 2000);
           }
-        }}
-        class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
-      >
-        Reset Scheduler
-      </button>
-    </Tooltip>
+        } catch {
+          toast('Failed to reset schedule', 2000);
+        }
+      }}
+      class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+    >
+      Reset Scheduler
+    </button>
   );
 };
 
@@ -53,16 +53,16 @@ const Scheduler: Component = () => {
   const handlePluginChange = (index: number, pluginId: number) => {
     actions.setSchedule(
       store.schedule.map((item, i) =>
-        i === index ? { ...item, pluginId } : item,
-      ),
+        i === index ? { ...item, pluginId } : item
+      )
     );
   };
 
   const handleDurationChange = (index: number, duration: number) => {
     actions.setSchedule(
       store.schedule.map((item, i) =>
-        i === index ? { ...item, duration } : item,
-      ),
+        i === index ? { ...item, duration } : item
+      )
     );
   };
 
@@ -76,7 +76,7 @@ const Scheduler: Component = () => {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
           body: `schedule=${JSON.stringify(store.schedule)}`,
-        },
+        }
       );
 
       if (response.ok) {
@@ -113,7 +113,7 @@ const Scheduler: Component = () => {
                           onChange={(e) =>
                             handlePluginChange(
                               index(),
-                              parseInt(e.currentTarget.value),
+                              parseInt(e.currentTarget.value)
                             )
                           }
                           class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
@@ -135,7 +135,7 @@ const Scheduler: Component = () => {
                             onInput={(e) =>
                               handleDurationChange(
                                 index(),
-                                parseInt(e.currentTarget.value),
+                                parseInt(e.currentTarget.value)
                               )
                             }
                             class="pr-16 pl-3 py-2 w-32 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
