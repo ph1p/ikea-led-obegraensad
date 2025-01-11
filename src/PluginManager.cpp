@@ -32,7 +32,7 @@ void PluginManager::init()
     }
 
 #ifdef ENABLE_STORAGE
-    storage.begin("led-wall", false);
+    storage.begin("led-wall", true);
     Serial.print("restore plugin: ");
     Serial.println(storage.getInt("current-plugin"));
     pluginManager.setActivePluginById(storage.getInt("current-plugin"));

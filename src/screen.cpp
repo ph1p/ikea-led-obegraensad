@@ -77,7 +77,7 @@ void Screen_::restoreCache()
 #ifdef ENABLE_STORAGE
 void Screen_::loadFromStorage()
 {
-  storage.begin("led-wall", false);
+  storage.begin("led-wall", true);
   setBrightness(255);
 
   if (currentStatus == NONE)
@@ -108,6 +108,13 @@ void Screen_::persist()
 
 void Screen_::setup()
 {
+#ifdef ENABLE_STORAGE
+  storage.begin("led-wall", true);
+  setBrightness(storage.getUInt("brightness", 255));
+  currentRotation = storage.getUInt("rotation", 0);
+  storage.end();
+#endif
+
   // TODO find proper unused pins for MISO and SS
 #ifdef ESP8266
   SPI.pins(PIN_CLOCK, 12, PIN_DATA, 15); // SCLK, MISO, MOSI, SS);
