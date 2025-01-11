@@ -2,13 +2,13 @@
 
 Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
-> 👉 If you have anything to improve, I would be very happy about a PR or an issue :)
-
-> ⚠ Use this code and instructions at your own risk! The device could be damaged! ⚠
+> **⚠ Disclaimer**: Use this code and instructions at your own risk! Improper use may damage the device.
+> **Contribute**: Have suggestions or improvements? Feel free to submit a PR or open an issue. 😊
 
 ![ezgif-3-2019fca7a4](https://user-images.githubusercontent.com/15351728/200184222-a590575d-983d-4ab8-a322-c6bcf433d364.gif)
 
-## Features
+<details>
+  <summary><h1>Features</h1></summary>
 
 - Persist your drawing
 - Rotate image
@@ -35,6 +35,8 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - Firework
   - DDP
   - Pong Clock
+
+</details>
 
 # Control the board
 
@@ -67,19 +69,32 @@ Above is a microcontroller. You have to remove it, because it contains the stand
 
 <img src="https://user-images.githubusercontent.com/86414213/205998862-e9962695-1328-49ea-b546-be592cbad3c2.jpg" width="90%" />
 
-## Clone repository and set variables
+### ESP32 Setup with VS Code and PlatformIO
 
-- Open folder with VSCode
-- Install platformIO (https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide)
-- Set all variables
-  - Wifi (on ESP8266)
-  - Upload
-  - Your Pins
-  - Latitude, Longitude, City etc. (https://github.com/chubin/wttr.in)
+1. **Prerequisites**
 
-Variables can be found inside `include/constants.h`.
+   - Install **[Visual Studio Code](https://code.visualstudio.com/)**.
+   - Install the **PlatformIO IDE** extension from the VS Code Extensions Marketplace.
 
-### Create `include/secrets.h`
+2. **Clone the Project**
+
+   - Download the project from GitHub and open it in VS Code. PlatformIO will automatically load dependencies.
+
+```bash
+git clone git@github.com:ph1p/ikea-led-obegraensad.git
+cd ikea-led-obegraensad
+code .
+```
+
+3. **Connect ESP32**
+
+   - Connect your ESP32 via USB.
+   - Check the COM port in the **PlatformIO Devices** tab.
+
+4. **Prepare the Project**
+
+   - Perform a `PlatformIO: Clean` (Recycle bin icon at the bottom right).
+   - Add a `secrets.h` file to the `include` directory. Modify passwords and save the file. Go in the next section for WiFi instructions.
 
 ```cpp
 #pragma once
@@ -95,7 +110,17 @@ Variables can be found inside `include/constants.h`.
 #define OTA_PASSWORD ""
 ```
 
-also set username and password inside `upload.py`, if you want to use OTA Updates.
+- Set variables inside `include/constants.h`.
+
+5. **Build the Project**
+
+   - Click the `PlatformIO Build` icon (bottom right corner).
+   - Check the log for missing libraries.
+     - Use the **Libraries** icon in PlatformIO to install required libraries.
+   - Repeat `Clean` and `Build` until the build succeeds.
+
+6. **Upload to ESP32**
+   - Click `PlatformIO Upload` (bottom right) to upload the firmware to the ESP32.
 
 ### Configuring WiFi with WiFi manager
 
@@ -129,6 +154,150 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 
 Thanks to [RBEGamer](https://github.com/RBEGamer) who is showing in this [issue](https://github.com/ph1p/ikea-led-obegraensad/issues/79) how to use the original button wiring. With this solution you won't need the "BUTTON one end" and "BUTTON other end" soldering from the table above.
 
+# HTTP API Endpoints
+
+## Get Information
+
+Get current values and the (fixed) metadata, like number of rows and columns and a list of available plugins.
+
+```
+GET http://your-server/api/info
+```
+
+## Set Active Plugin by ID
+
+To set an active plugin by ID, make an HTTP PATCH request to the following endpoint:
+
+```
+PATCH http://your-server/api/plugin
+```
+
+### Parameters
+
+- `id` (required): The ID of the plugin to set as active.
+
+### Response
+
+- Success: `200 OK` with the message "Plugin Set".
+- Not Found: `404 Not Found` with the message "Plugin not found".
+
+## Set Brightness
+
+To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
+
+```
+PATCH http://your-server/api/brightness
+```
+
+### Parameters
+
+- `value` (required): The brightness value (0..255).
+
+### Response
+
+- Success: `200 OK` with the message "Ok".
+- Invalid Value: `404 Not Found` with the message "Invalid Brightness Value".
+
+## Get current display data
+
+To get the current displayed data as an byte-array, each byte representing the brightness value.
+Be aware that the global brightness value gets applied AFTER these values, so if you set the global brightness to 16, you will still get values of 255 this way.
+
+```
+GET http://your-server/api/data
+```
+
+# Plugin Scheduler
+
+It is possible to switch between plugins automatically.
+You can define your schedule in the Web UI or just send an API call.
+
+```bash
+### set your plugins and duration in seconds
+curl -X POST http://x.x.x.x/api/schedule -d 'schedule=[{"pluginId":10,"duration":2},{"pluginId":8,"duration": 5}'
+
+### clear the schedule
+curl http://x.x.x.x/api/schedule/clear
+
+### start the schedule
+curl http://x.x.x.x/api/schedule/start
+
+### stop the schedule
+curl http://x.x.x.x/api/schedule/stop
+```
+
+# DDP (Distributed Display Protocol)
+
+You can set the panel to DDP using the button or via the web interface.
+This Protocol uses **UDP** and listens on Port **4048**.
+
+**Info**: The DDP Header is 10 Bytes!
+
+In the repository you will find an `ddp.py` as an example.
+
+Change the plugin to `DDP` and run following command with your IP:
+
+```bash
+./ddp.py --ip x.x.x.x --pixel 2 2 200 --pixel 0 0 255
+```
+
+### Helpful Links
+
+- https://kno.wled.ge/interfaces/ddp/
+- http://www.3waylabs.com/ddp/
+
+---
+
+# Messages HTTP API
+
+The LED Display service provides HTTP API to display messages and graphs on a 16x16 LED display. This functionality can be accessed through HTTP calls to the service endpoint.
+
+## Message Display
+
+To display a message on the LED display, users can make an HTTP GET request to the following endpoint:
+
+```
+http://your-server/api/message
+```
+
+### Parameters
+
+- `text` (optional): The text message to be displayed on the LED display.
+- `graph` (optional): A comma-separated list of integers representing a graph. The values should be in the range of 0 to 15 and will be visualized as a graph on the LED display.
+- `miny` (optional): scaling for lower end of the graph, defaults to 0
+- `maxy` (optional): scaling for upper end of the graph, defaults to 15
+- `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1. Set this value to -1 to repeat infinitely. While messages ar pending for display an indicator led in the upper left corner will flash.
+- `id` (optional): A unique identifier for the message. This can be used for later removal or modification of the message.
+- `delay` (optional): The number of ms of delay between every scroll move. Default is 50 ms.
+
+#### Example
+
+```
+GET http://your-server/api/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1&delay=60
+```
+
+This example will display the message "Hello" on the LED display with a corresponding graph, repeat it three times, and assign it the identifier 1, waits 60ms while scrolling.
+
+### Message Removal
+
+To remove a message from the display, users can make an HTTP GET request to the following endpoint:
+
+```
+http://your-server/api/removemessage
+```
+
+### Parameters
+
+- `id` (required): The unique identifier of the message to be removed.
+
+#### Example
+
+```
+GET http://your-server/api/removemessage?id=1
+```
+
+This example will remove the message with the identifier 1 from the LED display.
+
 # Development
 
 - `src` contains the arduino code.
@@ -146,7 +315,7 @@ Thanks to [RBEGamer](https://github.com/RBEGamer) who is showing in this [issue]
 - Build frontend using `Docker`
   - From the root of the repo, run `docker compose run node`
 
-## Plugins
+# Plugin Development
 
 1. Start by creating a new C++ file for your plugin. For example, let's call it plugins/MyPlugin.(cpp/h).
 
@@ -207,146 +376,6 @@ void MyPlugin::websocketHook(DynamicJsonDocument &request) {
 #include "plugins/MyPlugin.h"
 
 pluginManager.addPlugin(new MyPlugin());
-```
-
-# Plugin Scheduler
-
-It is possible to switch between plugins automatically.
-You can define your schedule in the Web UI or just send an API call.
-
-```bash
-### set your plugins and duration in seconds
-curl -X POST http://x.x.x.x/api/schedule -d 'schedule=[{"pluginId":10,"duration":2},{"pluginId":8,"duration": 5}'
-
-### clear the schedule
-curl http://x.x.x.x/api/schedule/clear
-
-### clear the schedule
-curl http://x.x.x.x/api/schedule/start
-
-### clear the schedule
-curl http://x.x.x.x/api/schedule/stop
-```
-
-# DDP (Distributed Display Protocol)
-
-You can set the panel to DDP using the button or via the web interface.
-This Protocol uses **UDP** and listens on Port **4048**.
-
-**Info**: The DDP Header is 10 Bytes!
-
-In the repository you will find an `ddp.py` as an example.
-
-Change the plugin to `DDP` and run following command with your IP:
-
-```bash
-./ddp.py --ip x.x.x.x --pixel 2 2 200 --pixel 0 0 255
-```
-
-## Helpful Links
-
-- https://kno.wled.ge/interfaces/ddp/
-- http://www.3waylabs.com/ddp/
-
-# External Call
-
-The LED Display service provides a simple yet powerful external interface that allows users to display messages and graphs on a 16x16 LED display. This functionality can be accessed through HTTP calls to the service endpoint.
-
-## Message Display
-
-To display a message on the LED display, users can make an HTTP GET request to the following endpoint:
-
-```
-http://your-server/api/message
-```
-
-### Parameters
-
-- `text` (optional): The text message to be displayed on the LED display.
-- `graph` (optional): A comma-separated list of integers representing a graph. The values should be in the range of 0 to 15 and will be visualized as a graph on the LED display.
-- `miny` (optional): scaling for lower end of the graph, defaults to 0
-- `maxy` (optional): scaling for upper end of the graph, defaults to 15
-- `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1. Set this value to -1 to repeat infinitely. While messages ar pending for display an indicator led in the upper left corner will flash.
-- `id` (optional): A unique identifier for the message. This can be used for later removal or modification of the message.
-- `delay` (optional): The number of ms of delay between every scroll move. Default is 50 ms.
-
-#### Example
-
-```
-GET http://your-server/api/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1&delay=60
-```
-
-This example will display the message "Hello" on the LED display with a corresponding graph, repeat it three times, and assign it the identifier 1, waits 60ms while scrolling.
-
-## Message Removal
-
-To remove a message from the display, users can make an HTTP GET request to the following endpoint:
-
-```
-http://your-server/api/removemessage
-```
-
-### Parameters
-
-- `id` (required): The unique identifier of the message to be removed.
-
-#### Example
-
-```
-GET http://your-server/api/removemessage?id=1
-```
-
-This example will remove the message with the identifier 1 from the LED display.
-
-## Get Information
-
-Get current values and the (fixed) metadata, like number of rows and columns and a list of available plugins.
-
-```
-GET http://your-server/api/info
-```
-
-## Set Active Plugin by ID
-
-To set an active plugin by ID, make an HTTP PATCH request to the following endpoint:
-
-```
-PATCH http://your-server/api/plugin
-```
-
-### Parameters
-
-- `id` (required): The ID of the plugin to set as active.
-
-### Response
-
-- Success: `200 OK` with the message "Plugin Set".
-- Not Found: `404 Not Found` with the message "Plugin not found".
-
-## Set Brightness
-
-To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
-
-```
-PATCH http://your-server/api/brightness
-```
-
-### Parameters
-
-- `value` (required): The brightness value (0..255).
-
-### Response
-
-- Success: `200 OK` with the message "Ok".
-- Invalid Value: `404 Not Found` with the message "Invalid Brightness Value".
-
-## Get current display data
-
-To get the current displayed data as an byte-array, each byte representing the brightness value.
-Be aware that the global brightness value gets applied AFTER these values, so if you set the global brightness to 16, you will still get values of 255 this way.
-
-```
-GET http://your-server/api/data
 ```
 
 # Troubleshooting
