@@ -8,24 +8,37 @@ export enum SYSTEM_STATUS {
   LOADING = 'loading',
 }
 
-export interface Store {
-  rotation: () => number;
-  brightness: () => number;
-  indexMatrix: () => number[];
-  leds: () => number[];
-  plugins: () => { id: number; name: string }[];
-  plugin: () => number;
-  systemStatus: () => SYSTEM_STATUS;
+export interface ScheduleItem {
+  pluginId: number;
+  duration: number;
+}
 
-  setRotation: Setter<number>;
-  setBrightness: Setter<number>;
-  setIndexMatrix: Setter<number[]>;
-  setLeds: Setter<number[]>;
-  setPlugin: Setter<number>;
-  setSystemStatus: Setter<SYSTEM_STATUS>;
+export interface StoreActions {
+  setRotation: (rotation: number) => void;
+  setPlugins: (plugins: []) => void;
+  setPlugin: (plugin: number) => void;
+  setBrightness: (brightness: number) => void;
+  setIndexMatrix: (indexMatrix: number[]) => void;
+  setLeds: (leds: number[]) => void;
+  setSystemStatus: (systemStatus: SYSTEM_STATUS) => void;
+  setSchedule: (items: ScheduleItem[]) => void;
   send: (message: string | ArrayBuffer) => void;
-  connectionState: () => number;
+}
 
+export interface Store {
+  isActiveScheduler: boolean;
+  rotation: number;
+  brightness: number;
+  indexMatrix: number[];
+  leds: number[];
+  plugins: { id: number; name: string }[];
+  plugin: number;
+  systemStatus: SYSTEM_STATUS;
+  connectionState: () => number;
   connectionStatus?: string;
+  schedule: ScheduleItem[];
+}
+
+export interface IToastContext {
   toast: (text: string, duration: number) => void;
 }

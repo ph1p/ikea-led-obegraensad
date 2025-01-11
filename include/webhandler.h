@@ -8,3 +8,5 @@ void handleGetInfo(AsyncWebServerRequest *request);
 void handleSetPlugin(AsyncWebServerRequest *request);
 void handleSetBrightness(AsyncWebServerRequest *request);
 void handleGetData(AsyncWebServerRequest *request);
+void handleSetSchedule(AsyncWebServerRequest *request);
+void handleClearSchedule(AsyncWebServerRequest *request);

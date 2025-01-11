@@ -2,7 +2,7 @@
 
 Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
-> 👉 This software is in an early stage and is my first of its kind. If you have anything to improve, I would be very happy about a PR or an issue :)
+> 👉 If you have anything to improve, I would be very happy about a PR or an issue :)
 
 > ⚠ Use this code and instructions at your own risk! The device could be damaged! ⚠
 
@@ -18,6 +18,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Web-GUI
 - Load an image
 - Switch plugin by pressing the button
+- Schedule Plugins to switch after "n" seconds
 - Plugins
   - Draw
   - Game of life
@@ -208,6 +209,19 @@ void MyPlugin::websocketHook(DynamicJsonDocument &request) {
 pluginManager.addPlugin(new MyPlugin());
 ```
 
+# Plugin Scheduler
+
+It is possible to switch between plugins automatically.
+You can define your schedule in the Web UI or just send an API call.
+
+```bash
+### set your plugins and duration in seconds
+curl -X POST http://x.x.x.x/api/schedule -d 'schedule=[{"pluginId":10,"duration":2},{"pluginId":8,"duration": 5}'
+
+### clear the schedule
+curl http://x.x.x.x/api/schedule/clear
+```
+
 # DDP (Distributed Display Protocol)
 
 You can set the panel to DDP using the button or via the web interface.
@@ -218,6 +232,7 @@ This Protocol uses **UDP** and listens on Port **4048**.
 In the repository you will find an `ddp.py` as an example.
 
 Change the plugin to `DDP` and run following command with your IP:
+
 ```bash
 ./ddp.py --ip x.x.x.x --pixel 2 2 200 --pixel 0 0 255
 ```
