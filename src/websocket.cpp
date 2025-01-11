@@ -21,16 +21,14 @@ void sendInfo()
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
+  jsonDocument["scheduleActive"] = Scheduler.isActive;
 
-  if (Scheduler.isActive)
+  JsonArray scheduleArray = jsonDocument.createNestedArray("schedule");
+  for (const auto &item : Scheduler.schedule)
   {
-    JsonArray scheduleArray = jsonDocument.createNestedArray("schedule");
-    for (const auto &item : Scheduler.schedule)
-    {
-      JsonObject scheduleItem = scheduleArray.createNestedObject();
-      scheduleItem["pluginId"] = item.pluginId;
-      scheduleItem["duration"] = item.duration / 1000; // Convert milliseconds to seconds
-    }
+    JsonObject scheduleItem = scheduleArray.createNestedObject();
+    scheduleItem["pluginId"] = item.pluginId;
+    scheduleItem["duration"] = item.duration / 1000; // Convert milliseconds to seconds
   }
 
   JsonArray plugins = jsonDocument.createNestedArray("plugins");

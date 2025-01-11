@@ -1,7 +1,7 @@
 import { Component, For, JSX, Show } from 'solid-js';
 import { useStore } from '../../contexts/store';
+import { ToggleScheduleButton } from '../../scheduler';
 import { Tooltip } from '../tooltip';
-import { ResetScheduleButton } from '../../scheduler';
 
 interface SidebarSectionProps {
   title: string;
@@ -33,7 +33,14 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
   return (
     <>
-      <Show when={!store?.isActiveScheduler} fallback={<ResetScheduleButton />}>
+      <Show
+        when={!store?.isActiveScheduler}
+        fallback={
+          <Show when={store.schedule.length > 0}>
+            <ToggleScheduleButton />
+          </Show>
+        }
+      >
         <SidebarSection title="Display Mode">
           <div class="flex flex-col gap-2.5">
             <select

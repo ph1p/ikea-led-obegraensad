@@ -126,16 +126,14 @@ void handleGetInfo(AsyncWebServerRequest *request)
     jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
     jsonDocument["rotation"] = Screen.currentRotation;
     jsonDocument["brightness"] = Screen.getCurrentBrightness();
+    jsonDocument["scheduleActive"] = Scheduler.isActive;
 
-    if (Scheduler.isActive)
+    JsonArray scheduleArray = jsonDocument.createNestedArray("schedule");
+    for (const auto &item : Scheduler.schedule)
     {
-        JsonArray scheduleArray = jsonDocument.createNestedArray("schedule");
-        for (const auto &item : Scheduler.schedule)
-        {
-            JsonObject scheduleItem = scheduleArray.createNestedObject();
-            scheduleItem["pluginId"] = item.pluginId;
-            scheduleItem["duration"] = item.duration / 1000; // Convert milliseconds to seconds
-        }
+        JsonObject scheduleItem = scheduleArray.createNestedObject();
+        scheduleItem["pluginId"] = item.pluginId;
+        scheduleItem["duration"] = item.duration / 1000; // Convert milliseconds to seconds
     }
 
     JsonArray plugins = jsonDocument.createNestedArray("plugins");
@@ -203,4 +201,32 @@ void handleClearSchedule(AsyncWebServerRequest *request)
     Scheduler.clearSchedule();
     sendInfo();
     request->send(200, "text/plain", "Schedule cleared");
+}
+
+void handleStopSchedule(AsyncWebServerRequest *request)
+{
+    if (!Scheduler.schedule.empty())
+    {
+        Scheduler.stop();
+        sendInfo();
+        request->send(200, "text/plain", "Schedule stopped");
+    }
+    else
+    {
+        request->send(404, "text/plain", "No schedule found");
+    }
+}
+
+void handleStartSchedule(AsyncWebServerRequest *request)
+{
+    if (!Scheduler.schedule.empty())
+    {
+        Scheduler.start();
+        sendInfo();
+        request->send(200, "text/plain", "Schedule started");
+    }
+    else
+    {
+        request->send(404, "text/plain", "No schedule found");
+    }
 }

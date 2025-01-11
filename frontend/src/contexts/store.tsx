@@ -20,7 +20,7 @@ const ws = createReconnectingWS(
     import.meta.env.PROD
       ? `ws://${window.location.host}/`
       : import.meta.env.VITE_WS_URL
-  }ws`,
+  }ws`
 );
 const wsState = createWSState(ws);
 
@@ -32,9 +32,7 @@ const connectionStatus = [
 ];
 
 const [mainStore, setStore] = createStore<Store>({
-  get isActiveScheduler() {
-    return this.schedule?.length > 0;
-  },
+  isActiveScheduler: false,
   rotation: 0,
   plugins: [],
   plugin: 1,
@@ -48,13 +46,13 @@ const [mainStore, setStore] = createStore<Store>({
 });
 
 const actions: StoreActions = {
-  setRotation: (rotation: number) => setStore('rotation', rotation),
-  setPlugins: (plugins: []) => setStore('plugins', plugins),
-  setPlugin: (plugin: number) => setStore('plugin', plugin),
-  setBrightness: (brightness: number) => setStore('brightness', brightness),
-  setIndexMatrix: (indexMatrix: number[]) =>
-    setStore('indexMatrix', indexMatrix),
-  setLeds: (leds: number[]) => setStore('leds', leds),
+  setIsActiveScheduler: (isActive) => setStore('isActiveScheduler', isActive),
+  setRotation: (rotation) => setStore('rotation', rotation),
+  setPlugins: (plugins) => setStore('plugins', plugins),
+  setPlugin: (plugin) => setStore('plugin', plugin),
+  setBrightness: (brightness) => setStore('brightness', brightness),
+  setIndexMatrix: (indexMatrix) => setStore('indexMatrix', indexMatrix),
+  setLeds: (leds) => setStore('leds', leds),
   setSystemStatus: (systemStatus: SYSTEM_STATUS) =>
     setStore('systemStatus', systemStatus),
   setSchedule: (items: ScheduleItem[]) => setStore('schedule', items),
@@ -68,7 +66,7 @@ const StoreContext = createContext<[Store, StoreActions]>(store);
 export const StoreProvider: ParentComponent = (props) => {
   const messageEvent = createEventSignal<{ message: MessageEvent }>(
     ws,
-    'message',
+    'message'
   );
 
   createEffect(() => {
@@ -77,19 +75,21 @@ export const StoreProvider: ParentComponent = (props) => {
     switch (json.event) {
       case 'minimal-info':
         actions.setSystemStatus(
-          Object.values(SYSTEM_STATUS)[json.status as number],
+          Object.values(SYSTEM_STATUS)[json.status as number]
         );
         actions.setRotation(json.rotation);
         actions.setBrightness(json.brightness);
         actions.setPlugin(json.plugin as number);
+        actions.setIsActiveScheduler(json.scheduleActive);
         break;
       case 'info':
         batch(() => {
           actions.setSystemStatus(
-            Object.values(SYSTEM_STATUS)[json.status as number],
+            Object.values(SYSTEM_STATUS)[json.status as number]
           );
           actions.setRotation(json.rotation);
           actions.setBrightness(json.brightness);
+          actions.setIsActiveScheduler(json.scheduleActive);
 
           if (json.schedule) {
             actions.setSchedule(json.schedule);

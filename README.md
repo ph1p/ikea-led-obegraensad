@@ -220,6 +220,12 @@ curl -X POST http://x.x.x.x/api/schedule -d 'schedule=[{"pluginId":10,"duration"
 
 ### clear the schedule
 curl http://x.x.x.x/api/schedule/clear
+
+### clear the schedule
+curl http://x.x.x.x/api/schedule/start
+
+### clear the schedule
+curl http://x.x.x.x/api/schedule/stop
 ```
 
 # DDP (Distributed Display Protocol)

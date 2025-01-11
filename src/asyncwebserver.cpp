@@ -32,6 +32,8 @@ void initWebServer()
   // Scheduler
   server.on("/api/schedule", HTTP_POST, handleSetSchedule);
   server.on("/api/schedule/clear", HTTP_GET, handleClearSchedule);
+  server.on("/api/schedule/stop", HTTP_GET, handleStopSchedule);
+  server.on("/api/schedule/start", HTTP_GET, handleStartSchedule);
 
   server.begin();
 }

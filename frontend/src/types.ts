@@ -14,6 +14,7 @@ export interface ScheduleItem {
 }
 
 export interface StoreActions {
+  setIsActiveScheduler: (isActive: boolean) => void;
   setRotation: (rotation: number) => void;
   setPlugins: (plugins: []) => void;
   setPlugin: (plugin: number) => void;

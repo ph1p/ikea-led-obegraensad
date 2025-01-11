@@ -10,3 +10,5 @@ void handleSetBrightness(AsyncWebServerRequest *request);
 void handleGetData(AsyncWebServerRequest *request);
 void handleSetSchedule(AsyncWebServerRequest *request);
 void handleClearSchedule(AsyncWebServerRequest *request);
+void handleStopSchedule(AsyncWebServerRequest *request);
+void handleStartSchedule(AsyncWebServerRequest *request);

@@ -5,33 +5,86 @@ import { Tooltip } from './components/tooltip';
 import { useStore } from './contexts/store';
 import { useToast } from './contexts/toast';
 
+const API_URL = import.meta.env.PROD
+  ? `http://${window.location.host}/`
+  : import.meta.env.VITE_BASE_URL;
+
 export const ResetScheduleButton = () => {
-  const [_, actions] = useStore();
   const { toast } = useToast();
+
   return (
     <button
       onClick={async () => {
         try {
-          const response = await fetch(
-            `${
-              import.meta.env.PROD
-                ? `ws://${window.location.host}/`
-                : import.meta.env.VITE_BASE_URL
-            }api/schedule/clear`
-          );
+          const response = await fetch(`${API_URL}api/schedule/clear`);
 
           if (response.ok) {
-            actions.setSchedule([]);
             toast('Reset schedule successfully', 2000);
           }
         } catch {
           toast('Failed to reset schedule', 2000);
         }
       }}
-      class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+      class="w-full bg-blue-600 hover:bg-red-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
     >
       Reset Scheduler
     </button>
+  );
+};
+
+export const ToggleScheduleButton = () => {
+  const [store] = useStore();
+  const { toast } = useToast();
+
+  return (
+    <>
+      <button
+        onClick={async () => {
+          const infoResponse = await (await fetch(`${API_URL}api/info`)).json();
+
+          if (infoResponse.schedule.length > 0) {
+            try {
+              const response = await fetch(
+                `${API_URL}api/schedule/${
+                  store.isActiveScheduler ? 'stop' : 'start'
+                }`
+              );
+
+              if (response.ok) {
+                toast(
+                  `${
+                    !store.isActiveScheduler ? 'Stopped' : 'Started'
+                  } schedule successfully`,
+                  2000
+                );
+              }
+            } catch {
+              toast('Failed to reset schedule', 2000);
+            }
+          } else {
+            try {
+              const response = await fetch(`${API_URL}api/schedule`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `schedule=${JSON.stringify(store.schedule)}`,
+              });
+
+              if (response.ok) {
+                toast('Schedule saved successfully', 2000);
+              }
+            } catch (error) {
+              console.error('Failed to save schedule:', error);
+              toast('Failed to save schedule', 2000);
+            }
+          }
+        }}
+        class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+      >
+        {store.isActiveScheduler ? 'Stop' : 'Start'} Scheduler
+      </button>
+    </>
   );
 };
 
@@ -64,28 +117,6 @@ const Scheduler: Component = () => {
         i === index ? { ...item, duration } : item
       )
     );
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}api/schedule`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: `schedule=${JSON.stringify(store.schedule)}`,
-        }
-      );
-
-      if (response.ok) {
-        toast('Schedule saved successfully', 2000);
-      }
-    } catch (error) {
-      console.error('Failed to save schedule:', error);
-      toast('Failed to save schedule', 2000);
-    }
   };
 
   return (
@@ -185,18 +216,16 @@ const Scheduler: Component = () => {
                   Add Plugin
                 </Button>
 
-                <Button
-                  onClick={handleSubmit}
-                  disabled={store.schedule?.length === 0}
-                  class="hover:bg-blue-700 transition-colors"
-                >
-                  <i class="fa-solid fa-save mr-2" />
-                  Send Schedule
-                </Button>
+                <Show when={store.schedule.length > 0}>
+                  <div class="my-6 border-t border-gray-200" />
+                  <ToggleScheduleButton />
+                </Show>
 
                 <Show when={store.isActiveScheduler}>
                   <div class="my-6 border-t border-gray-200" />
-                  <ResetScheduleButton />
+                  <Tooltip text="Removes all items and resets state">
+                    <ResetScheduleButton />
+                  </Tooltip>
                 </Show>
               </div>
             </div>
