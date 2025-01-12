@@ -91,13 +91,13 @@ void Screen_::loadFromStorage()
   }
 
   setBrightness(storage.getUInt("brightness", 255));
-  currentRotation = storage.getUInt("rotation", 0);
+  setCurrentRotation(storage.getUInt("rotation", 0));
   storage.end();
 }
 
 void Screen_::persist()
 {
-  storage.begin("led-wall", false);
+  storage.begin("led-wall");
   storage.putBytes("data", renderBuffer_, ROWS * COLS);
   storage.putUInt("brightness", brightness_);
   storage.putUInt("rotation", currentRotation);
@@ -111,8 +111,11 @@ void Screen_::setup()
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", true);
   setBrightness(storage.getUInt("brightness", 255));
-  currentRotation = storage.getUInt("rotation", 0);
+  Screen.setCurrentRotation(storage.getUInt("rotation", 0));
+
   storage.end();
+#else
+  Screen.setCurrentRotation(0);
 #endif
 
   // TODO find proper unused pins for MISO and SS
@@ -151,50 +154,64 @@ void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
   this->renderBuffer_[y * COLS + x] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
 }
 
-void Screen_::transformCoordinates(int x, int y, int &outX, int &outY)
+void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
+{
+  currentRotation = rotation & 0x3;
+  updateTransformations();
+
+#ifdef ENABLE_STORAGE
+  if (shouldPersist)
+  {
+    storage.begin("led-wall", false);
+    storage.putUInt("rotation", Screen.currentRotation);
+    storage.end();
+  }
+#endif
+}
+
+void Screen_::updateTransformations()
 {
   int rotation = currentRotation & 0x3;
-
-  switch (rotation)
+  for (int idx = 0; idx < ROWS * COLS; idx++)
   {
-  default: // 0 degrees
-    outX = x;
-    outY = y;
-    break;
+    uint8_t pos = positions[idx];
+    int x = pos & (COLS - 1);
+    int y = pos >> __builtin_ctz(COLS);
+    int outX, outY;
 
-  case 1: // 90 degrees
-    outX = y;
-    outY = COLS - 1 - x;
-    break;
+    switch (rotation)
+    {
+    case 1: // 90 degrees
+      outX = y;
+      outY = COLS - 1 - x;
+      break;
+    case 2: // 180 degrees
+      outX = COLS - 1 - x;
+      outY = ROWS - 1 - y;
+      break;
+    case 3: // 270 degrees
+      outX = ROWS - 1 - y;
+      outY = x;
+      break;
+    default: // 0 degrees
+      outX = x;
+      outY = y;
+      break;
+    }
 
-  case 2: // 180 degrees
-    outX = COLS - 1 - x;
-    outY = ROWS - 1 - y;
-    break;
-
-  case 3: // 270 degrees
-    outX = ROWS - 1 - y;
-    outY = x;
-    break;
-  }
-
-  // Only apply bounds checking if needed
-  if (outX < 0 || outX >= COLS)
-  {
     outX = (outX + COLS) % COLS;
-  }
-  if (outY < 0 || outY >= ROWS)
-  {
     outY = (outY + ROWS) % ROWS;
+
+    transformedPositions_[idx] = outY * COLS + outX;
   }
 }
 
-IRAM_ATTR void Screen_::onScreenTimer()
+void Screen_::onScreenTimer()
 {
   Screen._render();
 }
 
-IRAM_ATTR void Screen_::_render()
+ICACHE_RAM_ATTR void Screen_::_render()
 {
   static unsigned long spi_bits[(ROWS * COLS + 8 * sizeof(unsigned long) - 1) / 8 / sizeof(unsigned long)] = {0};
   unsigned char *bits = (unsigned char *)spi_bits;
@@ -204,9 +221,7 @@ IRAM_ATTR void Screen_::_render()
 
   for (int idx = 0; idx < ROWS * COLS; idx++)
   {
-    int newX, newY;
-    uint8_t pos = positions[idx];
-    uint8_t brightness = renderBuffer_[(transformCoordinates(pos & (COLS - 1), pos >> __builtin_ctz(COLS), newX, newY), newY * COLS + newX)];
+    uint8_t brightness = renderBuffer_[transformedPositions_[idx]];
     bits[idx >> 3] |= (brightness > counter ? 0x80 : 0) >> (idx & 7);
   }
 

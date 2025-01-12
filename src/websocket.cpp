@@ -120,12 +120,7 @@ void onWsEvent(
           else if (!strcmp(event, "rotate"))
           {
             bool isRight = (bool)!strcmp(wsRequest["direction"], "right");
-            Screen.currentRotation = (Screen.currentRotation + (isRight ? 1 : 3)) % 4;
-#ifdef ENABLE_STORAGE
-            storage.begin("led-wall", false);
-            storage.putUInt("rotation", Screen.currentRotation);
-            storage.end();
-#endif
+            Screen.setCurrentRotation((Screen.currentRotation + (isRight ? 1 : 3)) % 4, true);
           }
           else if (!strcmp(event, "info"))
           {
