@@ -1,4 +1,4 @@
-import { Component, createSignal, For, Show } from 'solid-js';
+import { Component, createSignal, For, Index, Show } from 'solid-js';
 import Button from './components/button';
 import { Layout } from './components/layout/layout';
 import { Tooltip } from './components/tooltip';
@@ -97,16 +97,16 @@ const Scheduler: Component = () => {
   const handlePluginChange = (index: number, pluginId: number) => {
     actions.setSchedule(
       store.schedule.map((item, i) =>
-        i === index ? { ...item, pluginId } : item,
-      ),
+        i === index ? { ...item, pluginId } : item
+      )
     );
   };
 
   const handleDurationChange = (index: number, duration: number) => {
     actions.setSchedule(
       store.schedule.map((item, i) =>
-        i === index ? { ...item, duration } : item,
-      ),
+        i === index ? { ...item, duration } : item
+      )
     );
   };
 
@@ -126,11 +126,11 @@ const Scheduler: Component = () => {
                   </div>
                 }
               >
-                <For each={store.schedule}>
+                <Index each={store.schedule}>
                   {(item, index) => (
                     <div
                       class={`flex items-center gap-4 p-4 rounded-lg shadow-sm border hover:border-gray-200 transition-all duration-200 ${
-                        store.plugin === item.pluginId
+                        store.plugin === item().pluginId
                           ? 'bg-green-300 border-green-500'
                           : 'bg-white border-gray-100'
                       }`}
@@ -141,11 +141,11 @@ const Scheduler: Component = () => {
                           <>
                             <div class="flex-1">
                               <select
-                                value={item.pluginId}
+                                value={item().pluginId}
                                 onChange={(e) =>
                                   handlePluginChange(
-                                    index(),
-                                    parseInt(e.currentTarget.value),
+                                    index,
+                                    parseInt(e.currentTarget.value)
                                   )
                                 }
                                 class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:border-0"
@@ -164,23 +164,23 @@ const Scheduler: Component = () => {
                                 <input
                                   type="number"
                                   min="1"
-                                  value={item.duration}
+                                  value={item().duration}
                                   onInput={(e) =>
                                     handleDurationChange(
-                                      index(),
-                                      parseInt(e.currentTarget.value),
+                                      index,
+                                      parseInt(e.currentTarget.value)
                                     )
                                   }
                                   class="pr-16 pl-3 py-2 w-32 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:border-0"
                                 />
                                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                                  {item.duration > 1 ? 'seconds' : 'second'}
+                                  {item().duration > 1 ? 'seconds' : 'second'}
                                 </span>
                               </div>
                             </div>
 
                             <button
-                              onClick={() => handleRemoveItem(index())}
+                              onClick={() => handleRemoveItem(index)}
                               class="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
                               aria-label="Remove item"
                             >
@@ -190,21 +190,21 @@ const Scheduler: Component = () => {
                         }
                       >
                         <div class="w-full">
-                          {store.plugins?.find((p) => p.id === item.pluginId)
+                          {store.plugins?.find((p) => p.id === item().pluginId)
                             ?.name ?? 'Unknown Plugin'}
                         </div>
                         <div class="flex items-center gap-3">
                           <div class="relative">
-                            {item.duration}
+                            {item().duration}
                             <span class="ml-2 text-sm text-gray-500">
-                              {item.duration > 1 ? 'seconds' : 'second'}
+                              {item().duration > 1 ? 'seconds' : 'second'}
                             </span>
                           </div>
                         </div>
                       </Show>
                     </div>
                   )}
-                </For>
+                </Index>
               </Show>
             </div>
           </div>
