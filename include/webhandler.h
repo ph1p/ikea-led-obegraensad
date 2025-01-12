@@ -12,3 +12,4 @@ void handleSetSchedule(AsyncWebServerRequest *request);
 void handleClearSchedule(AsyncWebServerRequest *request);
 void handleStopSchedule(AsyncWebServerRequest *request);
 void handleStartSchedule(AsyncWebServerRequest *request);
+void handleClearStorage(AsyncWebServerRequest *request);

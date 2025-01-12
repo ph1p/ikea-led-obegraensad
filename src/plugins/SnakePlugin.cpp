@@ -193,7 +193,6 @@ void SnakePlugin::findDirection()
     else
     {
       // killed yourself - no possible directions
-      Serial.println("congrats, you killed yourself! (no possible movements)");
       end();
     }
   }
@@ -269,8 +268,6 @@ void SnakePlugin::moveSnake(uint newpos)
 
 void SnakePlugin::end()
 {
-  Serial.println("GAME OVER!");
-
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);

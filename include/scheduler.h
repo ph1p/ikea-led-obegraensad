@@ -27,11 +27,12 @@ public:
   std::vector<ScheduleItem> schedule;
 
   void addItem(int pluginId, unsigned long durationSeconds);
-  void clearSchedule();
+  void clearSchedule(bool emptyStorage = false);
   void start();
   void stop();
   void update();
-  void reset();
+  void init();
+  bool setScheduleByJSONString(String scheduleJson);
 
 private:
   void switchToCurrentPlugin();

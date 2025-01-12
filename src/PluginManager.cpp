@@ -23,18 +23,9 @@ void PluginManager::init()
 {
     Screen.clear();
     std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
-    for (Plugin *plugin : allPlugins)
-    {
-        Serial.print("init plugin: ");
-        Serial.print(plugin->getName());
-        Serial.print(" id: ");
-        Serial.println(plugin->getId());
-    }
 
 #ifdef ENABLE_STORAGE
     storage.begin("led-wall", true);
-    Serial.print("restore plugin: ");
-    Serial.println(storage.getInt("current-plugin"));
     pluginManager.setActivePluginById(storage.getInt("current-plugin"));
     storage.end();
 #endif
@@ -51,8 +42,6 @@ void PluginManager::persistActivePlugin()
     storage.begin("led-wall", false);
     if (activePlugin)
     {
-        Serial.print("persist plugin: ");
-        Serial.println(activePlugin->getId());
         storage.putInt("current-plugin", activePlugin->getId());
     }
     storage.end();
@@ -80,9 +69,6 @@ void PluginManager::setActivePlugin(const char *pluginName)
     {
         if (strcmp(plugin->getName(), pluginName) == 0)
         {
-            Serial.print("activate: ");
-            Serial.println(plugin->getName());
-
             Screen.clear();
             activePlugin = plugin;
             activePlugin->setup();
@@ -158,9 +144,6 @@ size_t PluginManager::getNumPlugins()
 
 void PluginManager::activateNextPlugin()
 {
-    Serial.print("next plugin: ");
-    Serial.println(activePlugin->getId() + 1);
-
     if (activePlugin)
     {
         if (activePlugin->getId() <= getNumPlugins() - 1)

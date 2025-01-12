@@ -154,6 +154,7 @@ void setup()
 #endif
 
   pluginManager.init();
+  Scheduler.init();
 }
 
 void loop()

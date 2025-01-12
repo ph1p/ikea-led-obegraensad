@@ -35,6 +35,8 @@ void initWebServer()
   server.on("/api/schedule/stop", HTTP_GET, handleStopSchedule);
   server.on("/api/schedule/start", HTTP_GET, handleStartSchedule);
 
+  server.on("/api/storage/clear", HTTP_GET, handleClearStorage);
+
   server.begin();
 }
 

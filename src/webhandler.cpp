@@ -158,37 +158,12 @@ void handleGetInfo(AsyncWebServerRequest *request)
 
 void handleSetSchedule(AsyncWebServerRequest *request)
 {
-    String scheduleJson = request->arg("schedule");
+    bool scheduleIsSet = Scheduler.setScheduleByJSONString(request->arg("schedule"));
 
-    if (scheduleJson.length() == 0)
+    if (!scheduleIsSet)
     {
-        request->send(400, "text/plain", "Schedule parameter is required");
+        request->send(400, "text/plain", "Schedule cannot be set");
         return;
-    }
-
-    DynamicJsonDocument doc(1024);
-    DeserializationError error = deserializeJson(doc, scheduleJson);
-
-    if (error)
-    {
-        request->send(400, "text/plain", "Invalid JSON format");
-        return;
-    }
-
-    Scheduler.clearSchedule();
-
-    JsonArray schedule = doc.as<JsonArray>();
-    for (JsonObject item : schedule)
-    {
-        if (!item.containsKey("pluginId") || !item.containsKey("duration"))
-        {
-            request->send(400, "text/plain", "Each schedule item must have pluginId and duration");
-            return;
-        }
-
-        int pluginId = item["pluginId"].as<int>();
-        unsigned long duration = item["duration"].as<unsigned long>();
-        Scheduler.addItem(pluginId, duration);
     }
 
     Scheduler.start();
@@ -198,7 +173,7 @@ void handleSetSchedule(AsyncWebServerRequest *request)
 
 void handleClearSchedule(AsyncWebServerRequest *request)
 {
-    Scheduler.clearSchedule();
+    Scheduler.clearSchedule(true);
     sendInfo();
     request->send(200, "text/plain", "Schedule cleared");
 }
@@ -229,4 +204,14 @@ void handleStartSchedule(AsyncWebServerRequest *request)
     {
         request->send(404, "text/plain", "No schedule found");
     }
+}
+
+void handleClearStorage(AsyncWebServerRequest *request)
+{
+#ifdef ENABLE_STORAGE
+    storage.begin("led-wall", false);
+    storage.clear();
+    storage.end();
+    request->send(200, "text/plain", "Storage cleared");
+#endif
 }

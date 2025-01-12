@@ -42,24 +42,15 @@ export const ToggleScheduleButton = () => {
         onClick={async () => {
           const infoResponse = await (await fetch(`${API_URL}api/info`)).json();
 
-          if (infoResponse.schedule.length > 0) {
+          if (store.isActiveScheduler) {
             try {
-              const response = await fetch(
-                `${API_URL}api/schedule/${
-                  store.isActiveScheduler ? 'stop' : 'start'
-                }`
-              );
+              const response = await fetch(`${API_URL}api/schedule/stop`);
 
               if (response.ok) {
-                toast(
-                  `${
-                    !store.isActiveScheduler ? 'Stopped' : 'Started'
-                  } schedule successfully`,
-                  2000
-                );
+                toast('Stopped schedule successfully', 2000);
               }
             } catch {
-              toast('Failed to reset schedule', 2000);
+              toast('Failed to stop schedule', 2000);
             }
           } else {
             try {
@@ -72,11 +63,11 @@ export const ToggleScheduleButton = () => {
               });
 
               if (response.ok) {
-                toast('Schedule saved successfully', 2000);
+                toast('Schedule started successfully', 2000);
               }
             } catch (error) {
-              console.error('Failed to save schedule:', error);
-              toast('Failed to save schedule', 2000);
+              console.error('Failed to start schedule:', error);
+              toast('Failed to start schedule', 2000);
             }
           }
         }}
@@ -106,16 +97,16 @@ const Scheduler: Component = () => {
   const handlePluginChange = (index: number, pluginId: number) => {
     actions.setSchedule(
       store.schedule.map((item, i) =>
-        i === index ? { ...item, pluginId } : item
-      )
+        i === index ? { ...item, pluginId } : item,
+      ),
     );
   };
 
   const handleDurationChange = (index: number, duration: number) => {
     actions.setSchedule(
       store.schedule.map((item, i) =>
-        i === index ? { ...item, duration } : item
-      )
+        i === index ? { ...item, duration } : item,
+      ),
     );
   };
 
@@ -137,60 +128,80 @@ const Scheduler: Component = () => {
               >
                 <For each={store.schedule}>
                   {(item, index) => (
-                    <div class="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                      <div class="flex-1">
-                        <select
-                          value={item.pluginId}
-                          onChange={(e) =>
-                            handlePluginChange(
-                              index(),
-                              parseInt(e.currentTarget.value)
-                            )
-                          }
-                          class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-                        >
-                          <For each={store.plugins}>
-                            {(plugin) => (
-                              <option value={plugin.id}>{plugin.name}</option>
-                            )}
-                          </For>
-                        </select>
-                      </div>
+                    <div
+                      class={`flex items-center gap-4 p-4 rounded-lg shadow-sm border hover:border-gray-200 transition-all duration-200 ${
+                        store.plugin === item.pluginId
+                          ? 'bg-green-300 border-green-500'
+                          : 'bg-white border-gray-100'
+                      }`}
+                    >
+                      <Show
+                        when={store.isActiveScheduler}
+                        fallback={
+                          <>
+                            <div class="flex-1">
+                              <select
+                                value={item.pluginId}
+                                onChange={(e) =>
+                                  handlePluginChange(
+                                    index(),
+                                    parseInt(e.currentTarget.value),
+                                  )
+                                }
+                                class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:border-0"
+                              >
+                                <For each={store.plugins}>
+                                  {(plugin) => (
+                                    <option value={plugin.id}>
+                                      {plugin.name}
+                                    </option>
+                                  )}
+                                </For>
+                              </select>
+                            </div>
+                            <div class="flex items-center gap-3">
+                              <div class="relative">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={item.duration}
+                                  onInput={(e) =>
+                                    handleDurationChange(
+                                      index(),
+                                      parseInt(e.currentTarget.value),
+                                    )
+                                  }
+                                  class="pr-16 pl-3 py-2 w-32 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:border-0"
+                                />
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                                  {item.duration > 1 ? 'seconds' : 'second'}
+                                </span>
+                              </div>
+                            </div>
 
-                      <div class="flex items-center gap-3">
-                        <div class="relative">
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.duration}
-                            onInput={(e) =>
-                              handleDurationChange(
-                                index(),
-                                parseInt(e.currentTarget.value)
-                              )
-                            }
-                            class="pr-16 pl-3 py-2 w-32 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-                          />
-                          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                            {item.duration > 1 ? 'seconds' : 'second'}
-                          </span>
+                            <button
+                              onClick={() => handleRemoveItem(index())}
+                              class="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
+                              aria-label="Remove item"
+                            >
+                              <i class="fas fa-trash-alt text-lg" />
+                            </button>
+                          </>
+                        }
+                      >
+                        <div class="w-full">
+                          {store.plugins?.find((p) => p.id === item.pluginId)
+                            ?.name ?? 'Unknown Plugin'}
                         </div>
-                      </div>
-
-                      <Show when={store.plugin === item.pluginId}>
-                        <div class="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-md">
-                          <i class="fas fa-check text-sm" />
-                          <span class="text-sm font-medium">Active</span>
+                        <div class="flex items-center gap-3">
+                          <div class="relative">
+                            {item.duration}
+                            <span class="ml-2 text-sm text-gray-500">
+                              {item.duration > 1 ? 'seconds' : 'second'}
+                            </span>
+                          </div>
                         </div>
                       </Show>
-
-                      <button
-                        onClick={() => handleRemoveItem(index())}
-                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
-                        aria-label="Remove item"
-                      >
-                        <i class="fas fa-trash-alt text-lg" />
-                      </button>
                     </div>
                   )}
                 </For>

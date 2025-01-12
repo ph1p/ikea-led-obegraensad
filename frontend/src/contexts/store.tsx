@@ -20,7 +20,7 @@ const ws = createReconnectingWS(
     import.meta.env.PROD
       ? `ws://${window.location.host}/`
       : import.meta.env.VITE_WS_URL
-  }ws`
+  }ws`,
 );
 const wsState = createWSState(ws);
 
@@ -66,7 +66,7 @@ const StoreContext = createContext<[Store, StoreActions]>(store);
 export const StoreProvider: ParentComponent = (props) => {
   const messageEvent = createEventSignal<{ message: MessageEvent }>(
     ws,
-    'message'
+    'message',
   );
 
   createEffect(() => {
@@ -75,7 +75,7 @@ export const StoreProvider: ParentComponent = (props) => {
     switch (json.event) {
       case 'minimal-info':
         actions.setSystemStatus(
-          Object.values(SYSTEM_STATUS)[json.status as number]
+          Object.values(SYSTEM_STATUS)[json.status as number],
         );
         actions.setRotation(json.rotation);
         actions.setBrightness(json.brightness);
@@ -85,7 +85,7 @@ export const StoreProvider: ParentComponent = (props) => {
       case 'info':
         batch(() => {
           actions.setSystemStatus(
-            Object.values(SYSTEM_STATUS)[json.status as number]
+            Object.values(SYSTEM_STATUS)[json.status as number],
           );
           actions.setRotation(json.rotation);
           actions.setBrightness(json.brightness);

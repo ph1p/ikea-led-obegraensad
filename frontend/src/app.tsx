@@ -35,7 +35,7 @@ export const App: Component = () => {
     );
 
   const handleRotate = (turnRight = false) => {
-    let currentRotation = store?.rotation || 0;
+    let currentRotation = store.rotation || 0;
     currentRotation = turnRight
       ? currentRotation > 3
         ? 1
@@ -44,8 +44,8 @@ export const App: Component = () => {
         ? 3
         : currentRotation - 1;
 
-    actions?.setRotation(currentRotation);
-    actions?.send(
+    actions.setRotation(currentRotation);
+    actions.send(
       JSON.stringify({
         event: 'rotate',
         direction: turnRight ? 'right' : 'left',
@@ -55,8 +55,8 @@ export const App: Component = () => {
 
   const handleLoadImage = () => {
     loadImageAndGetDataArray((data) => {
-      actions?.setLeds(
-        store?.indexMatrix.map((index) => (data[index] ? 255 : 0)),
+      actions.setLeds(
+        store.indexMatrix.map((index) => (data[index] ? 255 : 0)),
       );
       wsMessage('screen', { data });
     });
@@ -96,10 +96,10 @@ export const App: Component = () => {
   const renderLedMatrix = () => (
     <div class="grid p-8 h-full justify-center items-center sm:p-4 sm:m-0">
       <Show
-        when={store?.plugin === 1 && !store.isActiveScheduler}
+        when={store.plugin === 1 && !store.isActiveScheduler}
         fallback={
           <Show
-            when={!store?.isActiveScheduler}
+            when={!store.isActiveScheduler}
             fallback={
               <ScreenInfo>
                 <h2 class="text-4xl">Scheduler is running</h2>
@@ -117,12 +117,12 @@ export const App: Component = () => {
       >
         <div
           style={{
-            opacity: (store?.brightness || 255) / 255,
+            opacity: (store.brightness || 255) / 255,
           }}
         >
           <LedMatrix
-            disabled={store?.plugin !== 1}
-            data={store?.leds || []}
+            disabled={store.plugin !== 1}
+            data={store.leds || []}
             indexData={rotatedMatrix()}
             onSetLed={(data) => {
               wsMessage('led', data);
