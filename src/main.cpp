@@ -27,6 +27,7 @@
 #include "plugins/SnakePlugin.h"
 #include "plugins/StarsPlugin.h"
 #include "plugins/PongClockPlugin.h"
+#include "plugins/TickingClockPlugin.h"
 #include "plugins/DDPPlugin.h"
 
 #ifdef ENABLE_SERVER
@@ -35,7 +36,6 @@
 #include "plugins/ClockPlugin.h"
 #include "plugins/WeatherPlugin.h"
 #include "plugins/AnimationPlugin.h"
-#include "plugins/TickingClockPlugin.h"
 #endif
 
 #include "asyncwebserver.h"
@@ -142,14 +142,14 @@ void setup()
   pluginManager.addPlugin(new CirclePlugin());
   pluginManager.addPlugin(new RainPlugin());
   pluginManager.addPlugin(new FireworkPlugin());
-  pluginManager.addPlugin(new PongClockPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
   pluginManager.addPlugin(new ClockPlugin());
+  pluginManager.addPlugin(new PongClockPlugin());
+  pluginManager.addPlugin(new TickingClockPlugin());
   pluginManager.addPlugin(new WeatherPlugin());
   pluginManager.addPlugin(new AnimationPlugin());
-  pluginManager.addPlugin(new TickingClockPlugin());
   pluginManager.addPlugin(new DDPPlugin());
 #endif
 
