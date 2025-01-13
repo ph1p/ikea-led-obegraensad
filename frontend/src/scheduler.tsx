@@ -40,8 +40,6 @@ export const ToggleScheduleButton = () => {
     <>
       <button
         onClick={async () => {
-          const infoResponse = await (await fetch(`${API_URL}api/info`)).json();
-
           if (store.isActiveScheduler) {
             try {
               const response = await fetch(`${API_URL}api/schedule/stop`);
@@ -97,16 +95,16 @@ const Scheduler: Component = () => {
   const handlePluginChange = (index: number, pluginId: number) => {
     actions.setSchedule(
       store.schedule.map((item, i) =>
-        i === index ? { ...item, pluginId } : item
-      )
+        i === index ? { ...item, pluginId } : item,
+      ),
     );
   };
 
   const handleDurationChange = (index: number, duration: number) => {
     actions.setSchedule(
       store.schedule.map((item, i) =>
-        i === index ? { ...item, duration } : item
-      )
+        i === index ? { ...item, duration } : item,
+      ),
     );
   };
 
@@ -145,7 +143,7 @@ const Scheduler: Component = () => {
                                 onChange={(e) =>
                                   handlePluginChange(
                                     index,
-                                    parseInt(e.currentTarget.value)
+                                    parseInt(e.currentTarget.value),
                                   )
                                 }
                                 class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:border-0"
@@ -168,7 +166,7 @@ const Scheduler: Component = () => {
                                   onInput={(e) =>
                                     handleDurationChange(
                                       index,
-                                      parseInt(e.currentTarget.value)
+                                      parseInt(e.currentTarget.value),
                                     )
                                   }
                                   class="pr-16 pl-3 py-2 w-32 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:border-0"

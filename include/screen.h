@@ -47,7 +47,7 @@ public:
   void setCurrentRotation(int rotation, bool shouldPersist = false);
 
   uint8_t getCurrentBrightness() const;
-  void setBrightness(uint8_t brightness);
+  void setBrightness(uint8_t brightness, bool shouldStore = false);
 
   void setRenderBuffer(const uint8_t *renderBuffer, bool grays = false);
   uint8_t *getRenderBuffer();

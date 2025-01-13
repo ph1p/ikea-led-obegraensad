@@ -24,7 +24,7 @@ interface SidebarProps {
   onPersist: () => void;
   onLoad: () => void;
   onPluginChange: (pluginId: number) => void;
-  onBrightnessChange: (value: number) => void;
+  onBrightnessChange: (value: number, shouldSend?: boolean) => void;
   onPersistPlugin: () => void;
 }
 
@@ -104,6 +104,9 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             onInput={(e) =>
               props.onBrightnessChange(parseInt(e.currentTarget.value))
             }
+            onPointerUp={(e) =>
+              props.onBrightnessChange(store.brightness, true)
+            }
           />
           <div class="text-sm text-gray-600 text-right">
             {Math.round(((store?.brightness || 255) / 255) * 100)}%
@@ -172,7 +175,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
             >
               <i class="fa-regular fa-clock fa- mr-2" />
-              Plugin Scheduler
+              Plugin Scheduler ({store.schedule.length})
             </a>
           </Tooltip>
         </div>

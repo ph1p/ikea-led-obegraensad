@@ -128,7 +128,8 @@ void onWsEvent(
           }
           else if (!strcmp(event, "brightness"))
           {
-            Screen.setBrightness(wsRequest["brightness"].as<uint8_t>());
+            uint8_t brightness = wsRequest["brightness"].as<uint8_t>();
+            Screen.setBrightness(brightness, true);
           }
         }
       }

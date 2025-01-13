@@ -83,9 +83,11 @@ export const App: Component = () => {
     toast('Mode changed', 1000);
   };
 
-  const handleBrightnessChange = (value: number) => {
+  const handleBrightnessChange = (value: number, shouldSend = false) => {
     actions?.setBrightness(value);
-    wsMessage('brightness', { brightness: value });
+    if (shouldSend) {
+      wsMessage('brightness', { brightness: value });
+    }
   };
 
   const handlePersistPlugin = () => {

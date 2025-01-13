@@ -10,7 +10,6 @@
 #endif
 #include <ArduinoJson.h>
 #include "PluginManager.h"
-
 class WeatherPlugin : public Plugin
 {
 private:

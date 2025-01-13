@@ -88,7 +88,7 @@ void handleSetBrightness(AsyncWebServerRequest *request)
         return;
     }
 
-    Screen.setBrightness(value);
+    Screen.setBrightness(value, true);
 
     request->send(200, "text/plain");
 }

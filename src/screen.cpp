@@ -11,13 +11,22 @@ uint8_t Screen_::getCurrentBrightness() const
   return brightness_;
 }
 
-void Screen_::setBrightness(uint8_t brightness)
+void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
 {
   brightness_ = brightness;
 
 #ifndef ESP8266
   // analogWrite disable the timer1 interrupt on esp8266
   analogWrite(PIN_ENABLE, 255 - brightness);
+#endif
+
+#ifdef ENABLE_STORAGE
+  if (shouldStore)
+  {
+    storage.begin("led-wall", false);
+    storage.putUInt("brightness", brightness);
+    storage.end();
+  }
 #endif
 }
 
