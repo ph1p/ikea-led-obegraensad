@@ -346,7 +346,7 @@ void PongClockPlugin::loop()
 
 
 
-    Screen.clearRect(0, 6, 16, 10);
+    Screen.clearRect(0, 5, 16, 11);
 
     // draw paddles
     Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX - 1, PongClockPlugin::LED_TYPE_ON, 255);
