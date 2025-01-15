@@ -35,16 +35,8 @@ export const App: Component = () => {
     );
 
   const handleRotate = (turnRight = false) => {
-    let currentRotation = store.rotation || 0;
-    currentRotation = turnRight
-      ? currentRotation > 3
-        ? 1
-        : currentRotation + 1
-      : currentRotation <= 0
-        ? 3
-        : currentRotation - 1;
-
-    actions.setRotation(currentRotation);
+    const currentRotation = store.rotation || 0;
+    actions.setRotation(((currentRotation + (turnRight ? 1 : -1)) + 4) % 4);
     actions.send(
       JSON.stringify({
         event: 'rotate',
