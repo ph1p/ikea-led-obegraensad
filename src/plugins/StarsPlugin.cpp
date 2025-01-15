@@ -2,6 +2,7 @@
 
 void StarsPlugin::setup()
 {
+  numStars = 25;
   for (int i = 0; i < numStars; i++)
   {
     stars[i].x = random(0, 16);
@@ -13,14 +14,14 @@ void StarsPlugin::setup()
 
 void StarsPlugin::loop()
 {
-  for (int fadeStep = 255; fadeStep >= 0; fadeStep -= 8)
+  for (int fadeStep = 255; fadeStep >= 0; fadeStep -= 4)
   {
     for (int i = 0; i < numStars; i++)
     {
       if (stars[i].brightness > 0)
       {
         unsigned long currentTime = millis();
-        if (currentTime - stars[i].lastUpdateTime >= 100)
+        if (currentTime - stars[i].lastUpdateTime >= 128)
         {
           stars[i].brightness = max(0, stars[i].brightness - 8);
           Screen.setPixel(stars[i].x, stars[i].y, 1, stars[i].brightness);
@@ -36,7 +37,7 @@ void StarsPlugin::loop()
         for (int brightness = 0; brightness <= stars[i].brightness; brightness += 5)
         {
           unsigned long currentTime = millis();
-          if (currentTime - stars[i].lastUpdateTime >= 50)
+          if (currentTime - stars[i].lastUpdateTime >= 64)
           {
             Screen.setPixel(stars[i].x, stars[i].y, 1, brightness);
             stars[i].lastUpdateTime = currentTime;
@@ -45,6 +46,12 @@ void StarsPlugin::loop()
       }
     }
   }
+}
+
+void StarsPlugin::teardown()
+{
+  numStars = 0;
+  Screen.clear();
 }
 
 const char *StarsPlugin::getName() const

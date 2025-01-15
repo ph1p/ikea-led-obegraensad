@@ -12,11 +12,12 @@ struct Star
 class StarsPlugin : public Plugin
 {
 private:
-  const int numStars = 25;
+  int numStars = 25;
   Star stars[25];
 
 public:
   void setup() override;
   void loop() override;
+  void teardown() override;
   const char *getName() const override;
 };
