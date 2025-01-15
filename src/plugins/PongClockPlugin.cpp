@@ -211,13 +211,19 @@ void PongClockPlugin::loop()
 {
   unsigned long currentMillis = millis();
 
-  if (!pongCelebrate)
+  if (getLocalTime(&timeinfo))
   {
-    if (currentMillis > pongShowtime)
+    // clear screen and draw time
+    if (previousHour != timeinfo.tm_hour || previousMinutes != timeinfo.tm_min)
     {
+      drawDigits();
+    }
 
-      if (getLocalTime(&timeinfo))
+    if (!pongCelebrate)
+    {
+      if (currentMillis > pongShowtime)
       {
+
         if (previousHour != timeinfo.tm_hour)
         {
           pongScoredHour = true;
@@ -228,132 +234,132 @@ void PongClockPlugin::loop()
         }
         previousMinutes = timeinfo.tm_min;
         previousHour = timeinfo.tm_hour;
-      }
 
-      pongShowtime = currentMillis + PongClockPlugin::SPEED;
+        pongShowtime = currentMillis + PongClockPlugin::SPEED;
 
-      // left side
-      if ((ballX + sin(degToRad(ballAngle)) * X_MAX) + .5 > 256 - X_MAX)
-      {
-        if (!pongScoredMinute)
+        // left side
+        if ((ballX + sin(degToRad(ballAngle)) * X_MAX) + .5 > 256 - X_MAX)
         {
-          if (getScreenIndex(ballX, ballY) < getScreenIndex(255, pongPaddleLeftY))
-            ballAngle = realRandom(225 - 25, 225 + 25);
-          else if (getScreenIndex(ballX, ballY) == getScreenIndex(255, pongPaddleLeftY) + 1)
-            swapXdirection();
-          else if (getScreenIndex(ballX, ballY) == getScreenIndex(255, pongPaddleLeftY) - 1)
-            swapXdirection();
+          if (!pongScoredMinute)
+          {
+            if (getScreenIndex(ballX, ballY) < getScreenIndex(255, pongPaddleLeftY))
+              ballAngle = realRandom(225 - 25, 225 + 25);
+            else if (getScreenIndex(ballX, ballY) == getScreenIndex(255, pongPaddleLeftY) + 1)
+              swapXdirection();
+            else if (getScreenIndex(ballX, ballY) == getScreenIndex(255, pongPaddleLeftY) - 1)
+              swapXdirection();
+            else
+              ballAngle = realRandom(315 - 25, 315 + 25);
+            pongBallDirection = 1;
+            pongPaddleRightStart = pongPaddleRightY;
+            pongPaddleRightTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), (Y_MAX * Y_MIN), 255 - Y_MAX); // Restrict paddle from mixin with digits
+          }
           else
-            ballAngle = realRandom(315 - 25, 315 + 25);
-          pongBallDirection = 1;
-          pongPaddleRightStart = pongPaddleRightY;
-          pongPaddleRightTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), (Y_MAX * Y_MIN), 255 - Y_MAX); // Restrict paddle from mixin with digits
+          {
+            pongCelebrate = true;
+            pongCelebrationEnd = currentMillis + 2000;
+          }
         }
-        else
+        // right side
+        else if ((ballX + sin(degToRad(ballAngle)) * Y_MAX) + .5 < Y_MAX)
         {
-          pongCelebrate = true;
-          pongCelebrationEnd = currentMillis + 2000;
-        }
-      }
-      // right side
-      else if ((ballX + sin(degToRad(ballAngle)) * Y_MAX) + .5 < Y_MAX)
-      {
-        if (!pongScoredHour)
-        {
-          if (getScreenIndex(ballX, ballY) < getScreenIndex(0, pongPaddleRightY))
-            ballAngle = realRandom(135 - 25, 135 + 25);
-          else if (getScreenIndex(ballX, ballY) == getScreenIndex(0, pongPaddleRightY) + 1)
-            swapXdirection();
-          else if (getScreenIndex(ballX, ballY) == getScreenIndex(0, pongPaddleRightY) - 1)
-            swapXdirection();
+          if (!pongScoredHour)
+          {
+            if (getScreenIndex(ballX, ballY) < getScreenIndex(0, pongPaddleRightY))
+              ballAngle = realRandom(135 - 25, 135 + 25);
+            else if (getScreenIndex(ballX, ballY) == getScreenIndex(0, pongPaddleRightY) + 1)
+              swapXdirection();
+            else if (getScreenIndex(ballX, ballY) == getScreenIndex(0, pongPaddleRightY) - 1)
+              swapXdirection();
+            else
+              ballAngle = realRandom(45 - 25, 45 + 25);
+            pongBallDirection = 0;
+            pongPaddleLeftStart = pongPaddleLeftY;
+            pongPaddleLeftTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), (Y_MAX * Y_MIN), 255 - Y_MAX); // Restrict paddle from mixin with digits
+          }
           else
-            ballAngle = realRandom(45 - 25, 45 + 25);
-          pongBallDirection = 0;
-          pongPaddleLeftStart = pongPaddleLeftY;
-          pongPaddleLeftTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), (Y_MAX * Y_MIN), 255 - Y_MAX); // Restrict paddle from mixin with digits
+          {
+            pongCelebrate = true;
+            pongCelebrationEnd = currentMillis + 2000;
+          }
         }
-        else
-        {
-          pongCelebrate = true;
-          pongCelebrationEnd = currentMillis + 2000;
-        }
+        if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 < (Y_MIN * Y_MAX)) // Avoid mixing ball with the Clock Digits
+          swapYdirection();
+        else if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 > 256)
+          swapYdirection();
+
+        ballX = ballX + sin(degToRad(ballAngle)) * X_MAX + .5;
+        ballY = ballY + cos(degToRad(ballAngle)) * Y_MAX + .5;
       }
-      if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 < (Y_MIN * Y_MAX)) // Avoid mixing ball with the Clock Digits
-        swapYdirection();
-      else if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 > 256)
-        swapYdirection();
-
-      ballX = ballX + sin(degToRad(ballAngle)) * X_MAX + .5;
-      ballY = ballY + cos(degToRad(ballAngle)) * Y_MAX + .5;
     }
-  }
-  else if (currentMillis > pongCelebrationEnd)
-  {
-    pongReset = true;
-    // Switch to new minute after celebration ends so score is updated afterwards
-    current_hour = timeinfo.tm_hour;
-    current_minute = timeinfo.tm_min;
-  }
-
-  if (pongReset)
-  {
-    reset();
-  }
-
-  // Blink the ball
-  if (pongCelebrate)
-  {
-    if (currentMillis > nextUpdateMillis)
+    else if (currentMillis > pongCelebrationEnd)
     {
-      if (ballBrightness == 255)
-        ballBrightness = 0;
-      else
-        ballBrightness = 255;
-      nextUpdateMillis = currentMillis + 100;
+      pongReset = true;
+      // Switch to new minute after celebration ends so score is updated afterwards
+      current_hour = timeinfo.tm_hour;
+      current_minute = timeinfo.tm_min;
     }
-  }
 
-  // manage paddles
-  if (pongBallDirection == 0)
-  {
-    int offset = 0;
-    if (pongScoredMinute)
+    if (pongReset)
     {
-      if (pongPaddleLeftTarget < 3 * X_MAX)
-        offset = 2 * X_MAX;
-      else
-        offset = -2 * X_MAX;
+      reset();
     }
-    pongPaddleLeftY = map(ballX, X_MAX, 256 - X_MAX, pongPaddleLeftStart, pongPaddleLeftTarget + offset);
-  }
-  else
-  {
-    int offset = 0;
-    if (pongScoredHour)
+
+    // Blink the ball
+    if (pongCelebrate)
     {
-      if (pongPaddleRightTarget < 3 * Y_MAX)
-        offset = 2 * Y_MAX;
-      else
-        offset = -2 * Y_MAX;
+      if (currentMillis > nextUpdateMillis)
+      {
+        if (ballBrightness == 255)
+          ballBrightness = 0;
+        else
+          ballBrightness = 255;
+        nextUpdateMillis = currentMillis + 100;
+      }
     }
-    pongPaddleRightY = map(ballX, 256 - Y_MAX, Y_MAX, pongPaddleRightStart, pongPaddleRightTarget + offset);
+
+    // manage paddles
+    if (pongBallDirection == 0)
+    {
+      int offset = 0;
+      if (pongScoredMinute)
+      {
+        if (pongPaddleLeftTarget < 3 * X_MAX)
+          offset = 2 * X_MAX;
+        else
+          offset = -2 * X_MAX;
+      }
+      pongPaddleLeftY = map(ballX, X_MAX, 256 - X_MAX, pongPaddleLeftStart, pongPaddleLeftTarget + offset);
+    }
+    else
+    {
+      int offset = 0;
+      if (pongScoredHour)
+      {
+        if (pongPaddleRightTarget < 3 * Y_MAX)
+          offset = 2 * Y_MAX;
+        else
+          offset = -2 * Y_MAX;
+      }
+      pongPaddleRightY = map(ballX, 256 - Y_MAX, Y_MAX, pongPaddleRightStart, pongPaddleRightTarget + offset);
+    }
+
+
+
+    Screen.clearRect(0, 6, 16, 10);
+
+    // draw paddles
+    Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX - 1, PongClockPlugin::LED_TYPE_ON, 255);
+    Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, 255);
+    Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX + 1, PongClockPlugin::LED_TYPE_ON, 255);
+
+    Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX - 1, PongClockPlugin::LED_TYPE_ON, 255);
+    Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, 255);
+    Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX + 1, PongClockPlugin::LED_TYPE_ON, 255);
+
+    // draw ball
+    Screen.setPixel(ballX / PongClockPlugin::X_MAX, ballY / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, ballBrightness);
   }
-
-  // clear screen and draw time
-  Screen.clear();
-  drawDigits();
-
-  // draw paddles
-  Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX - 1, PongClockPlugin::LED_TYPE_ON, 255);
-  Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, 255);
-  Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX + 1, PongClockPlugin::LED_TYPE_ON, 255);
-
-  Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX - 1, PongClockPlugin::LED_TYPE_ON, 255);
-  Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, 255);
-  Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX + 1, PongClockPlugin::LED_TYPE_ON, 255);
-
-  // draw ball
-  Screen.setPixel(ballX / PongClockPlugin::X_MAX, ballY / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, ballBrightness);
 }
 
 const char *PongClockPlugin::getName() const

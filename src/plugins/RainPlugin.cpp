@@ -24,11 +24,11 @@ void RainPlugin::loop()
       if (brightness <= 25)
         brightness = 0;
       else if (brightness <= 50)
-        brightness = 25;
+        brightness = 16;
       else if (brightness <= 75)
-        brightness = 50;
+        brightness = 32;
       else
-        brightness = 75;
+        brightness = 64;
 
       Screen.setPixel(x, y, 1, brightness);
     }
@@ -60,7 +60,7 @@ void RainPlugin::loop()
     }
   }
 
-  delay(100);
+  delay(96);
 }
 
 const char *RainPlugin::getName() const

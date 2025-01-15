@@ -36,7 +36,7 @@ void TickingClockPlugin::loop()
     if (previousSecond != timeinfo.tm_sec)
     {
       // clear second lane
-      Screen.drawRectangle(0, 7, 16, 2, true, 0);
+      Screen.clearRect(0, 7, 16, 2);
       // alternating second pixel
       if ((timeinfo.tm_sec * 32 / 60) % 2 == 0)
         Screen.setPixel(timeinfo.tm_sec * 16 / 60, 7, 1, Screen.getCurrentBrightness());
