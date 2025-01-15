@@ -1,5 +1,6 @@
 #include "screen.h"
 #include <SPI.h>
+#include <algorithm>
 
 #define TIMER_INTERVAL_US 200
 #define GRAY_LEVELS 64 // must be a power of two
@@ -55,12 +56,37 @@ uint8_t Screen_::getBufferIndex(int index)
   return renderBuffer_[index];
 }
 
-// CACHE START
 void Screen_::clear()
 {
   memset(renderBuffer_, 0, ROWS * COLS);
 }
 
+void Screen_::clearRect(int x, int y, int width, int height)
+{
+  if (x < 0)
+  {
+    width += x;
+    x = 0;
+  }
+  if (y < 0)
+  {
+    height += y;
+    y = 0;
+  }
+
+  if (x >= COLS || y >= ROWS || width <= 0 || height <= 0)
+  {
+    return;
+  }
+
+  width = std::min(width, COLS - x);
+  for (int row = y; row < y + height; row++)
+  {
+    memset(renderBuffer_ + (row * COLS + x), 0, width);
+  }
+}
+
+// CACHE START
 bool Screen_::isCacheEmpty() const
 {
   for (int i = 0; i < ROWS * COLS; i++)
@@ -153,20 +179,19 @@ void Screen_::setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness)
 {
   if (index >= COLS * ROWS)
     return;
-  this->renderBuffer_[index] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
+  renderBuffer_[index] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
 }
 
 void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
 {
   if (x >= COLS || y >= ROWS)
     return;
-  this->renderBuffer_[y * COLS + x] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
+  renderBuffer_[y * COLS + x] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
 }
 
 void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 {
   currentRotation = rotation & 0x3;
-  updateTransformations();
 
 #ifdef ENABLE_STORAGE
   if (shouldPersist)
@@ -178,40 +203,31 @@ void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 #endif
 }
 
-void Screen_::updateTransformations()
+uint8_t *Screen_::getRotatedRenderBuffer()
 {
-  int rotation = currentRotation & 0x3;
-  for (int idx = 0; idx < ROWS * COLS; idx++)
+  for (int i = 0; i < ROWS * COLS; i++)
   {
-    uint8_t pos = positions[idx];
-    int x = pos & (COLS - 1);
-    int y = pos >> __builtin_ctz(COLS);
-    int outX, outY;
+    rotatedRenderBuffer_[i] = renderBuffer_[i];
+  }
 
-    switch (rotation)
+  rotate();
+
+  return rotatedRenderBuffer_;
+}
+
+void Screen_::rotate()
+{
+  for (int row = 0; row < ROWS / 2; row++)
+  {
+    for (int col = row; col < COLS - row - 1; col++)
     {
-    case 1: // 90 degrees
-      outX = y;
-      outY = COLS - 1 - x;
-      break;
-    case 2: // 180 degrees
-      outX = COLS - 1 - x;
-      outY = ROWS - 1 - y;
-      break;
-    case 3: // 270 degrees
-      outX = ROWS - 1 - y;
-      outY = x;
-      break;
-    default: // 0 degrees
-      outX = x;
-      outY = y;
-      break;
+      for (int r = 0; r < currentRotation; r++)
+      {
+        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[col * ROWS + (ROWS - 1 - row)]);
+        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[(ROWS - 1 - row) * ROWS + (ROWS - 1 - col)]);
+        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[(ROWS - 1 - col) * ROWS + row]);
+      }
     }
-
-    outX = (outX + COLS) % COLS;
-    outY = (outY + ROWS) % ROWS;
-
-    transformedPositions_[idx] = outY * COLS + outX;
   }
 }
 
@@ -222,6 +238,9 @@ void Screen_::onScreenTimer()
 
 ICACHE_RAM_ATTR void Screen_::_render()
 {
+  const auto buf = getRotatedRenderBuffer();
+
+  // SPI data needs to be 32-bit aligned, round up before divide
   static unsigned long spi_bits[(ROWS * COLS + 8 * sizeof(unsigned long) - 1) / 8 / sizeof(unsigned long)] = {0};
   unsigned char *bits = (unsigned char *)spi_bits;
   memset(bits, 0, ROWS * COLS / 8);
@@ -230,8 +249,7 @@ ICACHE_RAM_ATTR void Screen_::_render()
 
   for (int idx = 0; idx < ROWS * COLS; idx++)
   {
-    uint8_t brightness = renderBuffer_[transformedPositions_[idx]];
-    bits[idx >> 3] |= (brightness > counter ? 0x80 : 0) >> (idx & 7);
+    bits[idx >> 3] |= (buf[positions[idx]] > counter ? 0x80 : 0) >> (idx & 7);
   }
 
   counter += (256 / GRAY_LEVELS);
@@ -239,7 +257,6 @@ ICACHE_RAM_ATTR void Screen_::_render()
   digitalWrite(PIN_LATCH, LOW);
   SPI.writeBytes(bits, sizeof(spi_bits));
   digitalWrite(PIN_LATCH, HIGH);
-
 #ifdef ESP8266
   timer1_write(100);
 #endif
