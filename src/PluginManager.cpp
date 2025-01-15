@@ -24,15 +24,21 @@ void PluginManager::init()
     Screen.clear();
     std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
 
+    activatePersistedPlugin();
+}
+
+void PluginManager::activatePersistedPlugin()
+{
+    std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
 #ifdef ENABLE_STORAGE
     storage.begin("led-wall", true);
-    pluginManager.setActivePluginById(storage.getInt("current-plugin"));
+    persistedPluginId = storage.getInt("current-plugin", allPlugins.at(0)->getId());
+    pluginManager.setActivePluginById(persistedPluginId);
     storage.end();
 #endif
-
     if (!activePlugin)
     {
-        pluginManager.setActivePluginById(1);
+        pluginManager.setActivePluginById(allPlugins.at(0)->getId());
     }
 }
 
@@ -42,7 +48,8 @@ void PluginManager::persistActivePlugin()
     storage.begin("led-wall", false);
     if (activePlugin)
     {
-        storage.putInt("current-plugin", activePlugin->getId());
+        persistedPluginId = activePlugin->getId();
+        storage.putInt("current-plugin", persistedPluginId);
     }
     storage.end();
 #endif
@@ -96,30 +103,8 @@ void PluginManager::setupActivePlugin()
     }
 }
 
-int modeButtonState = 0;
-int lastModeButtonState = 1;
-
 void PluginManager::runActivePlugin()
 {
-    static unsigned long lastButtonCheck = 0;
-    const unsigned long buttonInterval = 20;
-    unsigned long currentMillis = millis();
-
-    if (currentStatus != LOADING &&
-        currentMillis - lastButtonCheck >= buttonInterval)
-    {
-        lastButtonCheck = currentMillis;
-        modeButtonState = digitalRead(PIN_BUTTON);
-
-        if (modeButtonState != lastModeButtonState && modeButtonState == HIGH)
-        {
-            Scheduler.clearSchedule();
-            activateNextPlugin();
-        }
-        lastModeButtonState = modeButtonState;
-        currentStatus = NONE;
-    }
-
     if (activePlugin && currentStatus != UPDATE &&
         currentStatus != LOADING && currentStatus != WSBINARY)
     {

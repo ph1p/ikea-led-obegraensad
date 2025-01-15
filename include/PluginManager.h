@@ -35,6 +35,7 @@ private:
     std::vector<Plugin *> plugins;
     Plugin *activePlugin;
     int nextPluginId;
+    int persistedPluginId = 1;
 
 public:
     PluginManager();
@@ -47,6 +48,7 @@ public:
     void activateNextPlugin();
     void persistActivePlugin();
     void init();
+    void activatePersistedPlugin();
     Plugin *getActivePlugin() const;
     std::vector<Plugin *> &getAllPlugins();
     size_t getNumPlugins();
