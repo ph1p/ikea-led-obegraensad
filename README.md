@@ -166,10 +166,13 @@ GET http://your-server/api/info
 
 ## Set Active Plugin by ID
 
-To set an active plugin by ID, make an HTTP PATCH request to the following endpoint:
+To set an active plugin by ID, make an HTTP PATCH request to the following endpoint, passing the parameter as a query string:
 
 ```
 PATCH http://your-server/api/plugin
+```
+```
+e.g. curl -X PATCH "http://your-server/api/plugin?id=7"
 ```
 
 ### Parameters
@@ -183,12 +186,14 @@ PATCH http://your-server/api/plugin
 
 ## Set Brightness
 
-To set the brightness of the LED display, make an HTTP GET request to the following endpoint:
+To set the brightness of the LED display, make an HTTP GET request to the following endpoint, passing the parameter as a query string:
 
 ```
 PATCH http://your-server/api/brightness
 ```
-
+```
+e.g. curl -X PATCH "http://your-server/api/brightness?value=100"
+```
 ### Parameters
 
 - `value` (required): The brightness value (0..255).
