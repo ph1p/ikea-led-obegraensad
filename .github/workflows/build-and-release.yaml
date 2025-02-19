@@ -1,17 +1,18 @@
-name: PlatformIO Build and Validation
+name: Build and Release
 
 on:
   push:
+    tags:
+      - 'v*.*.*'
     branches:
       - main
   pull_request:
     branches:
       - main
-      - dev
-
+    
 jobs:
   build_esp32dev:
-    name: Build Firmware (ESP32)
+    name: Build Firmware
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -34,8 +35,8 @@ jobs:
           #pragma once
           #define WIFI_HOSTNAME "ikealedmatrix"
           #ifdef ESP8266
-          #define WIFI_SSID "Wifi"
-          #define WIFI_PASSWORD "password"
+          #define WIFI_SSID "WifiForIkeaLamp"
+          #define WIFI_PASSWORD "WifiPasswordForIkeaLamp"
           #endif
           #define OTA_USERNAME "admin"
           #define OTA_PASSWORD "password"
@@ -56,7 +57,7 @@ jobs:
           mv ./.pio/build/esp32dev/firmware.bin ./builds/esp32dev_firmware.bin
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: esp32dev_firmware
           path: ./builds/esp32dev_firmware.bin
@@ -64,7 +65,7 @@ jobs:
   build_optional:
     name: Build Optional Firmware
     runs-on: ubuntu-latest
-    continue-on-error: true  # Se fallisce, il workflow continua
+    continue-on-error: true
     strategy:
       matrix:
         environment: [nodemcuv2, d1_mini_pro-ota]
@@ -95,8 +96,8 @@ jobs:
           #pragma once
           #define WIFI_HOSTNAME "ikealedmatrix"
           #ifdef ESP8266
-          #define WIFI_SSID "Wifi"
-          #define WIFI_PASSWORD "password"
+          #define WIFI_SSID "WifiForIkeaLamp"
+          #define WIFI_PASSWORD "WifiPasswordForIkeaLamp"
           #endif
           #define OTA_USERNAME "admin"
           #define OTA_PASSWORD "password"
@@ -112,12 +113,74 @@ jobs:
         run: platformio run --environment ${{ matrix.environment }}
 
       - name: Archive build artifacts
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           mkdir -p ./builds
           mv ./.pio/build/${{ matrix.environment }}/firmware.bin ./builds/${{ matrix.artifact_name }}.bin
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: ./builds/${{ matrix.artifact_name }}.bin
+
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build_esp32dev, build_optional]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Download ESP32 firmware
+        uses: actions/download-artifact@v4
+        with:
+          name: esp32dev_firmware
+          path: ./builds/  # specify a target directory
+
+      - name: Download ESP8266 firmware (nodemcuv2)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: nodemcuv2_firmware
+          path: ./builds/  # specify a target directory
+
+      - name: Download ESP8266 firmware (d1_mini_pro-ota)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: d1_mini_pro_ota_firmware
+          path: ./builds/  # specify a target directory
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF##*/}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: Pre-release ${{ env.VERSION }}
+          draft: true
+          prerelease: true
+          body: |
+            This is a prerelease version of the firmware.
+            Credentials for OTA updates:
+            - Username: admin
+            - Password: password
+            Credentials for WiFi connection:
+            - SSID: WifiForIkeaLamp
+            - Password: WifiPasswordForIkeaLamp
+              Note: If the device cannot connect to the WiFi network (ESP32 only), it will create an access point.
+            Default hostname: ikealedmatrix
+          files: |
+            ./builds/esp32dev_firmware.bin
+            ./builds/nodemcuv2_firmware.bin
+            ./builds/d1_mini_pro_ota_firmware.bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
