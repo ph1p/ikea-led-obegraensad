@@ -153,7 +153,6 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 ### Alternate Button Wiring
 
 Thanks to [RBEGamer](https://github.com/RBEGamer) who is showing in this [issue](https://github.com/ph1p/ikea-led-obegraensad/issues/79) how to use the original button wiring. With this solution you won't need the "BUTTON one end" and "BUTTON other end" soldering from the table above.
-
 # HTTP API Endpoints
 
 ## Get Information
@@ -164,6 +163,43 @@ Get current values and the (fixed) metadata, like number of rows and columns and
 GET http://your-server/api/info
 ```
 
+### Example `curl` Command:
+
+```bash
+curl http://your-server/api/info
+```
+
+### Response
+
+```json
+{
+  "rows": 16,
+  "cols": 16,
+  "status": "active",
+  "plugin": 3,
+  "rotation": 90,
+  "brightness": 255,
+  "scheduleActive": true,
+  "schedule": [
+    {
+      "pluginId": 2,
+      "duration": 60
+    },
+    {
+      "pluginId": 4,
+      "duration": 120
+    }
+  ],
+  "plugins": [
+    {"id": 1, "name": "Plugin One"},
+    {"id": 2, "name": "Plugin Two"},
+    {"id": 3, "name": "Plugin Three"}
+  ]
+}
+```
+
+---
+
 ## Set Active Plugin by ID
 
 To set an active plugin by ID, make an HTTP PATCH request to the following endpoint, passing the parameter as a query string:
@@ -171,8 +207,11 @@ To set an active plugin by ID, make an HTTP PATCH request to the following endpo
 ```
 PATCH http://your-server/api/plugin
 ```
-```
-e.g. curl -X PATCH "http://your-server/api/plugin?id=7"
+
+#### Example `curl` Command:
+
+```bash
+curl -X PATCH "http://your-server/api/plugin?id=7"
 ```
 
 ### Parameters
@@ -181,127 +220,271 @@ e.g. curl -X PATCH "http://your-server/api/plugin?id=7"
 
 ### Response
 
-- Success: `200 OK` with the message "Plugin Set".
-- Not Found: `404 Not Found` with the message "Plugin not found".
+- **Success:**
+
+```json
+{
+  "status": "success",
+  "message": "Plugin set successfully"
+}
+```
+
+- **Error (Plugin not found):**
+
+```json
+{
+  "error": true,
+  "errormessage": "Could not set plugin to id 7"
+}
+```
+
+---
 
 ## Set Brightness
 
-To set the brightness of the LED display, make an HTTP GET request to the following endpoint, passing the parameter as a query string:
+To set the brightness of the LED display, make an HTTP PATCH request to the following endpoint, passing the parameter as a query string:
 
 ```
 PATCH http://your-server/api/brightness
 ```
+
+#### Example `curl` Command:
+
+```bash
+curl -X PATCH "http://your-server/api/brightness?value=100"
 ```
-e.g. curl -X PATCH "http://your-server/api/brightness?value=100"
-```
+
 ### Parameters
 
 - `value` (required): The brightness value (0..255).
 
 ### Response
 
-- Success: `200 OK` with the message "Ok".
-- Invalid Value: `404 Not Found` with the message "Invalid Brightness Value".
+- **Success:**
 
-## Get current display data
+```json
+{
+  "status": "success",
+  "message": "Brightness set successfully"
+}
+```
 
-To get the current displayed data as an byte-array, each byte representing the brightness value.
-Be aware that the global brightness value gets applied AFTER these values, so if you set the global brightness to 16, you will still get values of 255 this way.
+- **Error (Invalid Brightness Value):**
+
+```json
+{
+  "error": true,
+  "errormessage": "Invalid brightness value: 300 - must be between 0 and 255."
+}
+```
+
+---
+
+## Get Current Display Data
+
+To get the current displayed data as a byte-array, each byte representing the brightness value. Be aware that the global brightness value gets applied AFTER these values.
 
 ```
 GET http://your-server/api/data
 ```
 
-# Plugin Scheduler
-
-It is possible to switch between plugins automatically.
-You can define your schedule in the Web UI or just send an API call.
+#### Example `curl` Command:
 
 ```bash
-### set your plugins and duration in seconds
-curl -X POST http://x.x.x.x/api/schedule -d 'schedule=[{"pluginId":10,"duration":2},{"pluginId":8,"duration": 5}'
-
-### clear the schedule
-curl http://x.x.x.x/api/schedule/clear
-
-### start the schedule
-curl http://x.x.x.x/api/schedule/start
-
-### stop the schedule
-curl http://x.x.x.x/api/schedule/stop
+curl http://your-server/api/data
 ```
 
-# DDP (Distributed Display Protocol)
+### Response (Raw Byte-Array Example)
 
-You can set the panel to DDP using the button or via the web interface.
-This Protocol uses **UDP** and listens on Port **4048**.
-
-**Info**: The DDP Header is 10 Bytes!
-
-In the repository you will find an `ddp.py` as an example.
-
-Change the plugin to `DDP` and run following command with your IP:
-
-```bash
-./ddp.py --ip x.x.x.x --pixel 2 2 200 --pixel 0 0 255
+```json
+[255, 255, 255, 0, 128, 255, 255, 0, ...]
 ```
-
-### Helpful Links
-
-- https://kno.wled.ge/interfaces/ddp/
-- http://www.3waylabs.com/ddp/
 
 ---
 
-# Messages HTTP API
+# Plugin Scheduler
 
-The LED Display service provides HTTP API to display messages and graphs on a 16x16 LED display. This functionality can be accessed through HTTP calls to the service endpoint.
+It is possible to switch between plugins automatically.  
+You can define your schedule in the Web UI or just send an API call.
+
+### Set Schedule
+
+To define a schedule for switching between plugins automatically, make a POST request with your schedule data:
+
+```bash
+curl -X POST http://your-server/api/schedule -d 'schedule=[{"pluginId":10,"duration":2},{"pluginId":8,"duration":5}]'
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "message": "Schedule updated"
+}
+```
+
+### Clear Schedule
+
+To clear the existing schedule, make a GET request:
+
+```bash
+curl http://your-server/api/schedule/clear
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "message": "Schedule cleared"
+}
+```
+
+### Start Schedule
+
+To start the current schedule, make a GET request:
+
+```bash
+curl http://your-server/api/schedule/start
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "message": "Schedule started"
+}
+```
+
+### Stop Schedule
+
+To stop the current schedule, make a GET request:
+
+```bash
+curl http://your-server/api/schedule/stop
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "message": "Schedule stopped"
+}
+```
+
+---
+
+## Get Display Data
+
+To retrieve the current display data as a byte-array, each byte representing the brightness value. The global brightness is applied after these values.
+
+```
+GET http://your-server/api/data
+```
+
+#### Example `curl` Command:
+
+```bash
+curl http://your-server/api/data
+```
+
+### Response (Raw Byte-Array Example)
+
+```json
+[255, 255, 255, 0, 128, 255, 255, 0, ...]
+```
+
+---
 
 ## Message Display
 
 To display a message on the LED display, users can make an HTTP GET request to the following endpoint:
 
 ```
-http://your-server/api/message
+GET http://your-server/api/message
 ```
 
 ### Parameters
 
 - `text` (optional): The text message to be displayed on the LED display.
-- `graph` (optional): A comma-separated list of integers representing a graph. The values should be in the range of 0 to 15 and will be visualized as a graph on the LED display.
-- `miny` (optional): scaling for lower end of the graph, defaults to 0
-- `maxy` (optional): scaling for upper end of the graph, defaults to 15
-- `repeat` (optional): The number of times the message should be repeated. If not provided, the default is 1. Set this value to -1 to repeat infinitely. While messages ar pending for display an indicator led in the upper left corner will flash.
-- `id` (optional): A unique identifier for the message. This can be used for later removal or modification of the message.
-- `delay` (optional): The number of ms of delay between every scroll move. Default is 50 ms.
+- `graph` (optional): A comma-separated list of integers representing a graph (0-15).
+- `miny` (optional): Scaling for the lower end of the graph, defaults to 0.
+- `maxy` (optional): Scaling for the upper end of the graph, defaults to 15.
+- `repeat` (optional): Number of times the message should be repeated. Default is 1. Set to `-1` for infinite.
+- `id` (optional): A unique identifier for the message.
+- `delay` (optional): Delay in ms between every scroll movement. Default is 50ms.
 
-#### Example
+#### Example `curl` Command:
 
+```bash
+curl "http://your-server/api/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1&delay=60"
 ```
-GET http://your-server/api/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1&delay=60
+
+### Response
+
+```json
+{
+  "status": "success",
+  "message": "Message received"
+}
 ```
 
-This example will display the message "Hello" on the LED display with a corresponding graph, repeat it three times, and assign it the identifier 1, waits 60ms while scrolling.
+---
 
-### Message Removal
+## Message Removal
 
 To remove a message from the display, users can make an HTTP GET request to the following endpoint:
 
 ```
-http://your-server/api/removemessage
+GET http://your-server/api/removemessage
 ```
 
 ### Parameters
 
 - `id` (required): The unique identifier of the message to be removed.
 
-#### Example
+#### Example `curl` Command:
+
+```bash
+curl "http://your-server/api/removemessage?id=1"
+```
+
+### Response
+
+```json
+{
+  "status": "success",
+  "message": "Message removed"
+}
+```
+
+---
+
+## Clear Storage
+
+To clear the data storage:
 
 ```
-GET http://your-server/api/removemessage?id=1
+GET http://your-server/api/clearstorage
 ```
 
-This example will remove the message with the identifier 1 from the LED display.
+#### Example `curl` Command:
+
+```bash
+curl http://your-server/api/clearstorage
+```
+
+### Response
+
+```json
+{
+  "status": "success",
+  "message": "Storage cleared"
+}
+```
 
 # Development
 
