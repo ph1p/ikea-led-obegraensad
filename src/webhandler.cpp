@@ -35,12 +35,17 @@ void handleMessage(AsyncWebServerRequest *request)
         token = strtok(nullptr, ",");
     }
 
-    // Uncomment this to thee what charcode comes in
-    //  for(int i = 0;i<text.size();i++)Screen.scrollText(std::to_string(text[i]));
-
+    // Add the message
     Messages.add(text, repeat, id, delay, graph, miny, maxy);
 
-    request->send(200, "text/plain", "Message received");
+    // JSON response
+    StaticJsonDocument<256> jsonResponse;
+    jsonResponse["status"] = "success";
+    jsonResponse["message"] = "Message received";
+
+    String output;
+    serializeJson(jsonResponse, output);
+    request->send(200, "application/json", output);
 }
 
 // http://your-server/removemessage?id=42
@@ -48,7 +53,14 @@ void handleMessageRemove(AsyncWebServerRequest *request)
 {
     int id = request->arg("id").toInt();
     Messages.remove(id);
-    request->send(200, "text/plain", "Message received");
+
+    StaticJsonDocument<256> jsonResponse;
+    jsonResponse["status"] = "success";
+    jsonResponse["message"] = "Message removed";
+
+    String output;
+    serializeJson(jsonResponse, output);
+    request->send(200, "application/json", output);
 }
 
 void handleSetPlugin(AsyncWebServerRequest *request)
@@ -56,18 +68,22 @@ void handleSetPlugin(AsyncWebServerRequest *request)
     int id = request->arg("id").toInt();
     pluginManager.setActivePluginById(id);
 
+    StaticJsonDocument<256> jsonResponse;
+
     if (pluginManager.getActivePlugin() && pluginManager.getActivePlugin()->getId() == id)
     {
-        request->send(200, "text/plain");
+        jsonResponse["status"] = "success";
+        jsonResponse["message"] = "Plugin set successfully";
+        String output;
+        serializeJson(jsonResponse, output);
+        request->send(200, "application/json", output);
     }
     else
     {
-        StaticJsonDocument<256> jsonDocument;
-        jsonDocument["error"] = true;
-        jsonDocument["errormessage"] = "could not set plugin to id " + std::to_string(id);
-
+        jsonResponse["error"] = true;
+        jsonResponse["errormessage"] = "Could not set plugin to id " + std::to_string(id);
         String output;
-        serializeJson(jsonDocument, output);
+        serializeJson(jsonResponse, output);
         request->send(422, "application/json", output);
     }
 }
@@ -76,21 +92,26 @@ void handleSetBrightness(AsyncWebServerRequest *request)
 {
     int value = request->arg("value").toInt();
 
+    StaticJsonDocument<256> jsonResponse;
+
     if (value < 0 || value > 255)
     {
-        StaticJsonDocument<256> jsonDocument;
-        jsonDocument["error"] = true;
-        jsonDocument["errormessage"] = "invalid brightness value: " + std::to_string(value) + " - must be between 0 and 255.";
-
+        jsonResponse["error"] = true;
+        jsonResponse["errormessage"] = "Invalid brightness value: " + std::to_string(value) + " - must be between 0 and 255.";
         String output;
-        serializeJson(jsonDocument, output);
+        serializeJson(jsonResponse, output);
         request->send(422, "application/json", output);
         return;
     }
 
     Screen.setBrightness(value, true);
 
-    request->send(200, "text/plain");
+    jsonResponse["status"] = "success";
+    jsonResponse["message"] = "Brightness set successfully";
+
+    String output;
+    serializeJson(jsonResponse, output);
+    request->send(200, "application/json", output);
 }
 
 void handleGetData(AsyncWebServerRequest *request)
@@ -113,7 +134,12 @@ void handleGetData(AsyncWebServerRequest *request)
     }
     catch (const std::exception &e)
     {
-        request->send(500, "text/plain", e.what());
+        StaticJsonDocument<256> jsonResponse;
+        jsonResponse["error"] = true;
+        jsonResponse["errormessage"] = e.what();
+        String output;
+        serializeJson(jsonResponse, output);
+        request->send(500, "application/json", output);
     }
 }
 
@@ -140,11 +166,9 @@ void handleGetInfo(AsyncWebServerRequest *request)
 
     std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
 
-    // Loop through each plugin and add its details to the JSON document
     for (Plugin *plugin : allPlugins)
     {
         JsonObject object = plugins.createNestedObject();
-
         object["id"] = plugin->getId();
         object["name"] = plugin->getName();
     }
@@ -160,49 +184,86 @@ void handleSetSchedule(AsyncWebServerRequest *request)
 {
     bool scheduleIsSet = Scheduler.setScheduleByJSONString(request->arg("schedule"));
 
+    StaticJsonDocument<256> jsonResponse;
     if (!scheduleIsSet)
     {
-        request->send(400, "text/plain", "Schedule cannot be set");
+        jsonResponse["error"] = true;
+        jsonResponse["message"] = "Schedule cannot be set";
+        String output;
+        serializeJson(jsonResponse, output);
+        request->send(400, "application/json", output);
         return;
     }
 
     Scheduler.start();
     sendInfo();
-    request->send(200, "text/plain", "Schedule updated");
+
+    jsonResponse["status"] = "success";
+    jsonResponse["message"] = "Schedule updated";
+    String output;
+    serializeJson(jsonResponse, output);
+    request->send(200, "application/json", output);
 }
 
 void handleClearSchedule(AsyncWebServerRequest *request)
 {
     Scheduler.clearSchedule(true);
     sendInfo();
-    request->send(200, "text/plain", "Schedule cleared");
+
+    StaticJsonDocument<256> jsonResponse;
+    jsonResponse["status"] = "success";
+    jsonResponse["message"] = "Schedule cleared";
+
+    String output;
+    serializeJson(jsonResponse, output);
+    request->send(200, "application/json", output);
 }
 
 void handleStopSchedule(AsyncWebServerRequest *request)
 {
+    StaticJsonDocument<256> jsonResponse;
     if (!Scheduler.schedule.empty())
     {
         Scheduler.stop();
         sendInfo();
-        request->send(200, "text/plain", "Schedule stopped");
+
+        jsonResponse["status"] = "success";
+        jsonResponse["message"] = "Schedule stopped";
+        String output;
+        serializeJson(jsonResponse, output);
+        request->send(200, "application/json", output);
     }
     else
     {
-        request->send(404, "text/plain", "No schedule found");
+        jsonResponse["error"] = true;
+        jsonResponse["message"] = "No schedule found";
+        String output;
+        serializeJson(jsonResponse, output);
+        request->send(404, "application/json", output);
     }
 }
 
 void handleStartSchedule(AsyncWebServerRequest *request)
 {
+    StaticJsonDocument<256> jsonResponse;
     if (!Scheduler.schedule.empty())
     {
         Scheduler.start();
         sendInfo();
-        request->send(200, "text/plain", "Schedule started");
+
+        jsonResponse["status"] = "success";
+        jsonResponse["message"] = "Schedule started";
+        String output;
+        serializeJson(jsonResponse, output);
+        request->send(200, "application/json", output);
     }
     else
     {
-        request->send(404, "text/plain", "No schedule found");
+        jsonResponse["error"] = true;
+        jsonResponse["message"] = "No schedule found";
+        String output;
+        serializeJson(jsonResponse, output);
+        request->send(404, "application/json", output);
     }
 }
 
@@ -212,6 +273,13 @@ void handleClearStorage(AsyncWebServerRequest *request)
     storage.begin("led-wall", false);
     storage.clear();
     storage.end();
-    request->send(200, "text/plain", "Storage cleared");
+
+    StaticJsonDocument<256> jsonResponse;
+    jsonResponse["status"] = "success";
+    jsonResponse["message"] = "Storage cleared";
+
+    String output;
+    serializeJson(jsonResponse, output);
+    request->send(200, "application/json", output);
 #endif
 }
