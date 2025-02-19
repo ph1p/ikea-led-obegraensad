@@ -1,0 +1,123 @@
+name: PlatformIO Build and Validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build_esp32dev:
+    name: Build Firmware (ESP32)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+
+      - name: Create secrets.h dynamically
+        run: |
+          mkdir -p include
+          cat <<EOL > include/secrets.h
+          #pragma once
+          #define WIFI_HOSTNAME "ikealedmatrix"
+          #ifdef ESP8266
+          #define WIFI_SSID "Wifi"
+          #define WIFI_PASSWORD "password"
+          #endif
+          #define OTA_USERNAME "admin"
+          #define OTA_PASSWORD "password"
+          EOL
+
+      - name: Install dependencies
+        run: |
+          platformio update
+          platformio upgrade
+          platformio lib install
+
+      - name: Build project for esp32dev
+        run: platformio run --environment esp32dev
+
+      - name: Archive build artifacts
+        run: |
+          mkdir -p ./builds
+          mv ./.pio/build/esp32dev/firmware.bin ./builds/esp32dev_firmware.bin
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: esp32dev_firmware
+          path: ./builds/esp32dev_firmware.bin
+
+  build_optional:
+    name: Build Optional Firmware
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Se fallisce, il workflow continua
+    strategy:
+      matrix:
+        environment: [nodemcuv2, d1_mini_pro-ota]
+        include:
+          - environment: nodemcuv2
+            artifact_name: nodemcuv2_firmware
+          - environment: d1_mini_pro-ota
+            artifact_name: d1_mini_pro_ota_firmware
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+
+      - name: Create secrets.h dynamically
+        run: |
+          mkdir -p include
+          cat <<EOL > include/secrets.h
+          #pragma once
+          #define WIFI_HOSTNAME "ikealedmatrix"
+          #ifdef ESP8266
+          #define WIFI_SSID "Wifi"
+          #define WIFI_PASSWORD "password"
+          #endif
+          #define OTA_USERNAME "admin"
+          #define OTA_PASSWORD "password"
+          EOL
+
+      - name: Install dependencies
+        run: |
+          platformio update
+          platformio upgrade
+          platformio lib install
+
+      - name: Build project for ${{ matrix.environment }}
+        run: platformio run --environment ${{ matrix.environment }}
+
+      - name: Archive build artifacts
+        run: |
+          mkdir -p ./builds
+          mv ./.pio/build/${{ matrix.environment }}/firmware.bin ./builds/${{ matrix.artifact_name }}.bin
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ./builds/${{ matrix.artifact_name }}.bin
