@@ -67,10 +67,10 @@ uint16_t ArtnetWifi::read(void)
         incomingUniverse = artnetPacket[14] | artnetPacket[15] << 8;
         dmxDataLength = artnetPacket[17] | artnetPacket[16] << 8;
 
-        if (artDmxCallback) (*artDmxCallback)(incomingUniverse, dmxDataLength, sequence, artnetPacket + ART_DMX_START);
+        if (artDmxCallback) (*artDmxCallback)(incomingUniverse, dmxDataLength, outgoingUniverse, artnetPacket + ART_DMX_START);
 #if !defined(ARDUINO_AVR_UNO_WIFI_REV2)
         if (artDmxFunc) {
-          artDmxFunc(incomingUniverse, dmxDataLength, sequence, artnetPacket + ART_DMX_START);
+          artDmxFunc(incomingUniverse, dmxDataLength, outgoingUniverse, artnetPacket + ART_DMX_START);
         }
 #endif
         return ART_DMX;

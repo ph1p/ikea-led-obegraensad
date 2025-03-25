@@ -107,6 +107,11 @@ public:
   {
     outgoingUniverse = universe;
   }
+  
+  inline uint16_t getOutgoing(void)
+  {
+    return outgoingUniverse;
+  }
 
   inline void setPhysical(uint8_t port)
   {
@@ -129,7 +134,7 @@ public:
     dmxDataLength = len;
   }
 
-  inline void setArtDmxCallback(void (*fptr)(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data))
+  inline void setArtDmxCallback(void (*fptr)(uint16_t universe, uint16_t length, uint16_t outgoing, uint8_t* data))
   {
     artDmxCallback = fptr;
   }
@@ -159,7 +164,7 @@ private:
   uint16_t incomingUniverse;
   uint16_t outgoingUniverse;
   uint16_t dmxDataLength;
-  void (*artDmxCallback)(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data);
+  void (*artDmxCallback)(uint16_t universe, uint16_t length, uint16_t outgoing, uint8_t* data);
 #if !defined(ARDUINO_AVR_UNO_WIFI_REV2)
   StdFuncDmx_t artDmxFunc;
 #endif
