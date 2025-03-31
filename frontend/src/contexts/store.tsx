@@ -37,6 +37,7 @@ const [mainStore, setStore] = createStore<Store>({
   plugins: [],
   plugin: 1,
   brightness: 0,
+  artnetUniverse: 1,
   indexMatrix: [...new Array(256)].map((_, i) => i),
   leds: [...new Array(256)].fill(0),
   systemStatus: SYSTEM_STATUS.NONE,
@@ -51,6 +52,7 @@ const actions: StoreActions = {
   setPlugins: (plugins) => setStore('plugins', plugins),
   setPlugin: (plugin) => setStore('plugin', plugin),
   setBrightness: (brightness) => setStore('brightness', brightness),
+  setArtnetUniverse: (artnetUniverse) => setStore('artnetUniverse', artnetUniverse),
   setIndexMatrix: (indexMatrix) => setStore('indexMatrix', indexMatrix),
   setLeds: (leds) => setStore('leds', leds),
   setSystemStatus: (systemStatus: SYSTEM_STATUS) =>
