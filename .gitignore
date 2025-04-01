@@ -2,6 +2,8 @@
 .vscode
 .DS_Store
 .pnpm-store
+.cache
+compile_commands.json
 secrets.h
 
 # Logs

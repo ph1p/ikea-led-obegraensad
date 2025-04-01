@@ -39,7 +39,7 @@
 #define WEATHER_LOCATION "Hamburg"
 
 // name of WiFi created by the device if no known WiFi is available
-#define WIFI_MANAGER_SSID "Ikea Display Setup WiFi"
+#define WIFI_MANAGER_SSID "IKEA"
 
 // use ALL of the following to use static IP config
 /*
