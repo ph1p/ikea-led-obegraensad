@@ -7,7 +7,6 @@
 #ifdef ESP32
 #include <AsyncTCP.h>
 #include <Update.h>
-#include <esp_int_wdt.h>
 #include <esp_task_wdt.h>
 #endif
 #ifdef ESP8266
