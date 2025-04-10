@@ -109,9 +109,9 @@ void Screen_::restoreCache()
 // CACHE END
 
 // STORAGE START
-#ifdef ENABLE_STORAGE
 void Screen_::loadFromStorage()
 {
+#ifdef ENABLE_STORAGE
   storage.begin("led-wall", true);
   setBrightness(255);
 
@@ -128,17 +128,19 @@ void Screen_::loadFromStorage()
   setBrightness(storage.getUInt("brightness", 255));
   setCurrentRotation(storage.getUInt("rotation", 0));
   storage.end();
+#endif
 }
 
 void Screen_::persist()
 {
+#ifdef ENABLE_STORAGE
   storage.begin("led-wall");
   storage.putBytes("data", renderBuffer_, ROWS * COLS);
   storage.putUInt("brightness", brightness_);
   storage.putUInt("rotation", currentRotation);
   storage.end();
-}
 #endif
+}
 // STORAGE END
 
 void Screen_::setup()
