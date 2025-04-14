@@ -300,7 +300,9 @@ curl http://your-server/api/data
 [255, 255, 255, 0, 128, 255, 255, 0, ...]
 ```
 
-### Use HTTP API in Homeassistant
+---
+
+## Use HTTP API in Homeassistant
 
 Example configuration for an automation to sett / dim the brightness to low when the sun sets.
 
@@ -308,12 +310,12 @@ Example configuration for an automation to sett / dim the brightness to low when
   ```yaml
   rest_command:
     obegraensad_brightness_high:
-      url: "http://192.168.178.68/api/brightness/"
+      url: "http://your-server/api/brightness/"
       method: PATCH
       content_type: "application/x-www-form-urlencoded"
       payload: "value=100"
     obegraensad_brightness_low:
-      url: "http://192.168.178.68/api/brightness/"
+      url: "http://your-server/api/brightness/"
       method: PATCH
       content_type: "application/x-www-form-urlencoded"
       payload: "value=1"
