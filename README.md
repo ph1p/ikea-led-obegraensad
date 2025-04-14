@@ -300,6 +300,41 @@ curl http://your-server/api/data
 [255, 255, 255, 0, 128, 255, 255, 0, ...]
 ```
 
+### Use http endpoint in Homeassistant
+
+Example configuration for an automation setting the brightness to low when the sun sets.
+
+- Add the following to your `configuration.yaml`:
+  ```yaml
+  rest_command:
+    obegraensad_brightness_high:
+      url: "http://192.168.178.68/api/brightness/"
+      method: PATCH
+      content_type: "application/x-www-form-urlencoded"
+      payload: "value=100"
+    obegraensad_brightness_low:
+      url: "http://192.168.178.68/api/brightness/"
+      method: PATCH
+      content_type: "application/x-www-form-urlencoded"
+      payload: "value=1"
+  ```
+
+- Go to *Settings* --> *Automations* and create a new automation.
+- Select *Edit in YAML* and add the following content:
+  ```yaml
+  alias: Obegraensad low bightness
+  description: ""
+  triggers:
+    - trigger: sun
+      event: sunset
+      offset: 0
+  conditions: []
+  actions:
+    - action: rest_command.obegraensad_brightness_low
+      data: {}
+  mode: single
+  ```
+- To set the brightness back to bright, create e.g. another automation or a condition and call `rest_command.obegraensad_brightness_high`
 ---
 
 # Plugin Scheduler
