@@ -336,6 +336,7 @@ Example configuration for an automation to sett / dim the brightness to low when
   mode: single
   ```
 - To set the brightness back to bright, create e.g. another automation or a condition in which `rest_command.obegraensad_brightness_high` is called.
+
 ---
 
 # Plugin Scheduler
