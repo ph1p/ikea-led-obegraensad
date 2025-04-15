@@ -302,9 +302,9 @@ curl http://your-server/api/data
 
 ---
 
-## Use HTTP API in Homeassistant
+## Use HTTP API in Home Assistant
 
-Example configuration for an automation to sett / dim the brightness to low when the sun sets.
+An example configuration for an automation to set the brightness based on the sun's position. Dims the display when the sun is setting.
 
 - Add the following code to your `configuration.yaml`:
   ```yaml
