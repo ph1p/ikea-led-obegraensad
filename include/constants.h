@@ -4,11 +4,11 @@
 #define ENABLE_SERVER
 
 #ifdef ESP32
-#define PIN_ENABLE 26
-#define PIN_DATA 27
-#define PIN_CLOCK 14
-#define PIN_LATCH 12
-#define PIN_BUTTON 16
+#define PIN_ENABLE 1
+#define PIN_DATA 2
+#define PIN_CLOCK 3
+#define PIN_LATCH 4
+#define PIN_BUTTON 5
 #endif
 
 #ifdef ESP8266
@@ -52,8 +52,7 @@
 
 // ---------------
 
-enum SYSTEM_STATUS
-{
+enum SYSTEM_STATUS {
   NONE,
   WSBINARY,
   UPDATE,
