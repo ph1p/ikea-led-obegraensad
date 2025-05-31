@@ -4,11 +4,11 @@
 #define ENABLE_SERVER
 
 #ifdef ESP32
-#define PIN_ENABLE 1
-#define PIN_DATA 2
-#define PIN_CLOCK 3
-#define PIN_LATCH 4
-#define PIN_BUTTON 5
+#define PIN_ENABLE A9
+#define PIN_DATA MOSI
+#define PIN_CLOCK SCK
+#define PIN_LATCH D7
+#define PIN_BUTTON D6
 #endif
 
 #ifdef ESP8266
