@@ -57,6 +57,7 @@ void onOTAEnd(bool success)
 void initOTA(AsyncWebServer &server)
 {
     ElegantOTA.begin(&server); // Start ElegantOTA
+    ElegantOTA.setAuth(otaUser, otaPassword);
     // ElegantOTA callbacks
     ElegantOTA.onStart(onOTAStart);
     ElegantOTA.onProgress(onOTAProgress);
