@@ -11,7 +11,14 @@ void onOTAStart()
 {
     // Log when OTA has started
     Serial.println("OTA update started!");
-    // <Add your own code here>
+    currentStatus = UPDATE;
+
+    std::vector<int> bits = Screen.readBytes(letterU);
+
+    for (int i = 0; i < bits.size(); i++)
+    {
+        Screen.setPixelAtIndex(i, bits[i]);
+    }
 }
 
 void onOTAProgress(size_t current, size_t final)
@@ -35,7 +42,16 @@ void onOTAEnd(bool success)
     {
         Serial.println("There was an error during OTA update!");
     }
-    // <Add your own code here>
+    std::vector<int> bits = Screen.readBytes(letterR);
+
+    for (int i = 0; i < bits.size(); i++)
+    {
+        Screen.setPixelAtIndex(i, bits[i]);
+    }
+
+    delay(1000);
+    currentStatus = NONE;
+    Screen.loadFromStorage();
 }
 
 void initOTA(AsyncWebServer &server)
