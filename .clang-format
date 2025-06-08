@@ -1,0 +1,9 @@
+---
+BasedOnStyle: Microsoft
+IndentWidth: '4'
+Language: Cpp
+# Force pointers to the type for C++.
+DerivePointerAlignment: 'true'
+PointerAlignment: Right
+
+...
