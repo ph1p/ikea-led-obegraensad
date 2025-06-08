@@ -38,7 +38,7 @@ void AsyncElegantOtaClass::begin(AsyncWebServer *server, const char* username, c
                 return request->requestAuthentication();
             }
         }
-        AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", ELEGANT_HTML, ELEGANT_HTML_SIZE);
+        AsyncWebServerResponse *response = request->beginResponse(200, "text/html", ELEGANT_HTML, ELEGANT_HTML_SIZE);
         response->addHeader("Content-Encoding", "gzip");
         request->send(response);
     });
