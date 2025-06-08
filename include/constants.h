@@ -4,11 +4,11 @@
 #define ENABLE_SERVER
 
 #ifdef ESP32
-#define PIN_ENABLE A9
+#define PIN_ENABLE D4
 #define PIN_DATA MOSI
 #define PIN_CLOCK SCK
-#define PIN_LATCH D7
-#define PIN_BUTTON D6
+#define PIN_LATCH D5
+#define PIN_BUTTON D3
 #endif
 
 #ifdef ESP8266
@@ -52,11 +52,12 @@
 
 // ---------------
 
-enum SYSTEM_STATUS {
-  NONE,
-  WSBINARY,
-  UPDATE,
-  LOADING,
+enum SYSTEM_STATUS
+{
+    NONE,
+    WSBINARY,
+    UPDATE,
+    LOADING,
 };
 
 extern SYSTEM_STATUS currentStatus;
