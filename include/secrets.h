@@ -9,6 +9,6 @@
 #define WIFI_PASSWORD ""
 #endif
 
-// If you would like to performa OTA updates, you need to define the credentials here
+// If you would like to perform OTA updates, you need to define the credentials here
 #define OTA_USERNAME ""
 #define OTA_PASSWORD ""
