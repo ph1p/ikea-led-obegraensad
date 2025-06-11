@@ -94,23 +94,8 @@ code .
 4. **Prepare the Project**
 
    - Perform a `PlatformIO: Clean` (Recycle bin icon at the bottom right).
-   - Add a `secrets.h` file to the `include` directory. Modify passwords and save the file. Go in the next section for WiFi instructions.
-
-```cpp
-#pragma once
-
-#define WIFI_HOSTNAME ""
-
-#ifdef ESP8266
-#define WIFI_SSID ""
-#define WIFI_PASSWORD ""
-#endif
-
-#define OTA_USERNAME ""
-#define OTA_PASSWORD ""
-```
-
-- Set variables inside `include/constants.h`.
+   - Edit the secrets.h in the include directory with your WiFi information. If you are using an ESP32, you may skip the section ESP8266 and setup WiFi with the WiFi Manager. See the "[Configuring WiFi with WiFi manager](https://github.com/jaal2001/ikea-led-obegraensad-pr/edit/patch-3/README.md#configuring-wifi-with-wifi-manager)" section for instructions.
+   - Set variables inside `include/constants.h`.
 
 5. **Build the Project**
 
