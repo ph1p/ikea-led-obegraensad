@@ -2,6 +2,13 @@
 
 #ifdef ENABLE_SERVER
 
+#ifndef OTA_USERNAME
+#define OTA_USERNAME "admin"
+#endif
+#ifndef OTA_PASSWORD
+#define OTA_PASSWORD "password"
+#endif
+
 const char *otaUser = OTA_USERNAME;
 const char *otaPassword = OTA_PASSWORD;
 
