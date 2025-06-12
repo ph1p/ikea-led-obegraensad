@@ -9,7 +9,6 @@
 
 #include "screen.h"
 #include "PluginManager.h"
-#include "secrets.h"
 #include "signs.h"
 
 void onOTAStart();
