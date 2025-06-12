@@ -5,7 +5,7 @@
 const char *otaUser = OTA_USERNAME;
 const char *otaPassword = OTA_PASSWORD;
 
-void onOTAStart()
+void onOTAStartCallback()
 {
   currentStatus = UPDATE;
 
@@ -17,7 +17,7 @@ void onOTAStart()
   }
 }
 
-void onOTAEnd()
+void onOTAEndCallback(bool success)
 {
   std::vector<int> bits = Screen.readBytes(letterR);
 
@@ -33,9 +33,11 @@ void onOTAEnd()
 
 void initOTA(AsyncWebServer &server)
 {
-  AsyncElegantOTA.begin(&server, otaUser, otaPassword);
-  AsyncElegantOTA.onOTAStart(onOTAStart);
-  AsyncElegantOTA.onOTAEnd(onOTAEnd);
+  ElegantOTA.begin(&server, otaUser, otaPassword);
+  ElegantOTA.onStart(onOTAStartCallback);
+  ElegantOTA.onEnd(onOTAEndCallback);
+  ElegantOTA.setAutoReboot(true);
+  
 }
 
 #endif

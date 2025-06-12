@@ -94,21 +94,7 @@ code .
 4. **Prepare the Project**
 
    - Perform a `PlatformIO: Clean` (Recycle bin icon at the bottom right).
-   - Add a `secrets.h` file to the `include` directory. Modify passwords and save the file. Go in the next section for WiFi instructions.
-
-```cpp
-#pragma once
-
-#define WIFI_HOSTNAME ""
-
-#ifdef ESP8266
-#define WIFI_SSID ""
-#define WIFI_PASSWORD ""
-#endif
-
-#define OTA_USERNAME ""
-#define OTA_PASSWORD ""
-```
+   - Modify the passwords in the `example_secrets.ini`, rename it to `secrets.ini` and save the file. Go in the next section for WiFi instructions.
 
 - Set variables inside `include/constants.h`.
 
