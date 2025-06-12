@@ -5,11 +5,10 @@
 #ifdef ENABLE_SERVER
 
 #include <ESPAsyncWebServer.h>
-#include <AsyncElegantOTA.h>
+#include <ElegantOTA.h>
 
 #include "screen.h"
 #include "PluginManager.h"
-#include "secrets.h"
 #include "signs.h"
 
 void onOTAStart();
