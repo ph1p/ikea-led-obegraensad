@@ -33,7 +33,6 @@ void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
 
 void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
 {
-  noInterrupts();
   if (grays)
   {
     memcpy(renderBuffer_, renderBuffer, ROWS * COLS);
@@ -45,7 +44,6 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
       renderBuffer_[i] = renderBuffer[i] * 255;
     }
   }
-  interrupts();
 }
 
 uint8_t *Screen_::getRenderBuffer()
@@ -60,9 +58,7 @@ uint8_t Screen_::getBufferIndex(int index)
 
 void Screen_::clear()
 {
-  noInterrupts();
   memset(renderBuffer_, 0, ROWS * COLS);
-  interrupts();
 }
 
 void Screen_::clearRect(int x, int y, int width, int height)
@@ -84,12 +80,10 @@ void Screen_::clearRect(int x, int y, int width, int height)
   }
 
   width = std::min(width, COLS - x);
-  noInterrupts();
   for (int row = y; row < y + height; row++)
   {
     memset(renderBuffer_ + (row * COLS + x), 0, width);
   }
-  interrupts();
 }
 
 // CACHE START
@@ -105,16 +99,12 @@ bool Screen_::isCacheEmpty() const
 
 void Screen_::cacheCurrent()
 {
-  noInterrupts();
   memcpy(cache_, renderBuffer_, ROWS * COLS);
-  interrupts();
 }
 
 void Screen_::restoreCache()
 {
-  noInterrupts();
   setRenderBuffer(cache_, true);
-  interrupts();
 }
 // CACHE END
 
@@ -314,7 +304,6 @@ void Screen_::drawRectangle(int x,
                             int ledStatus,
                             uint8_t brightness)
 {
-  noInterrupts();
   if (!fill)
   {
     drawLine(x, y, x + width, y, ledStatus, brightness);
@@ -329,8 +318,7 @@ void Screen_::drawRectangle(int x,
       drawLine(i, y, i, y + height - 1, ledStatus, brightness);
     }
   }
-  interrupts();
-};
+}
 
 void Screen_::drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness)
 {
@@ -363,22 +351,18 @@ std::vector<int> Screen_::readBytes(std::vector<int> bytes)
 
 void Screen_::drawNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness)
 {
-  noInterrupts();
   for (int i = 0; i < numbers.size(); i++)
   {
     drawCharacter(x + (i * 5), y, readBytes(smallNumbers[numbers.at(i)]), 4, brightness);
   }
-  interrupts();
 }
 
 void Screen_::drawBigNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness)
 {
-  noInterrupts();
   for (int i = 0; i < numbers.size(); i++)
   {
     drawCharacter(x + (i * 8), y, readBytes(bigNumbers[numbers.at(i)]), 8, brightness);
   }
-  interrupts();
 }
 
 void Screen_::drawWeather(int x, int y, int weather, uint8_t brightness)
