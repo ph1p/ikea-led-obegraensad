@@ -33,6 +33,7 @@ void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
 
 void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
 {
+    noInterrupts();
     if (grays)
     {
         memcpy(renderBuffer_, renderBuffer, ROWS * COLS);
@@ -44,6 +45,7 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
             renderBuffer_[i] = renderBuffer[i] * 255;
         }
     }
+    interrupts();
 }
 
 uint8_t *Screen_::getRenderBuffer()
@@ -58,7 +60,9 @@ uint8_t Screen_::getBufferIndex(int index)
 
 void Screen_::clear()
 {
+    noInterrupts();
     memset(renderBuffer_, 0, ROWS * COLS);
+    interrupts();
 }
 
 void Screen_::clearRect(int x, int y, int width, int height)
@@ -80,10 +84,12 @@ void Screen_::clearRect(int x, int y, int width, int height)
     }
 
     width = std::min(width, COLS - x);
+    noInterrupts();
     for (int row = y; row < y + height; row++)
     {
         memset(renderBuffer_ + (row * COLS + x), 0, width);
     }
+    interrupts();
 }
 
 // CACHE START
@@ -99,12 +105,16 @@ bool Screen_::isCacheEmpty() const
 
 void Screen_::cacheCurrent()
 {
+    noInterrupts();
     memcpy(cache_, renderBuffer_, ROWS * COLS);
+    interrupts();
 }
 
 void Screen_::restoreCache()
 {
+    noInterrupts();
     setRenderBuffer(cache_, true);
+    interrupts();
 }
 // CACHE END
 
@@ -114,7 +124,7 @@ void Screen_::loadFromStorage()
 {
     storage.begin("led-wall", true);
     setBrightness(255);
-
+    
     if (currentStatus == NONE)
     {
         clear();
@@ -179,15 +189,18 @@ void Screen_::setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness)
 {
     if (index >= COLS * ROWS)
         return;
+    noInterrupts();
     renderBuffer_[index] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
+    interrupts();
 }
 
 void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
 {
     if (x >= COLS || y >= ROWS)
         return;
+    noInterrupts();
     renderBuffer_[y * COLS + x] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
-}
+    interrupts();}
 
 void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 {
