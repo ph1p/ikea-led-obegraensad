@@ -32,7 +32,6 @@ void BigClockPlugin::loop()
 
     bool leadingZero = (hh.at(0) == 0);
 
-    noInterrupts();
     Screen.clear();
     if (leadingZero)
     {
@@ -45,7 +44,7 @@ void BigClockPlugin::loop()
       Screen.drawBigNumbers(0, 0, hh);
       Screen.drawBigNumbers(0, ROWS / 2, mm);
     }
-    interrupts();
+    Screen.swapBuffers();
   }
 }
 
