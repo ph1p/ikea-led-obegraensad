@@ -35,13 +35,13 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
 {
   if (grays)
   {
-    memcpy(renderBuffer_, renderBuffer, ROWS * COLS);
+    memcpy(drawBuffer_, renderBuffer, ROWS * COLS);
   }
   else
   {
     for (int i = 0; i < ROWS * COLS; i++)
     {
-      renderBuffer_[i] = renderBuffer[i] * 255;
+      drawBuffer_[i] = renderBuffer[i] * 255;
     }
   }
 }
@@ -51,14 +51,19 @@ uint8_t *Screen_::getRenderBuffer()
   return renderBuffer_;
 }
 
+uint8_t *Screen_::getDrawBuffer()
+{
+  return drawBuffer_;
+}
+
 uint8_t Screen_::getBufferIndex(int index)
 {
-  return renderBuffer_[index];
+  return drawBuffer_[index];
 }
 
 void Screen_::clear()
 {
-  memset(renderBuffer_, 0, ROWS * COLS);
+  memset(drawBuffer_, 0, ROWS * COLS);
 }
 
 void Screen_::clearRect(int x, int y, int width, int height)
@@ -82,7 +87,7 @@ void Screen_::clearRect(int x, int y, int width, int height)
   width = std::min(width, COLS - x);
   for (int row = y; row < y + height; row++)
   {
-    memset(renderBuffer_ + (row * COLS + x), 0, width);
+    memset(drawBuffer_ + (row * COLS + x), 0, width);
   }
 }
 
@@ -99,7 +104,7 @@ bool Screen_::isCacheEmpty() const
 
 void Screen_::cacheCurrent()
 {
-  memcpy(cache_, renderBuffer_, ROWS * COLS);
+  memcpy(cache_, drawBuffer_, ROWS * COLS);
 }
 
 void Screen_::restoreCache()
@@ -179,14 +184,14 @@ void Screen_::setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness)
 {
   if (index >= COLS * ROWS)
     return;
-  renderBuffer_[index] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
+  drawBuffer_[index] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
 }
 
 void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
 {
   if (x >= COLS || y >= ROWS)
     return;
-  renderBuffer_[y * COLS + x] =
+  drawBuffer_[y * COLS + x] =
       value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
 }
 
@@ -202,6 +207,13 @@ void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
     storage.end();
   }
 #endif
+}
+
+void Screen_::swapBuffers()
+{
+  noInterrupts();
+  std::swap_ranges(renderBuffer_, renderBuffer_ + ROWS * COLS, drawBuffer_);
+  interrupts();
 }
 
 uint8_t *Screen_::getRotatedRenderBuffer()
@@ -403,10 +415,7 @@ void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness, ui
                                     ? text[strPos]
                                     : currentFont.offset;
 
-          Screen.drawCharacter(xPos,
-                               4,
-                               Screen.readBytes(currentFont.data[currentChar - currentFont.offset]),
-                               8);
+          drawCharacter(xPos, 4, readBytes(currentFont.data[currentChar - currentFont.offset]), 8);
         }
       }
     }
