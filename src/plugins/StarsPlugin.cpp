@@ -46,6 +46,7 @@ void StarsPlugin::loop()
       }
     }
   }
+  Screen.swapBuffers(); // Swap buffers to display the updated stars
 }
 
 void StarsPlugin::teardown()

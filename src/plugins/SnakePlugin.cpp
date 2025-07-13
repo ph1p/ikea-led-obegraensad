@@ -334,6 +334,7 @@ void SnakePlugin::loop()
     this->initGame();
     break;
   }
+  Screen.swapBuffers(); // Swap buffers to display the new frame
 }
 
 const char *SnakePlugin::getName() const

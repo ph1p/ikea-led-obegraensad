@@ -71,6 +71,7 @@ void FireworkPlugin::loop()
       previousMillis = currentMillis;
     }
   }
+  Screen.swapBuffers();
 }
 
 const char *FireworkPlugin::getName() const

@@ -26,10 +26,26 @@ void TickingClockPlugin::loop()
 
       Screen.clear();
 
-      Screen.drawCharacter(2, 0, Screen.readBytes(fonts[1].data[hh[0]]), 8, Screen.getCurrentBrightness());
-      Screen.drawCharacter(9, 0, Screen.readBytes(fonts[1].data[hh[1]]), 8, Screen.getCurrentBrightness());
-      Screen.drawCharacter(2, 9, Screen.readBytes(fonts[1].data[mm[0]]), 8, Screen.getCurrentBrightness());
-      Screen.drawCharacter(9, 9, Screen.readBytes(fonts[1].data[mm[1]]), 8, Screen.getCurrentBrightness());
+      Screen.drawCharacter(2,
+                           0,
+                           Screen.readBytes(fonts[1].data[hh[0]]),
+                           8,
+                           Screen.getCurrentBrightness());
+      Screen.drawCharacter(9,
+                           0,
+                           Screen.readBytes(fonts[1].data[hh[1]]),
+                           8,
+                           Screen.getCurrentBrightness());
+      Screen.drawCharacter(2,
+                           9,
+                           Screen.readBytes(fonts[1].data[mm[0]]),
+                           8,
+                           Screen.getCurrentBrightness());
+      Screen.drawCharacter(9,
+                           9,
+                           Screen.readBytes(fonts[1].data[mm[1]]),
+                           8,
+                           Screen.getCurrentBrightness());
       previousMinutes = timeinfo.tm_min;
       previousHour = timeinfo.tm_hour;
     }
@@ -45,6 +61,7 @@ void TickingClockPlugin::loop()
 
       previousSecond = timeinfo.tm_sec;
     }
+    Screen.swapBuffers(); // Swap buffers to display the updated time
   }
 }
 
