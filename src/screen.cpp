@@ -211,9 +211,8 @@ void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 
 void Screen_::swapBuffers()
 {
-  noInterrupts();
-  std::swap_ranges(renderBuffer_, renderBuffer_ + ROWS * COLS, drawBuffer_);
-  interrupts();
+  // Instead of swapping immediately, set the flag
+  pendingBufferSwap_ = true;
 }
 
 uint8_t *Screen_::getRotatedRenderBuffer()
@@ -263,6 +262,15 @@ ICACHE_RAM_ATTR void Screen_::_render()
   memset(bits, 0, ROWS * COLS / 8);
 
   static unsigned char counter = 0;
+
+  // Swap buffers only at the start of a new PWM cycle
+  if (counter == 0 && pendingBufferSwap_)
+  {
+    noInterrupts();
+    std::swap_ranges(renderBuffer_, renderBuffer_ + ROWS * COLS, drawBuffer_);
+    pendingBufferSwap_ = false;
+    interrupts();
+  }
 
   for (int idx = 0; idx < ROWS * COLS; idx++)
   {

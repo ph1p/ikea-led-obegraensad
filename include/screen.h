@@ -14,6 +14,7 @@ private:
   uint8_t brightness_ = 255;
   uint8_t renderBuffer_[ROWS * COLS];
   uint8_t drawBuffer_[ROWS * COLS]; // Double buffering: drawing buffer
+  bool pendingBufferSwap_ = false;
   uint8_t rotatedRenderBuffer_[ROWS * COLS];
   uint8_t cache_[ROWS * COLS];
   uint8_t positions[ROWS * COLS] = {
