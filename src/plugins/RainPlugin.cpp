@@ -60,7 +60,7 @@ void RainPlugin::loop()
     }
   }
 
-  Screen.swapBuffers();
+  Screen.present();
 
   delay(96);
 }

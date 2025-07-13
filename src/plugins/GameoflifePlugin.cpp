@@ -69,7 +69,7 @@ void GameOfLifePlugin::loop()
       Screen.setPixelAtIndex(i * COLS + j, this->buffer[i * COLS + j]);
     }
   }
-  Screen.swapBuffers();
+  Screen.present();
   delay(150);
 
   if (generations == 0)

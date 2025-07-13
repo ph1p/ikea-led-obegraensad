@@ -13,7 +13,7 @@ void CirclePlugin::loop()
   {
     Screen.setPixelAtIndex(i, bits[i]);
   }
-  Screen.swapBuffers();
+  Screen.present();
 
   this->circleStep++;
   if (this->circleStep > 14)

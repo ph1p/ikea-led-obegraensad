@@ -116,7 +116,7 @@ void WeatherPlugin::update()
       Screen.drawCharacter(9, tempY, Screen.readBytes(degreeSymbol), 4, 50);
       Screen.drawNumbers(3, tempY, {-temperature});
     }
-    Screen.swapBuffers();
+    Screen.present();
   }
 }
 

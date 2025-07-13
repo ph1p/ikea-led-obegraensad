@@ -61,7 +61,7 @@ void TickingClockPlugin::loop()
 
       previousSecond = timeinfo.tm_sec;
     }
-    Screen.swapBuffers(); // Swap buffers to display the updated time
+    Screen.present(); // Swap buffers to display the updated time
   }
 }
 

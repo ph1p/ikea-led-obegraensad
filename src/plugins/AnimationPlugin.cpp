@@ -35,7 +35,7 @@ void AnimationPlugin::loop()
     {
       Screen.setPixelAtIndex(i, bits[i]);
     }
-    Screen.swapBuffers();
+    Screen.present();
 
     this->step++;
 

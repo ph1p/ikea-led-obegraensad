@@ -399,7 +399,7 @@ void PongClockPlugin::loop()
                     PongClockPlugin::LED_TYPE_ON,
                     ballBrightness);
 
-    Screen.swapBuffers();
+    Screen.present();
   }
 }
 

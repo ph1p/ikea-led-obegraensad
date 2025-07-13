@@ -29,7 +29,7 @@ void ClockPlugin::loop()
     Screen.clear();
     Screen.drawNumbers(3, 2, {(previousHour - previousHour % 10) / 10, previousHour % 10});
     Screen.drawNumbers(3, 8, {(previousMinutes - previousMinutes % 10) / 10, previousMinutes % 10});
-    Screen.swapBuffers();
+    Screen.present();
   }
 }
 

@@ -15,7 +15,7 @@ void LinesPlugin::loop()
       Screen.setPixel(col, row, bits[col]);
     }
   }
-  Screen.swapBuffers();
+  Screen.present();
 
   this->count++;
   if (this->count >= 4)

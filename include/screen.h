@@ -12,10 +12,10 @@ private:
   Screen_() = default;
 
   uint8_t brightness_ = 255;
-  uint8_t renderBuffer_[ROWS * COLS];
+  uint8_t displayBuffer_[ROWS * COLS];
   uint8_t drawBuffer_[ROWS * COLS]; // Double buffering: drawing buffer
-  bool pendingBufferSwap_ = false;
-  uint8_t rotatedRenderBuffer_[ROWS * COLS];
+  bool pendingDisplayUpdate_ = false;
+  uint8_t rotatedDisplayBuffer_[ROWS * COLS];
   uint8_t cache_[ROWS * COLS];
   uint8_t positions[ROWS * COLS] = {
       0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
@@ -36,9 +36,9 @@ private:
       0xef, 0xee, 0xed, 0xec, 0xeb, 0xea, 0xe9, 0xe8, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
   static void onScreenTimer();
-  ICACHE_RAM_ATTR void _render();
+  ICACHE_RAM_ATTR void _display();
   void rotate();
-  uint8_t *getRotatedRenderBuffer();
+  uint8_t *getRotatedDisplayBuffer();
 
 public:
   static Screen_ &getInstance();
@@ -93,7 +93,7 @@ public:
                    uint8_t brightness = 255);
 
   // Atomically swap draw and render buffers
-  void swapBuffers();
+  void present();
 };
 
 extern Screen_ &Screen;

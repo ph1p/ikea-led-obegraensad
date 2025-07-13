@@ -57,7 +57,7 @@ void DrawPlugin::websocketHook(DynamicJsonDocument &request)
       sendInfo();
 #endif
     }
-    Screen.swapBuffers();
+    Screen.present();
   }
 }
 

@@ -36,8 +36,8 @@ void StarsPlugin::loop()
       Screen.setPixel(stars[i].x, stars[i].y, 1, stars[i].brightness);
     }
   }
-  Screen.swapBuffers(); // Show this frame
-  delay(20);            // Control the speed of the star twinkling effect
+  Screen.present(); // Show this frame
+  delay(20);        // Control the speed of the star twinkling effect
 }
 
 void StarsPlugin::teardown()

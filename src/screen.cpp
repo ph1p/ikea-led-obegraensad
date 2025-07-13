@@ -48,7 +48,7 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
 
 uint8_t *Screen_::getRenderBuffer()
 {
-  return renderBuffer_;
+  return displayBuffer_;
 }
 
 uint8_t *Screen_::getDrawBuffer()
@@ -123,7 +123,7 @@ void Screen_::loadFromStorage()
   if (currentStatus == NONE)
   {
     clear();
-    storage.getBytes("data", renderBuffer_, ROWS * COLS);
+    storage.getBytes("data", displayBuffer_, ROWS * COLS);
   }
   else
   {
@@ -138,7 +138,7 @@ void Screen_::loadFromStorage()
 void Screen_::persist()
 {
   storage.begin("led-wall");
-  storage.putBytes("data", renderBuffer_, ROWS * COLS);
+  storage.putBytes("data", displayBuffer_, ROWS * COLS);
   storage.putUInt("brightness", brightness_);
   storage.putUInt("rotation", currentRotation);
   storage.end();
@@ -209,22 +209,22 @@ void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 #endif
 }
 
-void Screen_::swapBuffers()
+void Screen_::present()
 {
   // Instead of swapping immediately, set the flag
-  pendingBufferSwap_ = true;
+  pendingDisplayUpdate_ = true;
 }
 
-uint8_t *Screen_::getRotatedRenderBuffer()
+uint8_t *Screen_::getRotatedDisplayBuffer()
 {
   for (int i = 0; i < ROWS * COLS; i++)
   {
-    rotatedRenderBuffer_[i] = renderBuffer_[i];
+    rotatedDisplayBuffer_[i] = displayBuffer_[i];
   }
 
   rotate();
 
-  return rotatedRenderBuffer_;
+  return rotatedDisplayBuffer_;
 }
 
 void Screen_::rotate()
@@ -235,12 +235,12 @@ void Screen_::rotate()
     {
       for (int r = 0; r < currentRotation; r++)
       {
-        swap(rotatedRenderBuffer_[row * ROWS + col],
-             rotatedRenderBuffer_[col * ROWS + (ROWS - 1 - row)]);
-        swap(rotatedRenderBuffer_[row * ROWS + col],
-             rotatedRenderBuffer_[(ROWS - 1 - row) * ROWS + (ROWS - 1 - col)]);
-        swap(rotatedRenderBuffer_[row * ROWS + col],
-             rotatedRenderBuffer_[(ROWS - 1 - col) * ROWS + row]);
+        swap(rotatedDisplayBuffer_[row * ROWS + col],
+             rotatedDisplayBuffer_[col * ROWS + (ROWS - 1 - row)]);
+        swap(rotatedDisplayBuffer_[row * ROWS + col],
+             rotatedDisplayBuffer_[(ROWS - 1 - row) * ROWS + (ROWS - 1 - col)]);
+        swap(rotatedDisplayBuffer_[row * ROWS + col],
+             rotatedDisplayBuffer_[(ROWS - 1 - col) * ROWS + row]);
       }
     }
   }
@@ -248,12 +248,12 @@ void Screen_::rotate()
 
 void Screen_::onScreenTimer()
 {
-  Screen._render();
+  Screen._display();
 }
 
-ICACHE_RAM_ATTR void Screen_::_render()
+ICACHE_RAM_ATTR void Screen_::_display()
 {
-  const auto buf = getRotatedRenderBuffer();
+  const auto buf = getRotatedDisplayBuffer();
 
   // SPI data needs to be 32-bit aligned, round up before divide
   static unsigned long
@@ -264,11 +264,11 @@ ICACHE_RAM_ATTR void Screen_::_render()
   static unsigned char counter = 0;
 
   // Copy drawBuffer_ to renderBuffer_ only at the start of a new PWM cycle
-  if (counter == 0 && pendingBufferSwap_)
+  if (counter == 0 && pendingDisplayUpdate_)
   {
     noInterrupts();
-    memcpy(renderBuffer_, drawBuffer_, ROWS * COLS);
-    pendingBufferSwap_ = false;
+    memcpy(displayBuffer_, drawBuffer_, ROWS * COLS);
+    pendingDisplayUpdate_ = false;
     interrupts();
   }
 

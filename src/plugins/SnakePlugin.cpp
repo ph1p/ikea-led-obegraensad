@@ -11,7 +11,7 @@ void SnakePlugin::initGame()
   }
 
   newDot();
-  Screen.swapBuffers(); // Swap buffers to display the initial state
+  Screen.present(); // Swap buffers to display the initial state
 }
 
 void SnakePlugin::newDot()
@@ -272,7 +272,7 @@ void SnakePlugin::moveSnake(uint newpos)
     Screen.setPixelAtIndex(this->dot, SnakePlugin::LED_TYPE_ON, 40);
   }
 
-  Screen.swapBuffers(); // Swap buffers to display the new frame
+  Screen.present(); // Swap buffers to display the new frame
 }
 
 void SnakePlugin::end()
@@ -281,55 +281,55 @@ void SnakePlugin::end()
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
   }
-  Screen.swapBuffers();
+  Screen.present();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
   }
-  Screen.swapBuffers();
+  Screen.present();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
   }
-  Screen.swapBuffers();
+  Screen.present();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
   }
-  Screen.swapBuffers();
+  Screen.present();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
   }
-  Screen.swapBuffers();
+  Screen.present();
   delay(200);
 
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
   }
-  Screen.swapBuffers();
+  Screen.present();
   delay(500);
 
   // Turn off each segment one by one, keeping the back buffer in sync
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
-    Screen.swapBuffers();
+    Screen.present();
     delay(200);
   }
 
   delay(200);
   Screen.setPixelAtIndex(this->dot, SnakePlugin::LED_TYPE_OFF);
-  Screen.swapBuffers();
+  Screen.present();
   delay(500);
 
   this->gameState = SnakePlugin::GAME_STATE_END;

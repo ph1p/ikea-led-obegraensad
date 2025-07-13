@@ -215,8 +215,8 @@ void BreakoutPlugin::loop()
     this->initGame();
     break;
   }
-  this->drawFrame();    // Draw everything to the draw buffer
-  Screen.swapBuffers(); // Swap buffers to display the new frame
+  this->drawFrame(); // Draw everything to the draw buffer
+  Screen.present();  // Swap buffers to display the new frame
   delay(random(100, 200));
 }
 

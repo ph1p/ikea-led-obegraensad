@@ -44,7 +44,7 @@ void BigClockPlugin::loop()
       Screen.drawBigNumbers(0, 0, hh);
       Screen.drawBigNumbers(0, ROWS / 2, mm);
     }
-    Screen.swapBuffers();
+    Screen.present();
   }
 }
 
