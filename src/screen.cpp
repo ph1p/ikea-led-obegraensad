@@ -263,11 +263,11 @@ ICACHE_RAM_ATTR void Screen_::_render()
 
   static unsigned char counter = 0;
 
-  // Swap buffers only at the start of a new PWM cycle
+  // Copy drawBuffer_ to renderBuffer_ only at the start of a new PWM cycle
   if (counter == 0 && pendingBufferSwap_)
   {
     noInterrupts();
-    std::swap_ranges(renderBuffer_, renderBuffer_ + ROWS * COLS, drawBuffer_);
+    memcpy(renderBuffer_, drawBuffer_, ROWS * COLS);
     pendingBufferSwap_ = false;
     interrupts();
   }

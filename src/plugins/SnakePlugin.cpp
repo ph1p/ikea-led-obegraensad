@@ -324,7 +324,6 @@ void SnakePlugin::end()
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
     Screen.swapBuffers();
-    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF); // Also clear on the back buffer
     delay(200);
   }
 
