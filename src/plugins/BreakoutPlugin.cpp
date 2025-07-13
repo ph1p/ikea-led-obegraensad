@@ -18,8 +18,6 @@ void BreakoutPlugin::initBricks()
   {
     this->bricks[i].x = i % this->X_MAX;
     this->bricks[i].y = i / this->X_MAX;
-    Screen.setPixelAtIndex(this->bricks[i].y * this->X_MAX + this->bricks[i].x, this->LED_TYPE_ON, 50);
-
     delay(25);
   }
 }
@@ -31,12 +29,10 @@ void BreakoutPlugin::newLevel()
   {
     this->paddle[i].x = (this->X_MAX / 2) - (this->PADDLE_WIDTH / 2) + i;
     this->paddle[i].y = this->Y_MAX - 1;
-    Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + this->paddle[i].x, this->LED_TYPE_ON, 50);
   }
   this->ball.x = this->paddle[1].x;
   this->ball.y = this->paddle[1].y - 1;
 
-  Screen.setPixelAtIndex(ball.y * this->X_MAX + ball.x, this->LED_TYPE_ON, 128);
   this->ballMovement[0] = 1;
   this->ballMovement[1] = -1;
   this->lastBallUpdate = 0;
@@ -52,7 +48,6 @@ void BreakoutPlugin::updateBall()
     return;
   }
   this->lastBallUpdate = millis();
-  Screen.setPixelAtIndex(this->ball.y * this->X_MAX + this->ball.x, this->LED_TYPE_OFF, 100);
 
   if (this->ballMovement[1] == 1)
   {
@@ -92,8 +87,6 @@ void BreakoutPlugin::updateBall()
 
   this->ball.x += this->ballMovement[0];
   this->ball.y += this->ballMovement[1];
-
-  Screen.setPixelAtIndex(this->ball.y * this->X_MAX + this->ball.x, this->LED_TYPE_ON, 100);
 }
 
 void BreakoutPlugin::hitBrick(byte i)
@@ -107,7 +100,6 @@ void BreakoutPlugin::hitBrick(byte i)
   {
     this->ballDelay -= this->BALL_DELAY_STEP;
   }
-  Screen.setPixelAtIndex(this->bricks[i].y * this->X_MAX + this->bricks[i].x, this->LED_TYPE_OFF);
 }
 
 void BreakoutPlugin::checkPaddleCollision()
@@ -163,15 +155,7 @@ void BreakoutPlugin::updatePaddle()
   {
     for (byte i = 0; i < this->PADDLE_WIDTH; i++)
     {
-      Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + this->paddle[i].x, this->LED_TYPE_OFF);
-    }
-    for (byte i = 0; i < this->PADDLE_WIDTH; i++)
-    {
       this->paddle[i].x += moveDirection;
-    }
-    for (byte i = 0; i < this->PADDLE_WIDTH; i++)
-    {
-      Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + this->paddle[i].x, this->LED_TYPE_ON);
     }
   }
   else
@@ -183,12 +167,37 @@ void BreakoutPlugin::updatePaddle()
 void BreakoutPlugin::end()
 {
   this->gameState = this->GAME_STATE_END;
-  Screen.setPixelAtIndex(this->ball.y * this->X_MAX + this->ball.x, this->LED_TYPE_ON);
 }
 
 void BreakoutPlugin::setup()
 {
   this->gameState = this->GAME_STATE_END;
+}
+
+void BreakoutPlugin::drawFrame()
+{
+  // Clear the draw buffer
+  Screen.clear();
+
+  // Draw all bricks
+  for (byte i = 0; i < this->BRICK_AMOUNT; i++)
+  {
+    if (this->bricks[i].x >= 0 && this->bricks[i].y >= 0)
+    {
+      Screen.setPixelAtIndex(this->bricks[i].y * this->X_MAX + this->bricks[i].x,
+                             this->LED_TYPE_ON,
+                             50);
+    }
+  }
+
+  // Draw paddle
+  for (byte i = 0; i < this->PADDLE_WIDTH; i++)
+  {
+    Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + this->paddle[i].x, this->LED_TYPE_ON);
+  }
+
+  // Draw ball
+  Screen.setPixelAtIndex(this->ball.y * this->X_MAX + this->ball.x, this->LED_TYPE_ON, 128);
 }
 
 void BreakoutPlugin::loop()
@@ -201,12 +210,14 @@ void BreakoutPlugin::loop()
   case this->GAME_STATE_RUNNING:
     this->updateBall();
     this->updatePaddle();
-    delay(random(100, 200));
     break;
   case this->GAME_STATE_END:
     this->initGame();
     break;
   }
+  this->drawFrame();    // Draw everything to the draw buffer
+  Screen.swapBuffers(); // Swap buffers to display the new frame
+  delay(random(100, 200));
 }
 
 const char *BreakoutPlugin::getName() const
