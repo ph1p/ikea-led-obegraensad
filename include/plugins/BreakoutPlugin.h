@@ -44,6 +44,7 @@ private:
   void initBricks();
   void newLevel();
   void updateBall();
+  void drawFrame();
   void hitBrick(unsigned char i);
   void checkPaddleCollision();
   void updatePaddle();

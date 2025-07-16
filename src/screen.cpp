@@ -35,30 +35,35 @@ void Screen_::setRenderBuffer(const uint8_t *renderBuffer, bool grays)
 {
   if (grays)
   {
-    memcpy(renderBuffer_, renderBuffer, ROWS * COLS);
+    memcpy(drawBuffer_, renderBuffer, ROWS * COLS);
   }
   else
   {
     for (int i = 0; i < ROWS * COLS; i++)
     {
-      renderBuffer_[i] = renderBuffer[i] * 255;
+      drawBuffer_[i] = renderBuffer[i] * 255;
     }
   }
 }
 
 uint8_t *Screen_::getRenderBuffer()
 {
-  return renderBuffer_;
+  return displayBuffer_;
+}
+
+uint8_t *Screen_::getDrawBuffer()
+{
+  return drawBuffer_;
 }
 
 uint8_t Screen_::getBufferIndex(int index)
 {
-  return renderBuffer_[index];
+  return drawBuffer_[index];
 }
 
 void Screen_::clear()
 {
-  memset(renderBuffer_, 0, ROWS * COLS);
+  memset(drawBuffer_, 0, ROWS * COLS);
 }
 
 void Screen_::clearRect(int x, int y, int width, int height)
@@ -82,7 +87,7 @@ void Screen_::clearRect(int x, int y, int width, int height)
   width = std::min(width, COLS - x);
   for (int row = y; row < y + height; row++)
   {
-    memset(renderBuffer_ + (row * COLS + x), 0, width);
+    memset(drawBuffer_ + (row * COLS + x), 0, width);
   }
 }
 
@@ -99,7 +104,7 @@ bool Screen_::isCacheEmpty() const
 
 void Screen_::cacheCurrent()
 {
-  memcpy(cache_, renderBuffer_, ROWS * COLS);
+  memcpy(cache_, drawBuffer_, ROWS * COLS);
 }
 
 void Screen_::restoreCache()
@@ -118,7 +123,7 @@ void Screen_::loadFromStorage()
   if (currentStatus == NONE)
   {
     clear();
-    storage.getBytes("data", renderBuffer_, ROWS * COLS);
+    storage.getBytes("data", displayBuffer_, ROWS * COLS);
   }
   else
   {
@@ -133,7 +138,7 @@ void Screen_::loadFromStorage()
 void Screen_::persist()
 {
   storage.begin("led-wall");
-  storage.putBytes("data", renderBuffer_, ROWS * COLS);
+  storage.putBytes("data", displayBuffer_, ROWS * COLS);
   storage.putUInt("brightness", brightness_);
   storage.putUInt("rotation", currentRotation);
   storage.end();
@@ -165,7 +170,7 @@ void Screen_::setup()
 #endif
 
 #ifdef ESP32
-  SPI.begin(PIN_CLOCK, 34, PIN_DATA, 25); // SCLK, MISO, MOSI, SS
+  SPI.begin(PIN_CLOCK, -1, PIN_DATA, -1); // SCLK, MISO, MOSI, SS
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
 
   hw_timer_t *Screen_timer = timerBegin(0, 80, true);
@@ -179,14 +184,15 @@ void Screen_::setPixelAtIndex(uint8_t index, uint8_t value, uint8_t brightness)
 {
   if (index >= COLS * ROWS)
     return;
-  renderBuffer_[index] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
+  drawBuffer_[index] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
 }
 
 void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
 {
   if (x >= COLS || y >= ROWS)
     return;
-  renderBuffer_[y * COLS + x] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
+  drawBuffer_[y * COLS + x] =
+      value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
 }
 
 void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
@@ -203,16 +209,22 @@ void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 #endif
 }
 
-uint8_t *Screen_::getRotatedRenderBuffer()
+void Screen_::present()
+{
+  // Instead of swapping immediately, set the flag
+  pendingDisplayUpdate_ = true;
+}
+
+uint8_t *Screen_::getRotatedDisplayBuffer()
 {
   for (int i = 0; i < ROWS * COLS; i++)
   {
-    rotatedRenderBuffer_[i] = renderBuffer_[i];
+    rotatedDisplayBuffer_[i] = displayBuffer_[i];
   }
 
   rotate();
 
-  return rotatedRenderBuffer_;
+  return rotatedDisplayBuffer_;
 }
 
 void Screen_::rotate()
@@ -223,9 +235,12 @@ void Screen_::rotate()
     {
       for (int r = 0; r < currentRotation; r++)
       {
-        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[col * ROWS + (ROWS - 1 - row)]);
-        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[(ROWS - 1 - row) * ROWS + (ROWS - 1 - col)]);
-        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[(ROWS - 1 - col) * ROWS + row]);
+        swap(rotatedDisplayBuffer_[row * ROWS + col],
+             rotatedDisplayBuffer_[col * ROWS + (ROWS - 1 - row)]);
+        swap(rotatedDisplayBuffer_[row * ROWS + col],
+             rotatedDisplayBuffer_[(ROWS - 1 - row) * ROWS + (ROWS - 1 - col)]);
+        swap(rotatedDisplayBuffer_[row * ROWS + col],
+             rotatedDisplayBuffer_[(ROWS - 1 - col) * ROWS + row]);
       }
     }
   }
@@ -233,19 +248,29 @@ void Screen_::rotate()
 
 void Screen_::onScreenTimer()
 {
-  Screen._render();
+  Screen._display();
 }
 
-ICACHE_RAM_ATTR void Screen_::_render()
+ICACHE_RAM_ATTR void Screen_::_display()
 {
-  const auto buf = getRotatedRenderBuffer();
+  const auto buf = getRotatedDisplayBuffer();
 
   // SPI data needs to be 32-bit aligned, round up before divide
-  static unsigned long spi_bits[(ROWS * COLS + 8 * sizeof(unsigned long) - 1) / 8 / sizeof(unsigned long)] = {0};
+  static unsigned long
+      spi_bits[(ROWS * COLS + 8 * sizeof(unsigned long) - 1) / 8 / sizeof(unsigned long)] = {0};
   unsigned char *bits = (unsigned char *)spi_bits;
   memset(bits, 0, ROWS * COLS / 8);
 
   static unsigned char counter = 0;
+
+  // Copy drawBuffer_ to renderBuffer_ only at the start of a new PWM cycle
+  if (counter == 0 && pendingDisplayUpdate_)
+  {
+    noInterrupts();
+    memcpy(displayBuffer_, drawBuffer_, ROWS * COLS);
+    pendingDisplayUpdate_ = false;
+    interrupts();
+  }
 
   for (int idx = 0; idx < ROWS * COLS; idx++)
   {
@@ -291,7 +316,13 @@ void Screen_::drawLine(int x1, int y1, int x2, int y2, int ledStatus, uint8_t br
   };
 };
 
-void Screen_::drawRectangle(int x, int y, int width, int height, bool fill, int ledStatus, uint8_t brightness)
+void Screen_::drawRectangle(int x,
+                            int y,
+                            int width,
+                            int height,
+                            bool fill,
+                            int ledStatus,
+                            uint8_t brightness)
 {
   if (!fill)
   {
@@ -307,7 +338,7 @@ void Screen_::drawRectangle(int x, int y, int width, int height, bool fill, int 
       drawLine(i, y, i, y + height - 1, ledStatus, brightness);
     }
   }
-};
+}
 
 void Screen_::drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness)
 {
@@ -387,9 +418,12 @@ void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness, ui
         if (xPos > -6 && xPos < ROWS)
         { // so are we somewhere on screen with the char?
           // ensure that we have a defined char, lets take the first
-          uint8_t currentChar = (((text[strPos] - currentFont.offset) < currentFont.data.size()) && (text[strPos] >= currentFont.offset)) ? text[strPos] : currentFont.offset;
+          uint8_t currentChar = (((text[strPos] - currentFont.offset) < currentFont.data.size()) &&
+                                 (text[strPos] >= currentFont.offset))
+                                    ? text[strPos]
+                                    : currentFont.offset;
 
-          Screen.drawCharacter(xPos, 4, Screen.readBytes(currentFont.data[currentChar - currentFont.offset]), 8);
+          drawCharacter(xPos, 4, readBytes(currentFont.data[currentChar - currentFont.offset]), 8);
         }
       }
     }
@@ -398,7 +432,11 @@ void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness, ui
   }
 }
 
-void Screen_::scrollGraph(std::vector<int> graph, int miny, int maxy, int delayTime, uint8_t brightness)
+void Screen_::scrollGraph(std::vector<int> graph,
+                          int miny,
+                          int maxy,
+                          int delayTime,
+                          uint8_t brightness)
 {
   if (graph.size() <= 0)
   {

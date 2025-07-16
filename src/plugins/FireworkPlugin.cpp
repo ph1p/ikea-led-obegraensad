@@ -22,12 +22,14 @@ void FireworkPlugin::explode(int x, int y)
   for (int radius = 1; radius <= maxRadius; radius++)
   {
     drawExplosion(x, y, radius, 255);
+    Screen.present(); // Swap buffers after drawing each explosion frame
     delay(explosionDelay);
   }
 
   for (int brightness = 248; brightness >= 0; brightness -= 8)
   {
     drawExplosion(x, y, maxRadius, brightness);
+    Screen.present(); // Swap buffers after drawing each fade frame
     delay(fadeDelay);
   }
 }
@@ -71,6 +73,7 @@ void FireworkPlugin::loop()
       previousMillis = currentMillis;
     }
   }
+  Screen.present();
 }
 
 const char *FireworkPlugin::getName() const

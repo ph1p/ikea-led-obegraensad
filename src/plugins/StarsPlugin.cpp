@@ -14,38 +14,30 @@ void StarsPlugin::setup()
 
 void StarsPlugin::loop()
 {
-  for (int fadeStep = 255; fadeStep >= 0; fadeStep -= 4)
+  Screen.clear();
+  for (int i = 0; i < numStars; i++)
   {
-    for (int i = 0; i < numStars; i++)
+    unsigned long currentTime = millis();
+    if (stars[i].brightness >= 8)
     {
-      if (stars[i].brightness > 0)
+      if (currentTime - stars[i].lastUpdateTime >= 128)
       {
-        unsigned long currentTime = millis();
-        if (currentTime - stars[i].lastUpdateTime >= 128)
-        {
-          stars[i].brightness = max(0, stars[i].brightness - 8);
-          Screen.setPixel(stars[i].x, stars[i].y, 1, stars[i].brightness);
-          stars[i].lastUpdateTime = currentTime;
-        }
+        stars[i].brightness = max(0, stars[i].brightness - 8);
+        stars[i].lastUpdateTime = currentTime;
       }
-      else
-      {
-        stars[i].x = random(0, 16);
-        stars[i].y = random(0, 16);
-        stars[i].brightness = random(8, 255);
-
-        for (int brightness = 0; brightness <= stars[i].brightness; brightness += 5)
-        {
-          unsigned long currentTime = millis();
-          if (currentTime - stars[i].lastUpdateTime >= 64)
-          {
-            Screen.setPixel(stars[i].x, stars[i].y, 1, brightness);
-            stars[i].lastUpdateTime = currentTime;
-          }
-        }
-      }
+      Screen.setPixel(stars[i].x, stars[i].y, 1, stars[i].brightness);
+    }
+    else
+    {
+      stars[i].x = random(0, 16);
+      stars[i].y = random(0, 16);
+      stars[i].brightness = random(8, 255);
+      stars[i].lastUpdateTime = currentTime;
+      Screen.setPixel(stars[i].x, stars[i].y, 1, stars[i].brightness);
     }
   }
+  Screen.present(); // Show this frame
+  delay(20);        // Control the speed of the star twinkling effect
 }
 
 void StarsPlugin::teardown()

@@ -60,6 +60,8 @@ void RainPlugin::loop()
     }
   }
 
+  Screen.present();
+
   delay(96);
 }
 

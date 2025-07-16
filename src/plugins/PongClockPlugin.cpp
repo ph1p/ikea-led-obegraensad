@@ -9,7 +9,11 @@
 *************************************************/
 static const uint8_t Y_MIN = 6;
 
-void PongClockPlugin::drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness)
+void PongClockPlugin::drawCharacter(int x,
+                                    int y,
+                                    std::vector<int> bits,
+                                    int bitCount,
+                                    uint8_t brightness)
 {
   for (int i = 0; i < bits.size(); i += bitCount)
   {
@@ -46,9 +50,17 @@ int PongClockPlugin::realRandom(int min, int max)
 
 void PongClockPlugin::drawDigits()
 {
-  drawCharacter(0, 0, Screen.readBytes(smallNumbers[(current_hour - current_hour % 10) / 10]), 4, 100);
+  drawCharacter(0,
+                0,
+                Screen.readBytes(smallNumbers[(current_hour - current_hour % 10) / 10]),
+                4,
+                100);
   drawCharacter(4, 0, Screen.readBytes(smallNumbers[current_hour % 10]), 4, 100);
-  drawCharacter(9, 0, Screen.readBytes(smallNumbers[(current_minute - current_minute % 10) / 10]), 4, 100);
+  drawCharacter(9,
+                0,
+                Screen.readBytes(smallNumbers[(current_minute - current_minute % 10) / 10]),
+                4,
+                100);
   drawCharacter(13, 0, Screen.readBytes(smallNumbers[current_minute % 10]), 4, 100);
 }
 
@@ -84,7 +96,8 @@ int PongClockPlugin::pong_predict_y(int x, int y, int angle)
 {
   while (x >= X_MAX && x <= 256 - X_MAX)
   {
-    if ((y + cos(degToRad(angle)) * X_MAX) + .5 < (X_MAX * Y_MIN)) // Limit gamefield not to mix up wit clock digits
+    if ((y + cos(degToRad(angle)) * X_MAX) + .5 <
+        (X_MAX * Y_MIN)) // Limit gamefield not to mix up wit clock digits
     {
       if (angle > 90 && angle < 270)
       {
@@ -252,7 +265,9 @@ void PongClockPlugin::loop()
               ballAngle = realRandom(315 - 25, 315 + 25);
             pongBallDirection = 1;
             pongPaddleRightStart = pongPaddleRightY;
-            pongPaddleRightTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), (Y_MAX * Y_MIN), 255 - Y_MAX); // Restrict paddle from mixin with digits
+            pongPaddleRightTarget = constrain(pong_predict_y(ballX, ballY, ballAngle),
+                                              (Y_MAX * Y_MIN),
+                                              255 - Y_MAX); // Restrict paddle from mixin with digits
           }
           else
           {
@@ -275,7 +290,9 @@ void PongClockPlugin::loop()
               ballAngle = realRandom(45 - 25, 45 + 25);
             pongBallDirection = 0;
             pongPaddleLeftStart = pongPaddleLeftY;
-            pongPaddleLeftTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), (Y_MAX * Y_MIN), 255 - Y_MAX); // Restrict paddle from mixin with digits
+            pongPaddleLeftTarget = constrain(pong_predict_y(ballX, ballY, ballAngle),
+                                             (Y_MAX * Y_MIN),
+                                             255 - Y_MAX); // Restrict paddle from mixin with digits
           }
           else
           {
@@ -283,7 +300,8 @@ void PongClockPlugin::loop()
             pongCelebrationEnd = currentMillis + 2000;
           }
         }
-        if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 < (Y_MIN * Y_MAX)) // Avoid mixing ball with the Clock Digits
+        if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 <
+            (Y_MIN * Y_MAX)) // Avoid mixing ball with the Clock Digits
           swapYdirection();
         else if ((ballY + cos(degToRad(ballAngle)) * Y_MAX) + .5 > 256)
           swapYdirection();
@@ -329,7 +347,8 @@ void PongClockPlugin::loop()
         else
           offset = -2 * X_MAX;
       }
-      pongPaddleLeftY = map(ballX, X_MAX, 256 - X_MAX, pongPaddleLeftStart, pongPaddleLeftTarget + offset);
+      pongPaddleLeftY =
+          map(ballX, X_MAX, 256 - X_MAX, pongPaddleLeftStart, pongPaddleLeftTarget + offset);
     }
     else
     {
@@ -341,24 +360,46 @@ void PongClockPlugin::loop()
         else
           offset = -2 * Y_MAX;
       }
-      pongPaddleRightY = map(ballX, 256 - Y_MAX, Y_MAX, pongPaddleRightStart, pongPaddleRightTarget + offset);
+      pongPaddleRightY =
+          map(ballX, 256 - Y_MAX, Y_MAX, pongPaddleRightStart, pongPaddleRightTarget + offset);
     }
-
-
 
     Screen.clearRect(0, 5, 16, 11);
 
     // draw paddles
-    Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX - 1, PongClockPlugin::LED_TYPE_ON, 255);
-    Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, 255);
-    Screen.setPixel(PongClockPlugin::X_MAX - 1, getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX + 1, PongClockPlugin::LED_TYPE_ON, 255);
+    Screen.setPixel(PongClockPlugin::X_MAX - 1,
+                    getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX - 1,
+                    PongClockPlugin::LED_TYPE_ON,
+                    255);
+    Screen.setPixel(PongClockPlugin::X_MAX - 1,
+                    getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX,
+                    PongClockPlugin::LED_TYPE_ON,
+                    255);
+    Screen.setPixel(PongClockPlugin::X_MAX - 1,
+                    getScreenIndex(255, pongPaddleLeftY) / PongClockPlugin::Y_MAX + 1,
+                    PongClockPlugin::LED_TYPE_ON,
+                    255);
 
-    Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX - 1, PongClockPlugin::LED_TYPE_ON, 255);
-    Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, 255);
-    Screen.setPixel(0, getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX + 1, PongClockPlugin::LED_TYPE_ON, 255);
+    Screen.setPixel(0,
+                    getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX - 1,
+                    PongClockPlugin::LED_TYPE_ON,
+                    255);
+    Screen.setPixel(0,
+                    getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX,
+                    PongClockPlugin::LED_TYPE_ON,
+                    255);
+    Screen.setPixel(0,
+                    getScreenIndex(0, pongPaddleRightY) / PongClockPlugin::Y_MAX + 1,
+                    PongClockPlugin::LED_TYPE_ON,
+                    255);
 
     // draw ball
-    Screen.setPixel(ballX / PongClockPlugin::X_MAX, ballY / PongClockPlugin::Y_MAX, PongClockPlugin::LED_TYPE_ON, ballBrightness);
+    Screen.setPixel(ballX / PongClockPlugin::X_MAX,
+                    ballY / PongClockPlugin::Y_MAX,
+                    PongClockPlugin::LED_TYPE_ON,
+                    ballBrightness);
+
+    Screen.present();
   }
 }
 
