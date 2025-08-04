@@ -9,7 +9,7 @@ on:
   pull_request:
     branches:
       - main
-    
+
 jobs:
   build_esp32dev:
     name: Build Firmware
@@ -44,9 +44,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          platformio update
-          platformio upgrade
-          platformio lib install
+          pio pkg update
+          pio upgrade
+          pio pkg install
 
       - name: Build project for esp32dev
         run: platformio run --environment esp32dev
@@ -105,9 +105,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          platformio update
-          platformio upgrade
-          platformio lib install
+          pio pkg update
+          pio upgrade
+          pio pkg install
 
       - name: Build project for ${{ matrix.environment }}
         run: platformio run --environment ${{ matrix.environment }}
