@@ -74,8 +74,10 @@ jobs:
             artifact_name: nodemcuv2_firmware
           - environment: d1_mini_pro-ota
             artifact_name: d1_mini_pro_ota_firmware
-          - environment: esp32dev
-            artifact_name: esp32dev_firmware
+          - environment: esp32c3
+            artifact_name: esp32c3_firmware
+          - environment: ESP32-wemos
+            artifact_name: ESP32-wemos_firmware
 
     steps:
       - name: Checkout Repository
