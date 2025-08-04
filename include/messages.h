@@ -59,7 +59,7 @@ public:
   void release(Message *msg)
   {
     ptrdiff_t index = msg - pool;
-    if (index >= 0 && index < POOL_SIZE)
+    if (index >= 0 && index < static_cast<ptrdiff_t>(POOL_SIZE))
     {
       used[index] = false;
       pool[index].reset();

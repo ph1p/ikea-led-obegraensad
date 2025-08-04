@@ -2,6 +2,7 @@
 
 void DDPPlugin::setup()
 {
+    #ifdef ASYNC_UDP_ENABLED
     udp = new AsyncUDP();
     if (udp->listen(4048))
     {
@@ -28,15 +29,18 @@ void DDPPlugin::setup()
             }
         });
     }
+    #endif
 }
 
 void DDPPlugin::teardown()
 {
+    #ifdef ASYNC_UDP_ENABLED
     if (udp)
     {
         delete udp;
         udp = nullptr;
     }
+    #endif
 }
 
 void DDPPlugin::loop()

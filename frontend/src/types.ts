@@ -34,6 +34,7 @@ export interface Store {
   leds: number[];
   plugins: { id: number; name: string }[];
   plugin: number;
+  artnetUniverse: number;
   systemStatus: SYSTEM_STATUS;
   connectionState: () => number;
   connectionStatus?: string;

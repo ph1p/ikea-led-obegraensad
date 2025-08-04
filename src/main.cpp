@@ -2,10 +2,12 @@
 #include <SPI.h>
 #include <BfButton.h>
 
-#ifdef ESP82666
+#ifdef ESP8266
 /* Fix duplicate defs of HTTP_GET, HTTP_POST, ... in ESPAsyncWebServer.h */
 #define WEBSERVER_H
 #endif
+
+
 #include <WiFiManager.h>
 
 #ifdef ESP32
@@ -225,14 +227,14 @@ void screenDrawingTask()
 void setup()
 {
   baseSetup();
-  Scheduler.start(&screenDrawingTask);
+  Scheduler.start();
 }
 #endif
 
 void loop()
 {
   static uint8_t taskCounter = 0;
-  const unsigned long currentMillis = millis();
+
   btn.read();
 
 #if !defined(ESP32) && !defined(ESP8266)
