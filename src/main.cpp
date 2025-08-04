@@ -216,7 +216,6 @@ void setup()
 }
 #endif
 #ifdef ESP8266
-#include <Scheduler.h>
 void screenDrawingTask()
 {
   Screen.setup();
