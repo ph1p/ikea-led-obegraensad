@@ -122,6 +122,8 @@ bool PluginScheduler::setScheduleByJSONString(String scheduleJson)
     return false;
   }
 
+  clearSchedule(true);
+
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall");
   storage.putString("schedule", scheduleJson);
