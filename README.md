@@ -302,6 +302,43 @@ curl http://your-server/api/data
 
 ---
 
+## Use HTTP API in Home Assistant
+
+An example configuration for an automation to set the brightness based on the sun's position. Dims the display when the sun is setting.
+
+- Add the following code to your `configuration.yaml`:
+  ```yaml
+  rest_command:
+    obegraensad_brightness_high:
+      url: "http://your-server/api/brightness/"
+      method: PATCH
+      content_type: "application/x-www-form-urlencoded"
+      payload: "value=100"
+    obegraensad_brightness_low:
+      url: "http://your-server/api/brightness/"
+      method: PATCH
+      content_type: "application/x-www-form-urlencoded"
+      payload: "value=1"
+  ```
+- Go to *Settings* --> *Automations* and create a new automation.
+- Select *Edit in YAML* and add the following content:
+  ```yaml
+  alias: Obegraensad low bightness
+  description: ""
+  triggers:
+    - trigger: sun
+      event: sunset
+      offset: 0
+  conditions: []
+  actions:
+    - action: rest_command.obegraensad_brightness_low
+      data: {}
+  mode: single
+  ```
+- To set the brightness back to bright, create e.g. another automation or a condition in which `rest_command.obegraensad_brightness_high` is called.
+
+---
+
 # Plugin Scheduler
 
 It is possible to switch between plugins automatically.  
