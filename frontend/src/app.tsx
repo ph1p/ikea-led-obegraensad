@@ -1,4 +1,4 @@
-import { Component, createMemo, Show } from 'solid-js';
+import { type Component, createMemo, Show } from 'solid-js';
 import { Layout } from './components/layout/layout';
 import Sidebar from './components/layout/sidebar';
 import { LedMatrix } from './components/led-matrix';
@@ -24,6 +24,7 @@ export const App: Component = () => {
       | 'screen'
       | 'led'
       | 'persist-plugin'
+      | 'artnet'
       | 'brightness',
     data?: any,
   ) =>
@@ -79,6 +80,13 @@ export const App: Component = () => {
     actions?.setBrightness(value);
     if (shouldSend) {
       wsMessage('brightness', { brightness: value });
+    }
+  };
+
+  const handleArtnetUniverseChange = (value: number, shouldSend = false) => {
+    actions?.setArtnetUniverse(value);
+    if (shouldSend) {
+      wsMessage('artnet', { universe: value });
     }
   };
 
@@ -142,6 +150,7 @@ export const App: Component = () => {
           onLoad={handleLoad}
           onPluginChange={handlePluginChange}
           onBrightnessChange={handleBrightnessChange}
+          onArtnetChange={handleArtnetUniverseChange}
           onPersistPlugin={handlePersistPlugin}
         />
       }

@@ -15,7 +15,6 @@ void onWsEvent(
     uint8_t *data,
     size_t len);
 void sendInfo();
-void sendMinimalInfo();
 void initWebsocketServer(AsyncWebServer &server);
 void cleanUpClients();
 

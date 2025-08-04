@@ -24,7 +24,7 @@ void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
 #ifdef ENABLE_STORAGE
   if (shouldStore)
   {
-    storage.begin("led-wall", false);
+    storage.begin("led-wall");
     storage.putUInt("brightness", brightness);
     storage.end();
   }
@@ -109,9 +109,9 @@ void Screen_::restoreCache()
 // CACHE END
 
 // STORAGE START
-#ifdef ENABLE_STORAGE
 void Screen_::loadFromStorage()
 {
+#ifdef ENABLE_STORAGE
   storage.begin("led-wall", true);
   setBrightness(255);
 
@@ -128,17 +128,19 @@ void Screen_::loadFromStorage()
   setBrightness(storage.getUInt("brightness", 255));
   setCurrentRotation(storage.getUInt("rotation", 0));
   storage.end();
+#endif
 }
 
 void Screen_::persist()
 {
+#ifdef ENABLE_STORAGE
   storage.begin("led-wall");
   storage.putBytes("data", renderBuffer_, ROWS * COLS);
   storage.putUInt("brightness", brightness_);
   storage.putUInt("rotation", currentRotation);
   storage.end();
-}
 #endif
+}
 // STORAGE END
 
 void Screen_::setup()
@@ -168,10 +170,9 @@ void Screen_::setup()
   SPI.begin(PIN_CLOCK, 34, PIN_DATA, 25); // SCLK, MISO, MOSI, SS
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
 
-  hw_timer_t *Screen_timer = timerBegin(0, 80, true);
-  timerAttachInterrupt(Screen_timer, &onScreenTimer, true);
-  timerAlarmWrite(Screen_timer, TIMER_INTERVAL_US, true);
-  timerAlarmEnable(Screen_timer);
+  hw_timer_t *Screen_timer = timerBegin(1000000);
+  timerAttachInterrupt(Screen_timer, &onScreenTimer);
+  timerAlarm(Screen_timer, TIMER_INTERVAL_US, true, 0);
 #endif
 }
 

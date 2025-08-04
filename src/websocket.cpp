@@ -47,23 +47,6 @@ void sendInfo()
   jsonDocument.clear();
 }
 
-void sendMinimalInfo()
-{
-  DynamicJsonDocument jsonDocument(6144);
-
-  jsonDocument["status"] = currentStatus;
-  jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
-  jsonDocument["event"] = "minimal-info";
-  jsonDocument["rotation"] = Screen.currentRotation;
-  jsonDocument["brightness"] = Screen.getCurrentBrightness();
-  jsonDocument["scheduleActive"] = Scheduler.isActive;
-
-  String output;
-  serializeJson(jsonDocument, output);
-  ws.textAll(output);
-  jsonDocument.clear();
-}
-
 void onWsEvent(
     AsyncWebSocket *server,
     AsyncWebSocketClient *client,
@@ -108,10 +91,10 @@ void onWsEvent(
           if (!strcmp(event, "plugin"))
           {
             int pluginId = wsRequest["plugin"];
+
             Scheduler.clearSchedule();
             pluginManager.setActivePluginById(pluginId);
-
-            sendMinimalInfo();
+            sendInfo();
           }
           else if (!strcmp(event, "persist-plugin"))
           {

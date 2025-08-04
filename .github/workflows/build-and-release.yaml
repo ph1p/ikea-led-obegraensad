@@ -9,7 +9,7 @@ on:
   pull_request:
     branches:
       - main
-    
+
 jobs:
   build_esp32dev:
     name: Build Firmware
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python environment
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Install PlatformIO
         run: |
@@ -44,9 +44,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          platformio update
-          platformio upgrade
-          platformio lib install
+          pio pkg update
+          pio upgrade
+          pio pkg install
 
       - name: Build project for esp32dev
         run: platformio run --environment esp32dev
@@ -68,12 +68,14 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        environment: [nodemcuv2, d1_mini_pro-ota]
+        environment: [nodemcuv2, d1_mini_pro-ota, ESP32-wemos]
         include:
           - environment: nodemcuv2
             artifact_name: nodemcuv2_firmware
           - environment: d1_mini_pro-ota
             artifact_name: d1_mini_pro_ota_firmware
+          - environment: ESP32-wemos
+            artifact_name: ESP32-wemos_firmware
 
     steps:
       - name: Checkout Repository
@@ -82,7 +84,7 @@ jobs:
       - name: Set up Python environment
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Install PlatformIO
         run: |
@@ -105,9 +107,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          platformio update
-          platformio upgrade
-          platformio lib install
+          pio pkg update
+          pio upgrade
+          pio pkg install
 
       - name: Build project for ${{ matrix.environment }}
         run: platformio run --environment ${{ matrix.environment }}

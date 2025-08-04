@@ -2,12 +2,11 @@
 
 void DDPPlugin::setup()
 {
+    #ifdef ASYNC_UDP_ENABLED
     udp = new AsyncUDP();
     if (udp->listen(4048))
     {
-        Serial.print("DDP server listening at IP: ");
-        Serial.print(WiFi.localIP());
-        Serial.println(" port: 4048");
+        Serial.print("DDP server listening at port: 4048");
 
         udp->onPacket([](AsyncUDPPacket packet)
         {
@@ -30,15 +29,18 @@ void DDPPlugin::setup()
             }
         });
     }
+    #endif
 }
 
 void DDPPlugin::teardown()
 {
+    #ifdef ASYNC_UDP_ENABLED
     if (udp)
     {
         delete udp;
         udp = nullptr;
     }
+    #endif
 }
 
 void DDPPlugin::loop()

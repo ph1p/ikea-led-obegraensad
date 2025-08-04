@@ -25,6 +25,7 @@ interface SidebarProps {
   onLoad: () => void;
   onPluginChange: (pluginId: number) => void;
   onBrightnessChange: (value: number, shouldSend?: boolean) => void;
+  onArtnetChange: (value: number, shouldSend?: boolean) => void;
   onPersistPlugin: () => void;
 }
 
@@ -56,6 +57,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             </select>
             <Tooltip text="Save current display mode as default startup mode">
               <button
+                type="button"
                 onClick={props.onPersistPlugin}
                 class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
               >
@@ -74,6 +76,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
         <div class="flex gap-2.5">
           <Tooltip text="Rotate display counter-clockwise">
             <button
+              type="button"
               onClick={() => props.onRotate(false)}
               class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
             >
@@ -82,6 +85,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
           </Tooltip>
           <Tooltip text="Rotate display clockwise">
             <button
+              type="button"
               onClick={() => props.onRotate(true)}
               class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
             >
@@ -104,7 +108,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             onInput={(e) =>
               props.onBrightnessChange(parseInt(e.currentTarget.value))
             }
-            onPointerUp={(e) =>
+            onPointerUp={() =>
               props.onBrightnessChange(store.brightness, true)
             }
           />
@@ -114,6 +118,31 @@ export const Sidebar: Component<SidebarProps> = (props) => {
         </div>
       </SidebarSection>
 
+      <Show when={store?.plugin === 17 && !store?.isActiveScheduler}>
+        <div class="my-6 border-t border-gray-200" />
+
+        <SidebarSection title="ArtNet Universe">
+          <div class="space-y-2">
+            <input
+              type="range"
+              min="0"
+              max="255"
+              value={store?.artnetUniverse}
+              class="w-full"
+              onInput={(e) =>
+                props.onArtnetChange(parseInt(e.currentTarget.value))
+              }
+              onPointerUp={() =>
+                props.onArtnetChange(store.artnetUniverse, true)
+              }
+            />
+            <div class="text-sm text-gray-600 text-right">
+              {store?.artnetUniverse}
+            </div>
+          </div>
+        </SidebarSection>
+      </Show>
+
       <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
         <div class="my-6 border-t border-gray-200" />
 
@@ -121,6 +150,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
           <div class="grid grid-cols-2 gap-2">
             <Tooltip text="Import image from your device">
               <button
+                type="button"
                 onClick={props.onLoadImage}
                 class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
               >
@@ -129,6 +159,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             </Tooltip>
             <Tooltip text="Clear all pixels">
               <button
+                type="button"
                 onClick={props.onClear}
                 class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded hover:bg-red-600"
               >
@@ -137,6 +168,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             </Tooltip>
             <Tooltip text="Save current display state">
               <button
+                type="button"
                 onClick={props.onPersist}
                 class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
               >
@@ -145,6 +177,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             </Tooltip>
             <Tooltip text="Load last saved state">
               <button
+                type="button"
                 onClick={props.onLoad}
                 class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
               >

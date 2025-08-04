@@ -145,6 +145,6 @@ void PluginManager::activateNextPlugin()
         setActivePluginById(1);
     }
 #ifdef ENABLE_SERVER
-    sendMinimalInfo();
+    sendInfo();
 #endif
 }
