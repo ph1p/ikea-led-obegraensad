@@ -30,6 +30,7 @@
 #include "plugins/PongClockPlugin.h"
 #include "plugins/TickingClockPlugin.h"
 #include "plugins/DDPPlugin.h"
+#include "plugins/ArtNet.h"
 
 #ifdef ENABLE_SERVER
 #include "plugins/AnimationPlugin.h"
@@ -175,6 +176,7 @@ void baseSetup()
   pluginManager.addPlugin(new WeatherPlugin());
   pluginManager.addPlugin(new AnimationPlugin());
   pluginManager.addPlugin(new DDPPlugin());
+  pluginManager.addPlugin(new ArtNetPlugin());
 #endif
 
   pluginManager.init();

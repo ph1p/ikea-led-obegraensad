@@ -25,6 +25,7 @@ interface SidebarProps {
   onLoad: () => void;
   onPluginChange: (pluginId: number) => void;
   onBrightnessChange: (value: number, shouldSend?: boolean) => void;
+  onArtnetChange: (value: number, shouldSend?: boolean) => void;
   onPersistPlugin: () => void;
 }
 
@@ -113,6 +114,32 @@ export const Sidebar: Component<SidebarProps> = (props) => {
           </div>
         </div>
       </SidebarSection>
+
+      <Show when={store?.plugin === 17 && !store?.isActiveScheduler}>
+        <div class="my-6 border-t border-gray-200" />
+
+        <SidebarSection title="ArtNet Universe">
+          <div class="space-y-2">
+            <input
+              type="range"
+              min="0"
+              max="255"
+              value={store?.artnetUniverse}
+              class="w-full"
+              onInput={(e) =>
+                props.onArtnetChange(parseInt(e.currentTarget.value))
+              }
+              onPointerUp={(e) =>
+                props.onArtnetChange(store.artnetUniverse, true)
+              }
+            />
+            <div class="text-sm text-gray-600 text-right">
+              {store?.artnetUniverse}
+            </div>
+          </div>
+        </SidebarSection>
+      </Show>
+
 
       <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
         <div class="my-6 border-t border-gray-200" />
