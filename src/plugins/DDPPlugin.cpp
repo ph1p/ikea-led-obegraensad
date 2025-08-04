@@ -5,9 +5,7 @@ void DDPPlugin::setup()
     udp = new AsyncUDP();
     if (udp->listen(4048))
     {
-        Serial.print("DDP server listening at IP: ");
-        Serial.print(WiFi.localIP());
-        Serial.println(" port: 4048");
+        Serial.print("DDP server listening at port: 4048");
 
         udp->onPacket([](AsyncUDPPacket packet)
         {
