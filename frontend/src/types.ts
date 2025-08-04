@@ -23,6 +23,7 @@ export interface StoreActions {
   setLeds: (leds: number[]) => void;
   setSystemStatus: (systemStatus: SYSTEM_STATUS) => void;
   setSchedule: (items: ScheduleItem[]) => void;
+  setArtnetUniverse: (artnetUniverse: number) => void;
   send: (message: string | ArrayBuffer) => void;
 }
 

@@ -1,4 +1,4 @@
-import { Component, createMemo, Show } from 'solid-js';
+import { type Component, createMemo, Show } from 'solid-js';
 import { Layout } from './components/layout/layout';
 import Sidebar from './components/layout/sidebar';
 import { LedMatrix } from './components/led-matrix';
@@ -82,9 +82,9 @@ export const App: Component = () => {
       wsMessage('brightness', { brightness: value });
     }
   };
-  
+
   const handleArtnetUniverseChange = (value: number, shouldSend = false) => {
-    actions?.setArtnetUniverse(value);    
+    actions?.setArtnetUniverse(value);
     if (shouldSend) {
       wsMessage('artnet', { universe: value });
     }

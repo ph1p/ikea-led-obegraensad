@@ -18,16 +18,21 @@ void PluginScheduler::addItem(int pluginId, unsigned long durationSeconds)
 
 void PluginScheduler::clearSchedule(bool emptyStorage)
 {
-  schedule.clear();
   currentIndex = 0;
   isActive = false;
 #ifdef ENABLE_STORAGE
   if (emptyStorage)
   {
-    storage.begin("led-wall", false);
+    schedule.clear();
+    storage.begin("led-wall");
     storage.putString("schedule", "");
     storage.putInt("scheduleactive", 0);
     storage.end();
+  }
+#else
+  if (emptyStorage)
+  {
+    schedule.clear();
   }
 #endif
 }
@@ -78,7 +83,7 @@ void PluginScheduler::switchToCurrentPlugin()
   {
     pluginManager.setActivePluginById(schedule[currentIndex].pluginId);
 #ifdef ENABLE_SERVER
-    sendMinimalInfo();
+    sendInfo();
 #endif
   }
 }
@@ -118,26 +123,22 @@ bool PluginScheduler::setScheduleByJSONString(String scheduleJson)
   }
 
 #ifdef ENABLE_STORAGE
-  storage.begin("led-wall", false);
+  storage.begin("led-wall");
   storage.putString("schedule", scheduleJson);
   storage.end();
 #endif
 
-  Scheduler.clearSchedule();
+  clearSchedule();
 
-  JsonArray schedule = doc.as<JsonArray>();
-  for (JsonObject item : schedule)
+  for (const auto &item : doc.as<JsonArray>())
   {
-    if (!item.containsKey("pluginId") || !item.containsKey("duration"))
+    if (item.containsKey("pluginId") && item.containsKey("duration"))
     {
-      return false;
+      int pluginId = item["pluginId"].as<int>();
+      unsigned long duration = item["duration"].as<unsigned long>();
+      addItem(pluginId, duration);
     }
-
-    int pluginId = item["pluginId"].as<int>();
-    unsigned long duration = item["duration"].as<unsigned long>();
-    Scheduler.addItem(pluginId, duration);
   }
-
   return true;
 }
 

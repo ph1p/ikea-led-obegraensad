@@ -75,15 +75,6 @@ export const StoreProvider: ParentComponent = (props) => {
     const json = JSON.parse(messageEvent()?.data || '{}');
 
     switch (json.event) {
-      case 'minimal-info':
-        actions.setSystemStatus(
-          Object.values(SYSTEM_STATUS)[json.status as number],
-        );
-        actions.setRotation(json.rotation);
-        actions.setBrightness(json.brightness);
-        actions.setPlugin(json.plugin as number);
-        actions.setIsActiveScheduler(json.scheduleActive);
-        break;
       case 'info':
         batch(() => {
           actions.setSystemStatus(

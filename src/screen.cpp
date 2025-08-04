@@ -24,7 +24,7 @@ void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
 #ifdef ENABLE_STORAGE
   if (shouldStore)
   {
-    storage.begin("led-wall", false);
+    storage.begin("led-wall");
     storage.putUInt("brightness", brightness);
     storage.end();
   }
