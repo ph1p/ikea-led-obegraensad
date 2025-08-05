@@ -344,8 +344,6 @@ void PongClockPlugin::loop()
       pongPaddleRightY = map(ballX, 256 - Y_MAX, Y_MAX, pongPaddleRightStart, pongPaddleRightTarget + offset);
     }
 
-
-
     Screen.clearRect(0, 5, 16, 11);
 
     // draw paddles

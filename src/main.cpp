@@ -7,7 +7,6 @@
 #define WEBSERVER_H
 #endif
 
-
 #include <WiFiManager.h>
 
 #ifdef ESP32
@@ -64,7 +63,8 @@ void connectToWiFi()
 {
   // if a WiFi setup AP was started, reboot is required to clear routes
   bool wifiWebServerStarted = false;
-  wifiManager.setWebServerCallback([&wifiWebServerStarted]() { wifiWebServerStarted = true; });
+  wifiManager.setWebServerCallback([&wifiWebServerStarted]()
+                                   { wifiWebServerStarted = true; });
 
   wifiManager.setHostname(WIFI_HOSTNAME);
 

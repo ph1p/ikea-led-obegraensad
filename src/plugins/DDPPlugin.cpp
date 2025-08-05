@@ -2,14 +2,14 @@
 
 void DDPPlugin::setup()
 {
-    #ifdef ASYNC_UDP_ENABLED
+#ifdef ASYNC_UDP_ENABLED
     udp = new AsyncUDP();
     if (udp->listen(4048))
     {
         Serial.print("DDP server listening at port: 4048");
 
         udp->onPacket([](AsyncUDPPacket packet)
-        {
+                      {
             if (packet.length() >= 10) {  // Basic DDP header check
                 const uint8_t* data = packet.data() + 10;  // Skip header
                 const size_t dataLength = packet.length() - 10;
@@ -26,21 +26,20 @@ void DDPPlugin::setup()
                         Screen.setPixelAtIndex(i, brightness > 4, brightness);
                     }
                 }
-            }
-        });
+            } });
     }
-    #endif
+#endif
 }
 
 void DDPPlugin::teardown()
 {
-    #ifdef ASYNC_UDP_ENABLED
+#ifdef ASYNC_UDP_ENABLED
     if (udp)
     {
         delete udp;
         udp = nullptr;
     }
-    #endif
+#endif
 }
 
 void DDPPlugin::loop()

@@ -51,7 +51,7 @@ const uint8_t GUI_HTML[] PROGMEM = {${addLineBreaks(output)}};
 
 void startGui(AsyncWebServerRequest *request)
 {
-  AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", GUI_HTML, GUI_HTML_SIZE);
+  AsyncWebServerResponse *response = request->beginResponse(200, "text/html", GUI_HTML, GUI_HTML_SIZE);
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
