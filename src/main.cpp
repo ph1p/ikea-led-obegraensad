@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include <SPI.h>
 #include <BfButton.h>
+#include <SPI.h>
 
 #ifdef ESP8266
 /* Fix duplicate defs of HTTP_GET, HTTP_POST, ... in ESPAsyncWebServer.h */
@@ -22,16 +22,16 @@
 
 #include "plugins/BreakoutPlugin.h"
 #include "plugins/CirclePlugin.h"
+#include "plugins/DDPPlugin.h"
 #include "plugins/DrawPlugin.h"
 #include "plugins/FireworkPlugin.h"
 #include "plugins/GameOfLifePlugin.h"
 #include "plugins/LinesPlugin.h"
+#include "plugins/PongClockPlugin.h"
 #include "plugins/RainPlugin.h"
 #include "plugins/SnakePlugin.h"
 #include "plugins/StarsPlugin.h"
-#include "plugins/PongClockPlugin.h"
 #include "plugins/TickingClockPlugin.h"
-#include "plugins/DDPPlugin.h"
 #include "plugins/ArtNet.h"
 
 #ifdef ENABLE_SERVER
@@ -39,15 +39,14 @@
 #include "plugins/BigClockPlugin.h"
 #include "plugins/ClockPlugin.h"
 #include "plugins/WeatherPlugin.h"
-#include "plugins/AnimationPlugin.h"
 #endif
 
 #include "asyncwebserver.h"
+#include "messages.h"
 #include "ota.h"
 #include "screen.h"
 #include "secrets.h"
 #include "websocket.h"
-#include "messages.h"
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, PIN_BUTTON, true, LOW);
 
@@ -65,9 +64,7 @@ void connectToWiFi()
 {
   // if a WiFi setup AP was started, reboot is required to clear routes
   bool wifiWebServerStarted = false;
-  wifiManager.setWebServerCallback(
-      [&wifiWebServerStarted]()
-      { wifiWebServerStarted = true; });
+  wifiManager.setWebServerCallback([&wifiWebServerStarted]() { wifiWebServerStarted = true; });
 
   wifiManager.setHostname(WIFI_HOSTNAME);
 
@@ -184,9 +181,7 @@ void baseSetup()
   pluginManager.init();
   Scheduler.init();
 
-  btn.onPress(pressHandler)
-      .onDoublePress(pressHandler)
-      .onPressFor(pressHandler, 1000);
+  btn.onPress(pressHandler).onDoublePress(pressHandler).onPressFor(pressHandler, 1000);
 }
 
 #ifdef ESP32
@@ -205,14 +200,13 @@ void screenDrawingTask(void *parameter)
 void setup()
 {
   baseSetup();
-  xTaskCreatePinnedToCore(
-      screenDrawingTask,
-      "screenDrawingTask",
-      10000,
-      NULL,
-      1,
-      &screenDrawingTaskHandle,
-      0);
+  xTaskCreatePinnedToCore(screenDrawingTask,
+                          "screenDrawingTask",
+                          10000,
+                          NULL,
+                          1,
+                          &screenDrawingTaskHandle,
+                          0);
 }
 #endif
 #ifdef ESP8266
@@ -235,6 +229,10 @@ void loop()
   static uint8_t taskCounter = 0;
 
   btn.read();
+
+#ifdef ENABLE_SERVER
+  ElegantOTA.loop();
+#endif
 
 #if !defined(ESP32) && !defined(ESP8266)
   pluginManager.runActivePlugin();
