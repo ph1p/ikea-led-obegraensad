@@ -32,6 +32,7 @@
 #include "plugins/StarsPlugin.h"
 #include "plugins/TickingClockPlugin.h"
 #include "plugins/ArtNet.h"
+#include "plugins/Blop.h"
 
 #ifdef ENABLE_SERVER
 #include "plugins/AnimationPlugin.h"
@@ -166,6 +167,7 @@ void baseSetup()
   pluginManager.addPlugin(new CirclePlugin());
   pluginManager.addPlugin(new RainPlugin());
   pluginManager.addPlugin(new FireworkPlugin());
+  pluginManager.addPlugin(new BlobPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
