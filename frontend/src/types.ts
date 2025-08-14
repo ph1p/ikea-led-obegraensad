@@ -1,11 +1,9 @@
-import { Setter } from 'solid-js';
-
 export enum SYSTEM_STATUS {
-  NONE = 'draw',
-  WSBINARY = 'wsbinary',
+  NONE = "draw",
+  WSBINARY = "wsbinary",
   // SYSTEM
-  UPDATE = 'update',
-  LOADING = 'loading',
+  UPDATE = "update",
+  LOADING = "loading",
 }
 
 export interface ScheduleItem {

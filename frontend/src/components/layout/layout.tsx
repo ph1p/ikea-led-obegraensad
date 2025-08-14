@@ -1,20 +1,17 @@
-import { Component, JSX, Show } from 'solid-js';
-import { useStore } from '../../contexts/store';
-import { ScreenInfo } from '../screen-info';
+import { type Component, type JSX, Show } from "solid-js";
+
+import { useStore } from "../../contexts/store";
+import { ScreenInfo } from "../screen-info";
 
 export const Layout: Component<{
   content: JSX.Element;
   sidebar: JSX.Element;
-  ref?: any;
+  ref?: HTMLElement;
 }> = (props) => {
   const [store] = useStore();
 
   return (
-    <div
-      class={`h-full ${
-        store.connectionState() === 1 ? 'grid grid-cols-[320px_1fr]' : ''
-      }`}
-    >
+    <div class={`h-full ${store.connectionState() === 1 ? "grid grid-cols-[320px_1fr]" : ""}`}>
       <Show
         when={store.connectionState() === 1}
         fallback={

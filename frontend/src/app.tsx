@@ -1,32 +1,31 @@
-import { type Component, createMemo, Show } from 'solid-js';
-import { Layout } from './components/layout/layout';
-import Sidebar from './components/layout/sidebar';
-import { LedMatrix } from './components/led-matrix';
-import { ScreenInfo } from './components/screen-info';
-import { useStore } from './contexts/store';
-import { useToast } from './contexts/toast';
-import { loadImageAndGetDataArray, rotateArray } from './helpers';
+import { type Component, createMemo, Show } from "solid-js";
+
+import { Layout } from "./components/layout/layout";
+import Sidebar from "./components/layout/sidebar";
+import { LedMatrix } from "./components/led-matrix";
+import { ScreenInfo } from "./components/screen-info";
+import { useStore } from "./contexts/store";
+import { useToast } from "./contexts/toast";
+import { loadImageAndGetDataArray, rotateArray } from "./helpers";
 
 export const App: Component = () => {
   const [store, actions] = useStore();
   const { toast } = useToast();
 
-  const rotatedMatrix = createMemo(() =>
-    rotateArray(store.indexMatrix, store.rotation),
-  );
+  const rotatedMatrix = createMemo(() => rotateArray(store.indexMatrix, store.rotation));
 
   const wsMessage = (
     event:
-      | 'persist'
-      | 'load'
-      | 'clear'
-      | 'plugin'
-      | 'screen'
-      | 'led'
-      | 'persist-plugin'
-      | 'artnet'
-      | 'brightness',
-    data?: any,
+      | "persist"
+      | "load"
+      | "clear"
+      | "plugin"
+      | "screen"
+      | "led"
+      | "persist-plugin"
+      | "artnet"
+      | "brightness",
+    data?: Record<string, string | number> | { data: number[] },
   ) =>
     actions.send(
       JSON.stringify({
@@ -37,61 +36,59 @@ export const App: Component = () => {
 
   const handleRotate = (turnRight = false) => {
     const currentRotation = store.rotation || 0;
-    actions.setRotation(((currentRotation + (turnRight ? 1 : -1)) + 4) % 4);
+    actions.setRotation((currentRotation + (turnRight ? 1 : -1) + 4) % 4);
     actions.send(
       JSON.stringify({
-        event: 'rotate',
-        direction: turnRight ? 'right' : 'left',
+        event: "rotate",
+        direction: turnRight ? "right" : "left",
       }),
     );
   };
 
   const handleLoadImage = () => {
     loadImageAndGetDataArray((data) => {
-      actions.setLeds(
-        store.indexMatrix.map((index) => (data[index] ? 255 : 0)),
-      );
-      wsMessage('screen', { data });
+      actions.setLeds(store.indexMatrix.map((index) => (data[index] ? 255 : 0)));
+      wsMessage("screen", { data });
     });
   };
 
   const handleClear = () => {
     actions?.setLeds([...new Array(256).fill(0)]);
-    wsMessage('clear');
+    wsMessage("clear");
     toast(`Canvas cleared`, 1000);
   };
 
   const handlePersist = () => {
-    wsMessage('persist');
+    wsMessage("persist");
     toast(`Saved current state`, 1500);
   };
 
   const handleLoad = () => {
-    wsMessage('load');
+    wsMessage("load");
     toast(`Saved state loaded`, 1500);
   };
 
   const handlePluginChange = (pluginId: number) => {
-    wsMessage('plugin', { plugin: pluginId });
-    toast('Mode changed', 1000);
+    wsMessage("plugin", { plugin: pluginId });
+    toast("Mode changed", 1000);
   };
 
   const handleBrightnessChange = (value: number, shouldSend = false) => {
     actions?.setBrightness(value);
     if (shouldSend) {
-      wsMessage('brightness', { brightness: value });
+      wsMessage("brightness", { brightness: value });
     }
   };
 
   const handleArtnetUniverseChange = (value: number, shouldSend = false) => {
     actions?.setArtnetUniverse(value);
     if (shouldSend) {
-      wsMessage('artnet', { universe: value });
+      wsMessage("artnet", { universe: value });
     }
   };
 
   const handlePersistPlugin = () => {
-    wsMessage('persist-plugin');
+    wsMessage("persist-plugin");
     toast(`Current mode set as default`, 1500);
   };
 
@@ -110,9 +107,7 @@ export const App: Component = () => {
           >
             <ScreenInfo>
               <h2 class="text-4xl">A plugin is currently running</h2>
-              <p class="text-xl mt-2 text-gray-300">
-                Select "Draw" to show the canvas.
-              </p>
+              <p class="text-xl mt-2 text-gray-300">Select "Draw" to show the canvas.</p>
             </ScreenInfo>
           </Show>
         }
@@ -127,7 +122,7 @@ export const App: Component = () => {
             data={store.leds || []}
             indexData={rotatedMatrix()}
             onSetLed={(data) => {
-              wsMessage('led', data);
+              wsMessage("led", data);
             }}
             onSetMatrix={(data) => {
               actions?.setLeds([...data]);

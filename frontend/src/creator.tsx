@@ -1,27 +1,19 @@
-import {
-  Component,
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  Show,
-} from 'solid-js';
-import { Button } from './components/button';
-import { Layout } from './components/layout/layout';
-import { LedMatrix } from './components/led-matrix';
-import { ScreenInfo } from './components/screen-info';
-import { Tooltip } from './components/tooltip';
-import { useStore } from './contexts/store';
-import { useToast } from './contexts/toast';
-import { chunkArray, matrixToHexArray } from './helpers';
+import { type Component, createEffect, createMemo, createSignal, For, Show } from "solid-js";
+
+import { Button } from "./components/button";
+import { Layout } from "./components/layout/layout";
+import { LedMatrix } from "./components/led-matrix";
+import { ScreenInfo } from "./components/screen-info";
+import { Tooltip } from "./components/tooltip";
+import { useStore } from "./contexts/store";
+import { useToast } from "./contexts/toast";
+import { chunkArray, matrixToHexArray } from "./helpers";
 
 export const Creator: Component = () => {
   const [store, actions] = useStore();
   const { toast } = useToast();
   const isAnimationPluginActive = createMemo<boolean>(
-    () =>
-      store?.plugins.find((p) => p.name.includes('Animation'))?.id ===
-      store?.plugin,
+    () => store?.plugins.find((p) => p.name.includes("Animation"))?.id === store?.plugin,
     true,
   );
 
@@ -35,9 +27,7 @@ export const Creator: Component = () => {
   let ref!: HTMLDivElement;
 
   const createNewScreen = (initialData?: number[]) => {
-    const [screen, setScreen] = createSignal(
-      initialData || new Array(256).fill(0),
-    );
+    const [screen, setScreen] = createSignal(initialData || new Array(256).fill(0));
     return [screen, setScreen] as const;
   };
 
@@ -47,7 +37,7 @@ export const Creator: Component = () => {
         ref?.scrollTo({
           top: 0,
           left: ref?.scrollWidth,
-          behavior: 'smooth',
+          behavior: "smooth",
         });
       }, 20);
     }
@@ -55,16 +45,10 @@ export const Creator: Component = () => {
 
   const handleAddScreen = () => {
     setScreenSignals((signals): ReturnType<typeof setScreenSignals> => {
-      const lastScreen =
-        signals.length > 0 ? signals[signals.length - 1][0]() : undefined;
-      const newSignal = createNewScreen(
-        lastScreen ? [...lastScreen] : undefined,
-      );
+      const lastScreen = signals.length > 0 ? signals[signals.length - 1][0]() : undefined;
+      const newSignal = createNewScreen(lastScreen ? [...lastScreen] : undefined);
       scrollToEnd();
-      return [
-        ...signals,
-        newSignal as unknown as ReturnType<typeof createSignal<number[]>>,
-      ];
+      return [...signals, newSignal as unknown as ReturnType<typeof createSignal<number[]>>];
     });
   };
 
@@ -86,17 +70,15 @@ export const Creator: Component = () => {
     if (isAnimationPluginActive()) {
       const screens = screenSignals().map(([screen]) => screen());
 
-      actions!.send(
+      actions.send(
         JSON.stringify({
-          event: 'upload',
+          event: "upload",
           screens: screens.length,
-          data: screens.map((screen) =>
-            matrixToHexArray(screen.map((s) => (s > 0 ? 1 : 0))),
-          ),
+          data: screens.map((screen) => matrixToHexArray(screen.map((s) => (s > 0 ? 1 : 0)))),
         }),
       );
 
-      toast('Data uploaded successfully!', 3000);
+      toast("Data uploaded successfully!", 3000);
     } else {
       toast('Set plugin to "Animation"!', 3000);
     }
@@ -108,21 +90,20 @@ export const Creator: Component = () => {
     for (const screen of screens) {
       animation.push(
         chunkArray(screen, 8).map(
-          (chunk) =>
-            `0x${parseInt(chunk.join(''), 2).toString(16).padStart(2, '0')}`,
+          (chunk) => `0x${parseInt(chunk.join(""), 2).toString(16).padStart(2, "0")}`,
         ),
       );
     }
 
-    const element = document.createElement('a');
+    const element = document.createElement("a");
     element.setAttribute(
-      'href',
-      'data:text/plain;charset=utf-8,' +
+      "href",
+      "data:text/plain;charset=utf-8," +
         encodeURIComponent(
           `std::vector<std::vector<int>> frames = ${JSON.stringify(animation)
-            .replace(/"/g, '')
-            .replace(/]/g, '}')
-            .replace(/\[/g, '{')};
+            .replace(/"/g, "")
+            .replace(/]/g, "}")
+            .replace(/\[/g, "{")};
 
 int size = frames.size();
 int count = 0;
@@ -143,8 +124,8 @@ if (size > 0)
 }`,
         ),
     );
-    element.setAttribute('download', 'animation.cpp');
-    element.style.display = 'none';
+    element.setAttribute("download", "animation.cpp");
+    element.style.display = "none";
     document.body.appendChild(element);
     element.click();
     element.remove();
@@ -172,7 +153,7 @@ if (size > 0)
       }
     };
     run();
-    const newIntervalId: any = setInterval(run, 400);
+    const newIntervalId = setInterval(run, 400) as unknown as number;
     setIntervalId(newIntervalId);
 
     return () => {
@@ -188,21 +169,16 @@ if (size > 0)
         <div class="h-full relative">
           {screenSignals().length ? (
             <div
-              ref={ref!}
+              ref={ref}
               class={`snap-x snap-mandatory flex flex-nowrap overflow-x-auto gap-[15vw] h-full items-center w-[calc(100vw-320px)] ${
-                isPlaying()
-                  ? 'justify-center'
-                  : 'justify-center px-[calc(50vw-320px)]'
+                isPlaying() ? "justify-center" : "justify-center px-[calc(50vw-320px)]"
               }`}
             >
               <Show
                 when={!isPlaying()}
                 fallback={
                   <div class="animate-fade-in">
-                    <LedMatrix
-                      data={currentFrame()}
-                      indexData={store!.indexMatrix}
-                    />
+                    <LedMatrix data={currentFrame()} indexData={store.indexMatrix} />
                   </div>
                 }
               >
@@ -232,14 +208,12 @@ if (size > 0)
                         </div>
                         <div class="text-center text-2xl text-white flex items-center">
                           <span class="font-bold">{index() + 1}</span>
-                          <span class="opacity-50">
-                            /{screenSignals().length}
-                          </span>
+                          <span class="opacity-50">/{screenSignals().length}</span>
                         </div>
                       </header>
                       <LedMatrix
                         data={screen()}
-                        indexData={store!.indexMatrix}
+                        indexData={store.indexMatrix}
                         onSetLed={(data) => {
                           const currentScreen = [...screen()];
                           currentScreen[data.index] = Number(data.status);
@@ -265,9 +239,7 @@ if (size > 0)
         <>
           <div class="space-y-6">
             <div class="space-y-3">
-              <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                Controls
-              </h3>
+              <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Controls</h3>
               <div class="flex gap-4 items-center">
                 <Show
                   when={!isPlaying()}

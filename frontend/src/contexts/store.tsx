@@ -1,35 +1,18 @@
-import { createEventSignal } from '@solid-primitives/event-listener';
-import {
-  createReconnectingWS,
-  createWSState,
-} from '@solid-primitives/websocket';
-import {
-  batch,
-  createContext,
-  createEffect,
-  ParentComponent,
-  Show,
-  useContext,
-} from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { ScheduleItem, Store, StoreActions, SYSTEM_STATUS } from '../types';
-import { ToastProvider } from './toast';
+import { createEventSignal } from "@solid-primitives/event-listener";
+import { createReconnectingWS, createWSState } from "@solid-primitives/websocket";
+import { batch, createContext, createEffect, type JSX, useContext } from "solid-js";
+import { createStore } from "solid-js/store";
+
+import { type ScheduleItem, type Store, type StoreActions, SYSTEM_STATUS } from "../types";
+import { ToastProvider } from "./toast";
 
 const ws = createReconnectingWS(
-  `${
-    import.meta.env.PROD
-      ? `ws://${window.location.host}/`
-      : import.meta.env.VITE_WS_URL
-  }ws`,
+  `${import.meta.env.PROD ? `ws://${window.location.host}/` : import.meta.env.VITE_WS_URL}ws`,
 );
+
 const wsState = createWSState(ws);
 
-const connectionStatus = [
-  'Connecting',
-  'Connected',
-  'Disconnecting',
-  'Disconnected',
-];
+const connectionStatus = ["Connecting", "Connected", "Disconnecting", "Disconnected"];
 
 const [mainStore, setStore] = createStore<Store>({
   isActiveScheduler: false,
@@ -47,17 +30,16 @@ const [mainStore, setStore] = createStore<Store>({
 });
 
 const actions: StoreActions = {
-  setIsActiveScheduler: (isActive) => setStore('isActiveScheduler', isActive),
-  setRotation: (rotation) => setStore('rotation', rotation),
-  setPlugins: (plugins) => setStore('plugins', plugins),
-  setPlugin: (plugin) => setStore('plugin', plugin),
-  setBrightness: (brightness) => setStore('brightness', brightness),
-  setArtnetUniverse: (artnetUniverse) => setStore('artnetUniverse', artnetUniverse),
-  setIndexMatrix: (indexMatrix) => setStore('indexMatrix', indexMatrix),
-  setLeds: (leds) => setStore('leds', leds),
-  setSystemStatus: (systemStatus: SYSTEM_STATUS) =>
-    setStore('systemStatus', systemStatus),
-  setSchedule: (items: ScheduleItem[]) => setStore('schedule', items),
+  setIsActiveScheduler: (isActive) => setStore("isActiveScheduler", isActive),
+  setRotation: (rotation) => setStore("rotation", rotation),
+  setPlugins: (plugins) => setStore("plugins", plugins),
+  setPlugin: (plugin) => setStore("plugin", plugin),
+  setBrightness: (brightness) => setStore("brightness", brightness),
+  setArtnetUniverse: (artnetUniverse) => setStore("artnetUniverse", artnetUniverse),
+  setIndexMatrix: (indexMatrix) => setStore("indexMatrix", indexMatrix),
+  setLeds: (leds) => setStore("leds", leds),
+  setSystemStatus: (systemStatus: SYSTEM_STATUS) => setStore("systemStatus", systemStatus),
+  setSchedule: (items: ScheduleItem[]) => setStore("schedule", items),
   send: ws.send,
 };
 
@@ -65,21 +47,16 @@ const store: [Store, StoreActions] = [mainStore, actions] as const;
 
 const StoreContext = createContext<[Store, StoreActions]>(store);
 
-export const StoreProvider: ParentComponent = (props) => {
-  const messageEvent = createEventSignal<{ message: MessageEvent }>(
-    ws,
-    'message',
-  );
+export const StoreProvider = (props?: { value?: Store; children?: JSX.Element }) => {
+  const messageEvent = createEventSignal<{ message: MessageEvent }>(ws, "message");
 
   createEffect(() => {
-    const json = JSON.parse(messageEvent()?.data || '{}');
+    const json = JSON.parse(messageEvent()?.data || "{}");
 
     switch (json.event) {
-      case 'info':
+      case "info":
         batch(() => {
-          actions.setSystemStatus(
-            Object.values(SYSTEM_STATUS)[json.status as number],
-          );
+          actions.setSystemStatus(Object.values(SYSTEM_STATUS)[json.status as number]);
           actions.setRotation(json.rotation);
           actions.setBrightness(json.brightness);
           actions.setIsActiveScheduler(json.scheduleActive);
@@ -110,9 +87,7 @@ export const StoreProvider: ParentComponent = (props) => {
 
   return (
     <ToastProvider>
-      <StoreContext.Provider value={store}>
-        {props.children}
-      </StoreContext.Provider>
+      <StoreContext.Provider value={store}>{props?.children}</StoreContext.Provider>
     </ToastProvider>
   );
 };
