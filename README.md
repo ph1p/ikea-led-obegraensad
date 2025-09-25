@@ -286,6 +286,11 @@ curl http://your-server/api/data
 ```
 
 ---
+# Home Assistant
+
+## HACS Home Assistant Integration
+
+Use [this](https://github.com/HennieLP/ikea-led-obegraensad-Home-Assistant-Integration) Home Assistant Integration for easy Setup as well as seamless integration and instant updates via websockets.
 
 ## Use HTTP API in Home Assistant
 
