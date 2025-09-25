@@ -49,6 +49,7 @@ public:
     void persistActivePlugin();
     void init();
     void activatePersistedPlugin();
+    int getPersistedPluginId();
     Plugin *getActivePlugin() const;
     std::vector<Plugin *> &getAllPlugins();
     size_t getNumPlugins();
