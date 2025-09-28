@@ -525,6 +525,15 @@ curl http://your-server/api/clearstorage
 - Build frontend using `Docker`
   - From the root of the repo, run `docker compose run node`
 
+- Please use the provided pre-commit hooks
+
+  - Install [pre-commit](https://pre-commit.com/)
+  - Activate the hooks by running
+
+  ```bash
+  pre-commit install
+  ```
+
 # Plugin Development
 
 1. Start by creating a new C++ file for your plugin. For example, let's call it plugins/MyPlugin.(cpp/h).
