@@ -22,6 +22,7 @@ export interface StoreActions {
   setSystemStatus: (systemStatus: SYSTEM_STATUS) => void;
   setSchedule: (items: ScheduleItem[]) => void;
   setArtnetUniverse: (artnetUniverse: number) => void;
+  setGOLDelay: (GOLDelay: number) => void;
   send: (message: string | ArrayBuffer) => void;
 }
 
@@ -34,6 +35,7 @@ export interface Store {
   plugins: { id: number; name: string }[];
   plugin: number;
   artnetUniverse: number;
+  GOLDelay: number;
   systemStatus: SYSTEM_STATUS;
   connectionState: () => number;
   connectionStatus?: string;

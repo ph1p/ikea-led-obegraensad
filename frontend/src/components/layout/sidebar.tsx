@@ -128,6 +128,26 @@ export const Sidebar: Component<SidebarProps> = (props) => {
         </SidebarSection>
       </Show>
 
+      <Show when={store?.plugin === 4 && !store?.isActiveScheduler}>
+        <div class="my-6 border-t border-gray-200" />
+
+        <SidebarSection title="Time Step Delay">
+          <div class="space-y-2">
+            <input
+              type="range"
+              min="1"
+              max="4000"
+              value={store?.GOLDelay}
+              class="w-full"
+              onInput={(e) => props.onGOLDelayChange(parseInt(e.currentTarget.value))}
+              onPointerUp={() => props.onGOLDelayChange(store.GOLDelay, true)}
+            />
+            <div class="text-sm text-gray-600 text-right">{store?.GOLDelay}</div>
+          </div>
+        </SidebarSection>
+      </Show>
+
+
       <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
         <div class="my-6 border-t border-gray-200" />
 

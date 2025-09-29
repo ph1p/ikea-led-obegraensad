@@ -8,45 +8,103 @@ uint8_t GameOfLifePlugin::countNeighbours(int row, int col)
   {
     for (j = col - 1; j <= col + 1; j++)
     {
-      count += this->buffer[i * COLS + j];
+      int r = i;
+      int c = j;
+      // OOB handling
+      if (r > (ROWS-1)) r = 0;
+      if (r < 0)        r = ROWS-1;
+      if (c > (COLS-1)) c = 0;
+      if (c < 0)        c = COLS-1;
+
+      count += this->previous[r * COLS + c];
     }
   }
-  count -= this->buffer[row * COLS + col];
+  count -= this->previous[row * COLS + col];
   return count;
 };
 
 uint8_t GameOfLifePlugin::updateCell(int row, int col)
 {
   uint8_t total = this->countNeighbours(row, col);
-  if (total > 4 || total < 3)
+  if (total > 3 || total < 2)
   {
     return 0;
   }
-  else if (this->buffer[row * COLS + col] == 0 && total == 3)
+  else if (this->previous[row * COLS + col] == 0 && total == 3)
   {
     return 1;
   }
   else
   {
-    return this->buffer[row * COLS + col];
+    return this->previous[row * COLS + col];
   }
 };
 
 void GameOfLifePlugin::setup()
 {
-  Screen.clear();
+  this->state = this->STATE_END;
+};
 
-  memset(previous, 0, ROWS * COLS);
+void GameOfLifePlugin::init()
+{
+  memset(this->previous2, 0, ROWS * COLS);
+  memset(this->previous, 0, ROWS * COLS);
+  memset(this->buffer, 0, ROWS * COLS);
   for (int i = 0; i < ROWS * COLS; i++)
   {
-    this->buffer[i] = (random(10)) ? 1 : 0;
+    this->buffer[i] = (random(2)) ? 1 : 0;
   }
-  this->next();
-};
+
+  // Simple glider to test rules and wrapping
+  // uint8_t start[] = {
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  // };
+  // memcpy(this->buffer, start, 256);
+
+  for (int j = 0; j < 8; j++)
+  {
+    for (int i = 0; i < COLS; i++)
+    {
+      if (j < 4)
+      { // grayish cover
+        Screen.setPixel((i),    (j*4+0), 1, 25);
+        Screen.setPixel((i),    (j*4+1), 1, 25);
+        Screen.setPixel((i),    (j*4+2), 1, 25);
+        Screen.setPixel((i),    (j*4+3), 1, 25);
+      } else { // fill in actual cells
+        j -= 4;
+        Screen.setPixel(i, (j*4+0), this->buffer[(j*4+0) * COLS + i]);
+        Screen.setPixel(i, (j*4+1), this->buffer[(j*4+1) * COLS + i]);
+        Screen.setPixel(i, (j*4+2), this->buffer[(j*4+2) * COLS + i]);
+        Screen.setPixel(i, (j*4+3), this->buffer[(j*4+3) * COLS + i]);
+        j += 4;
+      }
+      delay(50);
+    }
+  }
+
+  this->state = this->STATE_RUNNING;
+}
 
 void GameOfLifePlugin::next()
 {
-  Screen.clear();
+  memcpy(this->previous2, this->previous, ROWS * COLS);
+  memcpy(this->previous,  this->buffer, ROWS * COLS);
   for (int i = 0; i < ROWS; i++)
   {
     for (int j = 0; j < COLS; j++)
@@ -56,29 +114,69 @@ void GameOfLifePlugin::next()
   }
 }
 
-int generations = 30;
-void GameOfLifePlugin::loop()
+void GameOfLifePlugin::show()
 {
-  generations--;
-  this->next();
+  Screen.clear();
 
   for (int i = 0; i < ROWS; i++)
   {
     for (int j = 0; j < COLS; j++)
     {
-      Screen.setPixelAtIndex(i * COLS + j, this->buffer[i * COLS + j]);
+      Screen.setPixel(j, i, this->buffer[i * COLS + j]);
     }
   }
-  delay(150);
+}
 
-  if (generations == 0)
+int generations = 120;
+bool updated;
+bool updated2;
+void GameOfLifePlugin::loop()
+{
+  switch (this->state)
   {
-    generations = 30;
+  case this->STATE_RUNNING:
+    this->show();
+
+    generations--;
+    this->next();
+    updated  = memcmp(this->buffer, this->previous,  ROWS * COLS);  
+    updated2 = memcmp(this->buffer, this->previous2, ROWS * COLS);  
+
+    // is running in period of 2
+    if (!updated2) generations -= 5;
+
+    if (generations < 0 || !updated)
+    {
+      generations = 120;
+      delay(gol_delay*4);
+      this->state = this->STATE_END;
+    }
+    break;
+  case this->STATE_END:
     this->setup();
+    break;
   }
+
+  delay(gol_delay);
 };
 
 const char *GameOfLifePlugin::getName() const
 {
   return "GameOfLife";
+}
+
+void GameOfLifePlugin::websocketHook(DynamicJsonDocument &request)
+{
+    const char *event = request["event"];
+
+    if (currentStatus == NONE)
+    {
+      if (!strcmp(event, "goldelay"))
+      {
+        uint16_t new_delay = request["delay"].as<uint16_t>();
+        Serial.print("Changing Game of life delay to ");
+        Serial.println(new_delay);
+        gol_delay = new_delay;
+      }
+    }
 }
