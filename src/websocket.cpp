@@ -18,6 +18,7 @@ void sendInfo()
 
   jsonDocument["status"] = currentStatus;
   jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
+  jsonDocument["persist-plugin"] = pluginManager.getPersistedPluginId();
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
@@ -99,11 +100,13 @@ void onWsEvent(
           else if (!strcmp(event, "persist-plugin"))
           {
             pluginManager.persistActivePlugin();
+            sendInfo();
           }
           else if (!strcmp(event, "rotate"))
           {
             bool isRight = (bool)!strcmp(wsRequest["direction"], "right");
             Screen.setCurrentRotation((Screen.currentRotation + (isRight ? 1 : 3)) % 4, true);
+            sendInfo();
           }
           else if (!strcmp(event, "info"))
           {
@@ -113,6 +116,7 @@ void onWsEvent(
           {
             uint8_t brightness = wsRequest["brightness"].as<uint8_t>();
             Screen.setBrightness(brightness, true);
+            sendInfo();
           }
         }
       }
