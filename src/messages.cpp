@@ -79,8 +79,6 @@ void Messages_::scroll()
       ++it;
     }
   }
-
-  Screen.loadFromStorage();
 }
 
 void Messages_::scrollMessageEveryMinute()
