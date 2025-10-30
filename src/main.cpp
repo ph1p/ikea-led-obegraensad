@@ -238,9 +238,13 @@ void loop()
   pluginManager.runActivePlugin();
 #endif
 
-  if (currentStatus == NONE)
+  if (currentStatus == NONE || currentStatus == MESSAGES)
   {
-    Scheduler.update();
+    // Only update scheduler when not showing messages
+    if (currentStatus == NONE)
+    {
+      Scheduler.update();
+    }
 
     if ((taskCounter % 4) == 0)
     {
