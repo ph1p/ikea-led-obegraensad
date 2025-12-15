@@ -1,0 +1,19 @@
+name: PlatformIO Dependabot
+
+on:
+  workflow_dispatch: # option to manually trigger the workflow
+  schedule:
+    # Runs every day at 00:00
+    - cron: '0 0 * * *'
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    name: run PlatformIO Dependabot
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: run PlatformIO Dependabot
+        uses: peterus/platformio_dependabot@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
