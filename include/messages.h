@@ -74,6 +74,9 @@ private:
   MessagePool messagePool;
   std::vector<Message *> activeMessages;
 
+  // Whether we've cached the previous screen state for message display
+  bool screenCached = false;
+  
   int previousMinute = -1;
   int previousSecond = -1;
   int indicatorPixel = 0;

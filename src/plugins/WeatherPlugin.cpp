@@ -45,8 +45,23 @@ void WeatherPlugin::update()
 
     if (code == HTTP_CODE_OK)
     {
-        DynamicJsonDocument doc(2048);
-        deserializeJson(doc, http.getString());
+        String payload = http.getString();
+        // basic sanity check
+        if (payload.length() == 0) {
+            Serial.println("WeatherPlugin: empty payload");
+            http.end();
+            return;
+        }
+
+        // parse JSON with error checking
+        DynamicJsonDocument doc(4096);
+        DeserializationError err = deserializeJson(doc, payload);
+        if (err) {
+            Serial.print("WeatherPlugin: JSON parse error: ");
+            Serial.println(err.c_str());
+            http.end();
+            return;
+        }
 
         int temperature = round(doc["current_condition"][0]["temp_C"].as<float>());
         int weatherCode = doc["current_condition"][0]["weatherCode"].as<int>();
@@ -89,7 +104,7 @@ void WeatherPlugin::update()
             iconY = 2;
         }
 
-        Screen.clear();
+    Screen.clear();
         Screen.drawWeather(0, iconY, weatherIcon, 100);
 
         if (temperature >= 10)
@@ -115,6 +130,14 @@ void WeatherPlugin::update()
             Screen.drawCharacter(9, tempY, Screen.readBytes(degreeSymbol), 4, 50);
             Screen.drawNumbers(3, tempY, {-temperature});
         }
+        // clean up the HTTP client to free resources
+        http.end();
+    }
+    else
+    {
+        Serial.print("WeatherPlugin: HTTP GET failed, code=");
+        Serial.println(code);
+        http.end();
     }
 }
 

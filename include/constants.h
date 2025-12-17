@@ -58,6 +58,7 @@ enum SYSTEM_STATUS
   WSBINARY,
   UPDATE,
   LOADING,
+  MESSAGES,
 };
 
 extern SYSTEM_STATUS currentStatus;
