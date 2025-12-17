@@ -1,0 +1,15 @@
+---
+BasedOnStyle: Microsoft
+AllowAllArgumentsOnNextLine: 'false'
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+ColumnLimit: '102'
+ExperimentalAutoDetectBinPacking: 'false'
+IndentWidth: '2'
+Language: Cpp
+# Force pointers to the type for C++.
+DerivePointerAlignment: 'true'
+PointerAlignment: Right
+
+...
