@@ -87,6 +87,13 @@ export const App: Component = () => {
     }
   };
 
+  const handleGOLDelayChange = (value: number, shouldSend = false) => {
+    actions?.setGOLDelay(value);
+    if (shouldSend) {
+      wsMessage("goldelay", { delay: value });
+    }
+  };
+
   const handlePersistPlugin = () => {
     wsMessage("persist-plugin");
     toast(`Current mode set as default`, 1500);
@@ -146,6 +153,7 @@ export const App: Component = () => {
           onPluginChange={handlePluginChange}
           onBrightnessChange={handleBrightnessChange}
           onArtnetChange={handleArtnetUniverseChange}
+          onGOLDelayChange={handleGOLDelayChange}
           onPersistPlugin={handlePersistPlugin}
         />
       }
