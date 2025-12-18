@@ -26,6 +26,7 @@ interface SidebarProps {
   onBrightnessChange: (value: number, shouldSend?: boolean) => void;
   onArtnetChange: (value: number, shouldSend?: boolean) => void;
   onPersistPlugin: () => void;
+  onGOLDelayChange: (value: number, shouldSend?: boolean) => void;
 }
 
 export const Sidebar: Component<SidebarProps> = (props) => {
@@ -45,7 +46,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
           <div class="flex flex-col gap-2.5">
             <select
               class="flex-1 px-2.5 py-2.5 bg-gray-50 border border-gray-200 rounded"
-              onChange={(e) => props.onPluginChange(parseInt(e.currentTarget.value))}
+              onChange={(e) => props.onPluginChange(parseInt(e.currentTarget.value, 10))}
               value={store?.plugin}
             >
               <For each={store?.plugins}>
@@ -56,7 +57,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               <button
                 type="button"
                 onClick={props.onPersistPlugin}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
               >
                 Set Default
               </button>
@@ -73,7 +74,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             <button
               type="button"
               onClick={() => props.onRotate(false)}
-              class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+              class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
             >
               <i class="fa-solid fa-rotate-left" />
             </button>
@@ -82,7 +83,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             <button
               type="button"
               onClick={() => props.onRotate(true)}
-              class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+              class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
             >
               <i class="fa-solid fa-rotate-right" />
             </button>
@@ -100,7 +101,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             max="255"
             value={store?.brightness}
             class="w-full"
-            onInput={(e) => props.onBrightnessChange(parseInt(e.currentTarget.value))}
+            onInput={(e) => props.onBrightnessChange(parseInt(e.currentTarget.value, 10))}
             onPointerUp={() => props.onBrightnessChange(store.brightness, true)}
           />
           <div class="text-sm text-gray-600 text-right">
@@ -120,7 +121,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               max="255"
               value={store?.artnetUniverse}
               class="w-full"
-              onInput={(e) => props.onArtnetChange(parseInt(e.currentTarget.value))}
+              onInput={(e) => props.onArtnetChange(parseInt(e.currentTarget.value, 10))}
               onPointerUp={() => props.onArtnetChange(store.artnetUniverse, true)}
             />
             <div class="text-sm text-gray-600 text-right">{store?.artnetUniverse}</div>
@@ -139,14 +140,13 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               max="4000"
               value={store?.GOLDelay}
               class="w-full"
-              onInput={(e) => props.onGOLDelayChange(parseInt(e.currentTarget.value))}
+              onInput={(e) => props.onGOLDelayChange(parseInt(e.currentTarget.value, 10))}
               onPointerUp={() => props.onGOLDelayChange(store.GOLDelay, true)}
             />
             <div class="text-sm text-gray-600 text-right">{store?.GOLDelay}</div>
           </div>
         </SidebarSection>
       </Show>
-
 
       <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
         <div class="my-6 border-t border-gray-200" />
@@ -157,7 +157,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               <button
                 type="button"
                 onClick={props.onLoadImage}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
               >
                 <i class="fa-solid fa-file-import" />
               </button>
@@ -166,7 +166,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               <button
                 type="button"
                 onClick={props.onClear}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded hover:bg-red-600"
+                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded hover:bg-red-600"
               >
                 <i class="fa-solid fa-trash" />
               </button>
@@ -175,7 +175,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               <button
                 type="button"
                 onClick={props.onPersist}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
               >
                 <i class="fa-solid fa-floppy-disk" />
               </button>
@@ -184,7 +184,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               <button
                 type="button"
                 onClick={props.onLoad}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
               >
                 <i class="fa-solid fa-refresh" />
               </button>

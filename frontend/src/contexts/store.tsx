@@ -49,41 +49,82 @@ const store: [Store, StoreActions] = [mainStore, actions] as const;
 
 const StoreContext = createContext<[Store, StoreActions]>(store);
 
+// WebSocket message validation helpers
+const isValidNumber = (value: unknown): value is number =>
+  typeof value === "number" && !Number.isNaN(value);
+
+const isValidBoolean = (value: unknown): value is boolean => typeof value === "boolean";
+
+const isValidArray = (value: unknown): value is unknown[] => Array.isArray(value);
+
 export const StoreProvider = (props?: { value?: Store; children?: JSX.Element }) => {
   const messageEvent = createEventSignal<{ message: MessageEvent }>(ws, "message");
 
   createEffect(() => {
-    const json = JSON.parse(messageEvent()?.data || "{}");
+    try {
+      const json = JSON.parse(messageEvent()?.data || "{}");
 
-    switch (json.event) {
-      case "info":
-        batch(() => {
-          actions.setSystemStatus(Object.values(SYSTEM_STATUS)[json.status as number]);
-          actions.setRotation(json.rotation);
-          actions.setBrightness(json.brightness);
-          actions.setIsActiveScheduler(json.scheduleActive);
+      // Validate event type
+      if (!json.event || typeof json.event !== "string") {
+        return;
+      }
 
-          if (json.schedule) {
-            actions.setSchedule(json.schedule);
-          }
+      switch (json.event) {
+        case "info":
+          batch(() => {
+            // Validate and set system status
+            if (
+              isValidNumber(json.status) &&
+              json.status >= 0 &&
+              json.status < Object.values(SYSTEM_STATUS).length
+            ) {
+              actions.setSystemStatus(Object.values(SYSTEM_STATUS)[json.status]);
+            }
 
-          if (!mainStore.plugins.length) {
-            actions.setPlugins(json.plugins);
-          }
+            // Validate and set rotation
+            if (isValidNumber(json.rotation)) {
+              actions.setRotation(json.rotation);
+            }
 
-          if (json.plugin) {
-            actions.setPlugin(json.plugin as number);
-          }
+            // Validate and set brightness
+            if (isValidNumber(json.brightness)) {
+              actions.setBrightness(json.brightness);
+            }
 
-          if (mainStore.plugin === 1) {
-            actions.setIndexMatrix([...new Array(256)].map((_, i) => i));
-          }
+            // Validate and set scheduler active status
+            if (isValidBoolean(json.scheduleActive)) {
+              actions.setIsActiveScheduler(json.scheduleActive);
+            }
 
-          if (json.data) {
-            actions.setLeds(json.data);
-          }
-        });
-        break;
+            // Validate and set schedule
+            if (isValidArray(json.schedule)) {
+              actions.setSchedule(json.schedule as ScheduleItem[]);
+            }
+
+            // Validate and set plugins (only if not already loaded)
+            if (!mainStore.plugins.length && isValidArray(json.plugins)) {
+              actions.setPlugins(json.plugins);
+            }
+
+            // Validate and set current plugin
+            if (isValidNumber(json.plugin)) {
+              actions.setPlugin(json.plugin);
+            }
+
+            // Reset index matrix for plugin 1
+            if (mainStore.plugin === 1) {
+              actions.setIndexMatrix([...new Array(256)].map((_, i) => i));
+            }
+
+            // Validate and set LED data
+            if (isValidArray(json.data)) {
+              actions.setLeds(json.data as number[]);
+            }
+          });
+          break;
+      }
+    } catch (error) {
+      console.error("Failed to parse WebSocket message:", error);
     }
   });
 

@@ -27,7 +27,7 @@ export const ResetScheduleButton = () => {
           toast("Failed to reset schedule", 2000);
         }
       }}
-      class="w-full bg-blue-600 hover:bg-red-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+      class="w-full bg-blue-600 hover:bg-red-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
     >
       Reset Scheduler
     </button>
@@ -53,6 +53,12 @@ export const ToggleScheduleButton = () => {
             toast("Failed to stop schedule", 2000);
           }
         } else {
+          // Validate schedule before starting
+          if (store.schedule.length === 0) {
+            toast("Cannot start empty schedule", 2000);
+            return;
+          }
+
           try {
             const response = await fetch(`${API_URL}api/schedule`, {
               method: "POST",
@@ -71,7 +77,7 @@ export const ToggleScheduleButton = () => {
           }
         }
       }}
-      class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:translate-y-[-1px] transition-all rounded"
+      class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
     >
       {store.isActiveScheduler ? "Stop" : "Start"} Scheduler
     </button>
@@ -82,7 +88,9 @@ const Scheduler: Component = () => {
   const [store, actions] = useStore();
 
   const handleAddItem = () => {
-    actions.setSchedule([...store.schedule, { pluginId: store.plugins[0].id || 1, duration: 1 }]);
+    // Ensure plugins array is not empty before accessing first plugin
+    const defaultPluginId = store.plugins.length > 0 ? store.plugins[0].id : 1;
+    actions.setSchedule([...store.schedule, { pluginId: defaultPluginId, duration: 1 }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -130,7 +138,7 @@ const Scheduler: Component = () => {
                               <select
                                 value={item().pluginId}
                                 onChange={(e) =>
-                                  handlePluginChange(index, parseInt(e.currentTarget.value))
+                                  handlePluginChange(index, parseInt(e.currentTarget.value, 10))
                                 }
                                 class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:border-0"
                               >
@@ -144,9 +152,10 @@ const Scheduler: Component = () => {
                                 <input
                                   type="number"
                                   min="1"
+                                  max="86400"
                                   value={item().duration}
                                   onInput={(e) =>
-                                    handleDurationChange(index, parseInt(e.currentTarget.value))
+                                    handleDurationChange(index, parseInt(e.currentTarget.value, 10))
                                   }
                                   class="pr-16 pl-3 py-2 w-32 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:border-0"
                                 />

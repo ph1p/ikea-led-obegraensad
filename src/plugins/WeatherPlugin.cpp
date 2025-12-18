@@ -1,7 +1,11 @@
 #include "plugins/WeatherPlugin.h"
 
 // https://github.com/chubin/wttr.in/blob/master/share/translations/en.txt
+#ifdef ESP32
+#include <WiFi.h>
+#endif
 #ifdef ESP8266
+#include <ESP8266WiFi.h>
 WiFiClient wiFiClient;
 #endif
 
@@ -16,14 +20,22 @@ void WeatherPlugin::setup()
   Screen.setPixel(8, 7, 1);
   Screen.setPixel(10, 7, 1);
   Screen.setPixel(11, 7, 1);
-  this->lastUpdate = millis();
-  this->update();
+
+#ifdef ESP32
+  if (secureClient == nullptr)
+  {
+    secureClient = new WiFiClientSecure();
+    secureClient->setInsecure();
+  }
+#endif
+
+  this->lastUpdate = 0;
   currentStatus = NONE;
 }
 
 void WeatherPlugin::loop()
 {
-  if (millis() >= this->lastUpdate + (1000 * 60 * 30))
+  if (this->lastUpdate == 0 || millis() >= this->lastUpdate + (1000 * 60 * 30))
   {
     this->update();
     this->lastUpdate = millis();
@@ -33,20 +45,55 @@ void WeatherPlugin::loop()
 
 void WeatherPlugin::update()
 {
+  // Check WiFi connection first
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("WiFi not connected, skipping weather update");
+    return;
+  }
+
   String weatherApiString = "https://wttr.in/" + String(WEATHER_LOCATION) + "?format=j2&lang=en";
+  Serial.print("Requesting weather from: ");
+  Serial.println(weatherApiString);
+
 #ifdef ESP32
-  http.begin(weatherApiString);
+  if (secureClient != nullptr)
+  {
+    http.begin(*secureClient, weatherApiString);
+  }
+  else
+  {
+    Serial.println("Secure client not initialized!");
+    return;
+  }
 #endif
 #ifdef ESP8266
   http.begin(wiFiClient, weatherApiString);
 #endif
 
+  http.setTimeout(15000);
+
+  Serial.println("Sending HTTP GET request...");
   int code = http.GET();
+  Serial.print("HTTP response code: ");
+  Serial.println(code);
 
   if (code == HTTP_CODE_OK)
   {
-    DynamicJsonDocument doc(2048);
-    deserializeJson(doc, http.getString());
+    String payload = http.getString();
+    Serial.print("Response size: ");
+    Serial.println(payload.length());
+
+    DynamicJsonDocument doc(8192);
+    DeserializationError error = deserializeJson(doc, payload);
+
+    if (error)
+    {
+      Serial.print("JSON parsing failed: ");
+      Serial.println(error.c_str());
+      http.end();
+      return;
+    }
 
     int temperature = round(doc["current_condition"][0]["temp_C"].as<float>());
     int weatherCode = doc["current_condition"][0]["weatherCode"].as<int>();
@@ -117,6 +164,13 @@ void WeatherPlugin::update()
       Screen.drawNumbers(3, tempY, {-temperature});
     }
   }
+  else
+  {
+    Serial.print("HTTP request failed with code: ");
+    Serial.println(code);
+  }
+
+  http.end();
 }
 
 const char *WeatherPlugin::getName() const

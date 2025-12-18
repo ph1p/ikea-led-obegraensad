@@ -42,7 +42,7 @@ void AnimationPlugin::loop()
     {
       this->step = 0;
     }
-    delay(400);
+    delay(frameDelay);
   }
 }
 
@@ -52,6 +52,14 @@ void AnimationPlugin::websocketHook(DynamicJsonDocument &request)
   if (!strcmp(event, "upload"))
   {
     int size = (int)request["screens"];
+    if (request.containsKey("frameDelay"))
+    {
+      frameDelay = (int)request["frameDelay"];
+      if (frameDelay < 10)
+        frameDelay = 10;
+      if (frameDelay > 10000)
+        frameDelay = 10000;
+    }
 
     customAnimationFrames.resize(size);
     for (int i = 0; i < size; i++)

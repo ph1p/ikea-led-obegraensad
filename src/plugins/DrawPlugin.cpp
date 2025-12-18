@@ -2,7 +2,7 @@
 
 void DrawPlugin::setup()
 {
-  delay(50);
+  delay(1000);
   Screen.clear();
   if (Screen.isCacheEmpty())
   {

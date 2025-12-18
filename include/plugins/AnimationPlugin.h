@@ -7,6 +7,7 @@ class AnimationPlugin : public Plugin
 private:
   uint8_t step = 0;
   std::vector<std::vector<int>> customAnimationFrames;
+  int frameDelay = 400;
 
 public:
   void setup() override;

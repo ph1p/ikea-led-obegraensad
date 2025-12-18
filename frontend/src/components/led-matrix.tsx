@@ -167,7 +167,7 @@ export const LedMatrix: Component<Props> = (props) => {
         transition-opacity duration-300
         ${visible() ? "opacity-100" : "opacity-50"}
         ${props.disabled ? "opacity-30" : ""}
-        w-full h-[calc(100vh*0.8)] aspect-[3/4]
+        w-full h-[calc(100vh*0.7)] aspect-3/4
       `}
     >
       <canvas

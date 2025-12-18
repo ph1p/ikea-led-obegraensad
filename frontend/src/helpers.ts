@@ -1,5 +1,8 @@
+// Image conversion constants
+const MATRIX_SIZE = 16;
+const BRIGHTNESS_THRESHOLD = 383; // ~50% of max RGB sum (255*3=765)
+
 export const loadImageAndGetDataArray = (cb: (data: number[]) => void) => {
-  const matrixSize = 16;
   const tempFileInput = document.createElement("input");
   tempFileInput.type = "file";
   tempFileInput.click();
@@ -11,19 +14,19 @@ export const loadImageAndGetDataArray = (cb: (data: number[]) => void) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      const image = new Image(matrixSize, matrixSize);
+      const image = new Image(MATRIX_SIZE, MATRIX_SIZE);
       image.src = reader.result as string;
       image.onload = () => {
-        const canvas = new OffscreenCanvas(matrixSize, matrixSize);
+        const canvas = new OffscreenCanvas(MATRIX_SIZE, MATRIX_SIZE);
         const ctx = canvas.getContext("2d");
 
-        ctx?.drawImage(image, 0, 0, matrixSize, matrixSize);
-        const imgData = ctx?.getImageData(0, 0, matrixSize, matrixSize);
+        ctx?.drawImage(image, 0, 0, MATRIX_SIZE, MATRIX_SIZE);
+        const imgData = ctx?.getImageData(0, 0, MATRIX_SIZE, MATRIX_SIZE);
         if (imgData) {
           const data: number[] = [];
           for (let i = 0; i < imgData.data.length; i += 4) {
-            const isActive =
-              imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2] <= 383 ? 1 : 0;
+            const pixelBrightness = imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2];
+            const isActive = pixelBrightness <= BRIGHTNESS_THRESHOLD ? 1 : 0;
             data.push(isActive);
           }
 
@@ -35,8 +38,11 @@ export const loadImageAndGetDataArray = (cb: (data: number[]) => void) => {
 };
 
 export const rotateArray = (matrix: number[], rotations: number) => {
-  const SIZE = 16;
-  const newState = [...matrix];
+  const SIZE = MATRIX_SIZE;
+  // Normalize rotations to 0-3 (4 rotations = 360° = no rotation)
+  const normalizedRotations = ((rotations % 4) + 4) % 4;
+
+  let newState = [...matrix];
 
   const swap = (arr: number[], i: number, j: number) => {
     const temp = arr[i];
@@ -44,14 +50,18 @@ export const rotateArray = (matrix: number[], rotations: number) => {
     arr[j] = temp;
   };
 
-  for (let row = 0; row < SIZE / 2; row++) {
-    for (let col = row; col < SIZE - row - 1; col++) {
-      for (let r = 0; r < rotations; r++) {
-        swap(newState, row * SIZE + col, col * SIZE + (SIZE - 1 - row));
-        swap(newState, row * SIZE + col, (SIZE - 1 - row) * SIZE + (SIZE - 1 - col));
-        swap(newState, row * SIZE + col, (SIZE - 1 - col) * SIZE + row);
+  // Perform the rotation normalizedRotations times
+  for (let r = 0; r < normalizedRotations; r++) {
+    const tempState = [...newState];
+    for (let row = 0; row < SIZE / 2; row++) {
+      for (let col = row; col < SIZE - row - 1; col++) {
+        // Rotate 90 degrees clockwise by swapping 4 positions
+        swap(tempState, row * SIZE + col, col * SIZE + (SIZE - 1 - row));
+        swap(tempState, row * SIZE + col, (SIZE - 1 - row) * SIZE + (SIZE - 1 - col));
+        swap(tempState, row * SIZE + col, (SIZE - 1 - col) * SIZE + row);
       }
     }
+    newState = tempState;
   }
 
   return newState;

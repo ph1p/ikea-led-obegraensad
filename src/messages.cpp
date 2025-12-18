@@ -85,7 +85,10 @@ void Messages_::scroll()
     }
   }
 
-  Screen.loadFromStorage();
+  if (currentStatus == NONE)
+  {
+    Screen.loadFromStorage();
+  }
 }
 
 void Messages_::scrollMessageEveryMinute()
