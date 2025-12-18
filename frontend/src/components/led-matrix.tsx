@@ -7,6 +7,7 @@ interface Props {
   onSetMatrix?: (data: number[]) => void;
   data: number[];
   indexData: number[];
+  brightness: number;
 }
 
 export const LedMatrix: Component<Props> = (props) => {
@@ -17,18 +18,18 @@ export const LedMatrix: Component<Props> = (props) => {
 
   const MATRIX_SIZE = 16;
   const LED_COLORS = {
-    OFF: "#333333",
+    OFF: "#000000",
     BACKGROUND: "#111111",
   };
 
   const useVisibilityObserver = createVisibilityObserver({ threshold: 0.9 });
   const visible = useVisibilityObserver(() => containerRef);
 
-  const getLedColor = (brightness: number) => {
-    if (brightness <= 0) return LED_COLORS.OFF;
-
-    const intensity = Math.min(255, Math.max(0, brightness));
-    return `rgb(${intensity}, ${intensity}, ${intensity})`;
+  const getLedColor = (ledBrightness: number) => {
+    const brightnessFactor = props.brightness / 255;
+    const intensity = Math.round(Math.min(255, Math.max(0, ledBrightness * brightnessFactor)));
+    const displayIntensity = Math.round(51 + (intensity * 204) / 255);
+    return `rgb(${displayIntensity}, ${displayIntensity}, ${displayIntensity})`;
   };
 
   const drawMatrix = (data: number[], indexData: number[]) => {
@@ -151,6 +152,7 @@ export const LedMatrix: Component<Props> = (props) => {
   createEffect(() => {
     const data = props.data;
     const indexData = props.indexData;
+    const brightness = props.brightness;
 
     if (canvasRef && data.length && indexData.length) {
       drawMatrix(data, indexData);

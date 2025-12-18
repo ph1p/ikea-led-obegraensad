@@ -383,7 +383,11 @@ export const Creator: Component = () => {
                   when={!isPlaying()}
                   fallback={
                     <div class="animate-fade-in">
-                      <LedMatrix data={currentFrame()} indexData={store.indexMatrix} />
+                      <LedMatrix
+                        data={currentFrame()}
+                        indexData={store.indexMatrix}
+                        brightness={store.brightness || 255}
+                      />
                     </div>
                   }
                 >
@@ -403,6 +407,7 @@ export const Creator: Component = () => {
                           <LedMatrix
                             data={frameSignals()[0]()}
                             indexData={store.indexMatrix}
+                            brightness={store.brightness || 255}
                             onSetLed={(data) => {
                               const [screen, setScreen] = frameSignals();
                               const currentScreen = [...screen()];

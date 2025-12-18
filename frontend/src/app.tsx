@@ -24,7 +24,8 @@ export const App: Component = () => {
       | "led"
       | "persist-plugin"
       | "artnet"
-      | "brightness",
+      | "brightness"
+      | "goldelay",
     data?: Record<string, string | number> | { data: number[] },
   ) =>
     actions.send(
@@ -119,23 +120,18 @@ export const App: Component = () => {
           </Show>
         }
       >
-        <div
-          style={{
-            opacity: (store.brightness || 255) / 255,
+        <LedMatrix
+          disabled={store.plugin !== 1}
+          data={store.leds || []}
+          indexData={rotatedMatrix()}
+          brightness={store.brightness ?? 255}
+          onSetLed={(data) => {
+            wsMessage("led", data);
           }}
-        >
-          <LedMatrix
-            disabled={store.plugin !== 1}
-            data={store.leds || []}
-            indexData={rotatedMatrix()}
-            onSetLed={(data) => {
-              wsMessage("led", data);
-            }}
-            onSetMatrix={(data) => {
-              actions?.setLeds([...data]);
-            }}
-          />
-        </div>
+          onSetMatrix={(data) => {
+            actions?.setLeds([...data]);
+          }}
+        />
       </Show>
     </div>
   );

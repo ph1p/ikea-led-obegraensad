@@ -102,10 +102,10 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             value={store?.brightness}
             class="w-full"
             onInput={(e) => props.onBrightnessChange(parseInt(e.currentTarget.value, 10))}
-            onPointerUp={() => props.onBrightnessChange(store.brightness, true)}
+            onPointerUp={(e) => props.onBrightnessChange(parseInt(e.currentTarget.value, 10), true)}
           />
           <div class="text-sm text-gray-600 text-right">
-            {Math.round(((store?.brightness || 255) / 255) * 100)}%
+            {Math.round(((store?.brightness ?? 255) / 255) * 100)}%
           </div>
         </div>
       </SidebarSection>
@@ -122,7 +122,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               value={store?.artnetUniverse}
               class="w-full"
               onInput={(e) => props.onArtnetChange(parseInt(e.currentTarget.value, 10))}
-              onPointerUp={() => props.onArtnetChange(store.artnetUniverse, true)}
+              onPointerUp={(e) => props.onArtnetChange(parseInt(e.currentTarget.value, 10), true)}
             />
             <div class="text-sm text-gray-600 text-right">{store?.artnetUniverse}</div>
           </div>
@@ -141,7 +141,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               value={store?.GOLDelay}
               class="w-full"
               onInput={(e) => props.onGOLDelayChange(parseInt(e.currentTarget.value, 10))}
-              onPointerUp={() => props.onGOLDelayChange(store.GOLDelay, true)}
+              onPointerUp={(e) => props.onGOLDelayChange(parseInt(e.currentTarget.value, 10), true)}
             />
             <div class="text-sm text-gray-600 text-right">{store?.GOLDelay}</div>
           </div>

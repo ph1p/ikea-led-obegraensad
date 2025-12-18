@@ -86,44 +86,14 @@ void Screen_::clearRect(int x, int y, int width, int height)
   }
 }
 
-// CACHE START
-bool Screen_::isCacheEmpty() const
-{
-  for (int i = 0; i < ROWS * COLS; i++)
-  {
-    if (cache_[i] != 0)
-      return false;
-  }
-  return true;
-}
-
-void Screen_::cacheCurrent()
-{
-  memcpy(cache_, renderBuffer_, ROWS * COLS);
-}
-
-void Screen_::restoreCache()
-{
-  setRenderBuffer(cache_, true);
-}
-// CACHE END
-
 // STORAGE START
 void Screen_::loadFromStorage()
 {
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", true);
-  setBrightness(255);
 
-  if (currentStatus == NONE)
-  {
-    clear();
-    storage.getBytes("data", renderBuffer_, ROWS * COLS);
-  }
-  else
-  {
-    storage.getBytes("data", cache_, ROWS * COLS);
-  }
+  clear();
+  storage.getBytes("data", renderBuffer_, ROWS * COLS);
 
   setBrightness(storage.getUInt("brightness", 255));
   setCurrentRotation(storage.getUInt("rotation", 0));
