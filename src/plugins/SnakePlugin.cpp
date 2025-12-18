@@ -268,53 +268,90 @@ void SnakePlugin::moveSnake(uint newpos)
 
 void SnakePlugin::end()
 {
-  for (const int &n : this->position)
+  this->gameState = SnakePlugin::GAME_STATE_DEATH_ANIMATION;
+  this->animationStep = 0;
+  this->animationTimer.reset();
+}
+
+void SnakePlugin::updateDeathAnimation()
+{
+  // Death animation sequence with non-blocking delays
+  switch (this->animationStep)
   {
-    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
+  case 0: // Blink off
+  case 2:
+  case 4:
+    if (animationTimer.isReady(200))
+    {
+      for (const int &n : this->position)
+      {
+        Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
+      }
+      this->animationStep++;
+    }
+    break;
+
+  case 1: // Blink on
+  case 3:
+    if (animationTimer.isReady(200))
+    {
+      for (const int &n : this->position)
+      {
+        Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
+      }
+      this->animationStep++;
+    }
+    break;
+
+  case 5: // Last blink on (longer)
+    if (animationTimer.isReady(200))
+    {
+      for (const int &n : this->position)
+      {
+        Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
+      }
+      this->animationStep++;
+    }
+    break;
+
+  case 6: // Wait before fade out
+    if (animationTimer.isReady(500))
+    {
+      this->animationStep++;
+    }
+    break;
+
+  case 7: // Fade out snake pixel by pixel
+    if (animationTimer.isReady(200))
+    {
+      if (this->position.size() > 0)
+      {
+        Screen.setPixelAtIndex(this->position[0], SnakePlugin::LED_TYPE_OFF);
+        this->position.erase(this->position.begin());
+      }
+      else
+      {
+        this->animationStep++;
+      }
+    }
+    break;
+
+  case 8: // Turn off dot
+    if (animationTimer.isReady(200))
+    {
+      Screen.setPixelAtIndex(this->dot, SnakePlugin::LED_TYPE_OFF);
+      this->animationStep++;
+    }
+    break;
+
+  case 9: // Final delay
+    if (animationTimer.isReady(500))
+    {
+      this->gameState = SnakePlugin::GAME_STATE_END;
+      this->animationStep = 0;
+    }
+    break;
   }
-  delay(200);
-
-  for (const int &n : this->position)
-  {
-    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
-  }
-  delay(200);
-
-  for (const int &n : this->position)
-  {
-    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
-  }
-  delay(200);
-
-  for (const int &n : this->position)
-  {
-    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
-  }
-  delay(200);
-
-  for (const int &n : this->position)
-  {
-    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
-  }
-  delay(200);
-
-  for (const int &n : this->position)
-  {
-    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
-  }
-  delay(500);
-
-  for (const int &n : this->position)
-  {
-    Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_OFF);
-    delay(200);
-  }
-
-  delay(200);
-  Screen.setPixelAtIndex(this->dot, SnakePlugin::LED_TYPE_OFF);
-  delay(500);
-
-  this->gameState = SnakePlugin::GAME_STATE_END;
 }
 
 void SnakePlugin::setup()
@@ -327,8 +364,13 @@ void SnakePlugin::loop()
   switch (this->gameState)
   {
   case SnakePlugin::GAME_STATE_RUNNING:
-    this->findDirection();
-    delay(100);
+    if (moveTimer.isReady(100))
+    {
+      this->findDirection();
+    }
+    break;
+  case SnakePlugin::GAME_STATE_DEATH_ANIMATION:
+    updateDeathAnimation();
     break;
   case SnakePlugin::GAME_STATE_END:
     this->initGame();

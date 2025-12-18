@@ -7,120 +7,107 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 
 ![ezgif-3-2019fca7a4](https://user-images.githubusercontent.com/15351728/200184222-a590575d-983d-4ab8-a322-c6bcf433d364.gif)
 
-<details>
-  <summary><h1>Features</h1></summary>
+## Table of Contents
 
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Hardware Setup](#hardware-setup)
+  - [Opening the Lamp](#opening-the-lamp)
+  - [Understanding the Panels](#understanding-the-panels)
+  - [Pin Configuration](#pin-configuration)
+  - [Alternate Button Wiring](#alternate-button-wiring)
+- [Software Setup](#software-setup)
+  - [ESP32 Setup with VS Code and PlatformIO](#esp32-setup-with-vs-code-and-platformio)
+  - [WiFi Configuration](#wifi-configuration)
+- [HTTP API Reference](#http-api-reference)
+  - [Device Information](#device-information)
+  - [Plugin Control](#plugin-control)
+  - [Display Control](#display-control)
+  - [Message Display](#message-display)
+  - [Plugin Scheduler](#plugin-scheduler)
+  - [Storage Management](#storage-management)
+- [DDP (Display Data Protocol)](#ddp-display-data-protocol)
+- [Home Assistant Integration](#home-assistant-integration)
+- [Development](#development)
+  - [Plugin Development](#plugin-development)
+- [Troubleshooting](#troubleshooting)
+
+## Features
+
+<details>
+  <summary>Click to expand feature list</summary>
+
+**General Features:**
 - Persist your drawing
 - Rotate image
 - Live Drawing
 - OTA Update
-- Wifi Control
-- Web-GUI
+- WiFi Control
+- Web GUI
 - Load an image
 - Switch plugin by pressing the button
 - Schedule Plugins to switch after "n" seconds
-- Plugins
-  - Draw
-  - Game of life
-  - Breakout
-  - Snake
-  - Stars
-  - Lines
-  - Circle
-  - Clock
-  - Big Clock
-  - Weather
-  - Rain
-  - Animation with the "Animation Creator in Web UI"
-  - Firework
-  - DDP
-  - Pong Clock
+
+**Available Plugins:**
+- Draw
+- Game of Life
+- Breakout
+- Snake
+- Stars
+- Lines
+- Circle
+- Clock
+- Big Clock
+- Weather
+- Rain
+- Animation (with Animation Creator in Web UI)
+- Firework
+- DDP (Display Data Protocol)
+- Pong Clock
 
 </details>
 
-# Control the board
+## Quick Start
 
 https://github.com/user-attachments/assets/ddf91be1-2c95-4adc-b178-05b0781683cc
 
-You can control the lamp with a supplied web GUI.
-You can get the IP via serial output or you can search it in your router settings.
+Control the lamp using the built-in web GUI. Find the device IP address via:
+- Serial monitor output
+- Router admin panel
 
-# How to
+---
 
-First of all. This software was written for the ESP32 Dev Board, but it should work with any other Arduino board as well. You just need to remove the WiFi, OTA and web server related code.
+## Hardware Setup
 
-The ESP32 I used:
+This software is designed for ESP32 Dev Boards but can work with other Arduino boards (WiFi, OTA, and web server features will need to be removed for non-ESP boards).
+
+**Supported Boards:**
+- ESP32 Dev Board (recommended)
+- TTGO LoRa32 V2.1 (T3_V1.6.1)
+- ESP8266 (with limitations: per-pixel brightness only works when storage and global brightness are disabled)
 
 <img src="https://user-images.githubusercontent.com/15351728/200148521-86d0f9e6-2c41-4707-b2d9-8aa24a0e440e.jpg" width="60%" />
 
-Verified to work with TTGO LoRa32 V2.1 (T3_V1.6.1).
-Note: On esp8266 per pixel brightness only works when storage and global brightness (analogWrite) are disabled.
+### Opening the Lamp
 
-## Open the lamp
+IKEA uses rivets instead of regular screws. To open:
+1. Insert a screwdriver between the rivets and back panel
+2. Carefully pry open with a second object
+3. Alternative: Drill out the rivets (cleaner but permanent)
 
-I'm sorry to say this, but you'll have to pry open the back of your Lamp, as IKEA didn't install regular screws here. I lifted the back with a screwdriver between the screws and pried it open with a second object, but you can also drill out the rivets to avoid breaking the backpanel.
-
-## The panels
+### Understanding the Panels
 
 <img src="https://user-images.githubusercontent.com/15351728/200183585-39c1668d-665b-4c12-bcbb-387aec1d3874.JPG" width="60%" />
 
-After you open the back, you will see 4 identical plates. These are each equipped with 64 Leds in 4 fields. We are only interested in the lowest one. Here you will find 6 connectors at the bottom edge, to which we connect our board.
-Above is a microcontroller. You have to remove it, because it contains the standard programs.
+Inside you'll find 4 identical plates with 64 LEDs each (in 4 fields). Focus on the lowest plate:
+- 6 connectors at the bottom edge (connection points for your board)
+- Original microcontroller at the top (must be removed)
 
 <img src="https://user-images.githubusercontent.com/86414213/205998862-e9962695-1328-49ea-b546-be592cbad3c2.jpg" width="90%" />
 
-### ESP32 Setup with VS Code and PlatformIO
+### Pin Configuration
 
-1. **Prerequisites**
-
-   - Install **[Visual Studio Code](https://code.visualstudio.com/)**.
-   - Install the **PlatformIO IDE** extension from the VS Code Extensions Marketplace.
-
-2. **Clone the Project**
-
-   - Download the project from GitHub and open it in VS Code. PlatformIO will automatically load dependencies.
-
-```bash
-git clone git@github.com:ph1p/ikea-led-obegraensad.git
-cd ikea-led-obegraensad
-code .
-```
-
-3. **Connect ESP32**
-
-   - Connect your ESP32 via USB.
-   - Check the COM port in the **PlatformIO Devices** tab.
-
-4. **Prepare the Project**
-
-   - Perform a `PlatformIO: Clean` (Recycle bin icon at the bottom right).
-   - Edit the secrets.h in the include directory with your WiFi information. If you are using an ESP32, you may skip the section ESP8266 and setup WiFi with the WiFi Manager. See the "[Configuring WiFi with WiFi manager](https://github.com/jaal2001/ikea-led-obegraensad-pr/edit/patch-3/README.md#configuring-wifi-with-wifi-manager)" section for instructions.
-   - Set variables inside `include/constants.h`.
-
-5. **Build the Project**
-
-   - Click the `PlatformIO Build` icon (bottom right corner).
-   - Check the log for missing libraries.
-     - Use the **Libraries** icon in PlatformIO to install required libraries.
-   - Repeat `Clean` and `Build` until the build succeeds.
-
-6. **Upload to ESP32**
-   - Click `PlatformIO Upload` (bottom right) to upload the firmware to the ESP32.
-
-### Configuring WiFi with WiFi manager
-
-_Note:_ The WiFi manager only works on ESP32. For ESP8266, `WIFI_SSID` and `WIFI_PASSWORD` need to be provided in `secrets.h`.
-
-This project uses [tzapu's WiFiManager](https://github.com/tzapu/WiFiManager). After booting up, the device will try
-to connect to known access points. If no known access point is available, the device will create a network called
-`Ikea Display Setup WiFi`. Connect to this network on any device. A captive portal will pop up and will take you
-through the configuration process. After a successful connection, the device will reboot and is ready to go.
-
-The name of the created network can be changed by modifying `WIFI_MANAGER_SSID` in `include/constants.h`.
-
-### PINS
-
-Connect them like this and remember to set them in `include/constants.h` according to your board.
+Connect the pins as shown below. Remember to configure them in `include/constants.h` according to your board.
 
 |       LCD        | ESP32  | TTGO LoRa32 | NodeMCUv2 | Lolin D32 (Pro) |
 | :--------------: | :----: | :---------: | :-------: | :-------------: |
@@ -137,25 +124,80 @@ Connect them like this and remember to set them in `include/constants.h` accordi
 
 ### Alternate Button Wiring
 
-Thanks to [RBEGamer](https://github.com/RBEGamer) who is showing in this [issue](https://github.com/ph1p/ikea-led-obegraensad/issues/79) how to use the original button wiring. With this solution you won't need the "BUTTON one end" and "BUTTON other end" soldering from the table above.
-# HTTP API Endpoints
+You can use the original button wiring without adding external connections. See [this issue](https://github.com/ph1p/ikea-led-obegraensad/issues/79) by [RBEGamer](https://github.com/RBEGamer) for details.
 
-## Get Information
+---
 
-Get current values and the (fixed) metadata, like number of rows and columns and a list of available plugins.
+## Software Setup
 
+### ESP32 Setup with VS Code and PlatformIO
+
+1. **Prerequisites**
+   - Install [Visual Studio Code](https://code.visualstudio.com/)
+   - Install the PlatformIO IDE extension from VS Code Extensions Marketplace
+
+2. **Clone the Project**
+   ```bash
+   git clone git@github.com:ph1p/ikea-led-obegraensad.git
+   cd ikea-led-obegraensad
+   code .
+   ```
+   PlatformIO will automatically load dependencies.
+
+3. **Connect ESP32**
+   - Connect your ESP32 via USB
+   - Verify the COM port in the PlatformIO Devices tab
+
+4. **Configure the Project**
+   - Run `PlatformIO: Clean` (Recycle bin icon in bottom toolbar)
+   - Edit `include/secrets.h` with your WiFi credentials (ESP8266 only; ESP32 can use WiFi Manager)
+   - Configure variables in `include/constants.h`
+
+5. **Build the Project**
+   - Click the `PlatformIO Build` icon (bottom toolbar)
+   - If libraries are missing, install them via the PlatformIO Libraries tab
+   - Repeat `Clean` and `Build` until successful
+
+6. **Upload to ESP32**
+   - Click `PlatformIO Upload` (bottom toolbar)
+
+### WiFi Configuration
+
+**ESP32 (WiFi Manager - Recommended):**
+
+This project uses [tzapu's WiFiManager](https://github.com/tzapu/WiFiManager). After booting:
+1. Device attempts to connect to known access points
+2. If none available, creates network named `Ikea Display Setup WiFi`
+3. Connect to this network on any device
+4. Captive portal guides you through WiFi configuration
+5. Device reboots and connects to your network
+
+**Network name can be changed via `WIFI_MANAGER_SSID` in `include/constants.h`.*
+
+**ESP8266 (Manual Configuration):**
+
+For ESP8266, WiFi Manager is not available. Set `WIFI_SSID` and `WIFI_PASSWORD` in `include/secrets.h`.
+
+---
+
+## HTTP API Reference
+
+Base URL: `http://your-server/api`
+
+### Device Information
+
+**Get device info, current state, and available plugins**
+
+```http
+GET /api/info
 ```
-GET http://your-server/api/info
-```
 
-### Example `curl` Command:
-
+**Example:**
 ```bash
 curl http://your-server/api/info
 ```
 
-### Response
-
+**Response:**
 ```json
 {
   "rows": 16,
@@ -166,47 +208,32 @@ curl http://your-server/api/info
   "brightness": 255,
   "scheduleActive": true,
   "schedule": [
-    {
-      "pluginId": 2,
-      "duration": 60
-    },
-    {
-      "pluginId": 4,
-      "duration": 120
-    }
+    {"pluginId": 2, "duration": 60},
+    {"pluginId": 4, "duration": 120}
   ],
   "plugins": [
     {"id": 1, "name": "Plugin One"},
-    {"id": 2, "name": "Plugin Two"},
-    {"id": 3, "name": "Plugin Three"}
+    {"id": 2, "name": "Plugin Two"}
   ]
 }
 ```
 
 ---
 
-## Set Active Plugin by ID
+### Plugin Control
 
-To set an active plugin by ID, make an HTTP PATCH request to the following endpoint, passing the parameter as a query string:
+**Set active plugin by ID**
 
+```http
+PATCH /api/plugin?id={plugin_id}
 ```
-PATCH http://your-server/api/plugin
-```
 
-#### Example `curl` Command:
-
+**Example:**
 ```bash
 curl -X PATCH "http://your-server/api/plugin?id=7"
 ```
 
-### Parameters
-
-- `id` (required): The ID of the plugin to set as active.
-
-### Response
-
-- **Success:**
-
+**Response:**
 ```json
 {
   "status": "success",
@@ -214,8 +241,7 @@ curl -X PATCH "http://your-server/api/plugin?id=7"
 }
 ```
 
-- **Error (Plugin not found):**
-
+**Error Response:**
 ```json
 {
   "error": true,
@@ -225,28 +251,20 @@ curl -X PATCH "http://your-server/api/plugin?id=7"
 
 ---
 
-## Set Brightness
+### Display Control
 
-To set the brightness of the LED display, make an HTTP PATCH request to the following endpoint, passing the parameter as a query string:
+#### Set Brightness
 
+```http
+PATCH /api/brightness?value={0-255}
 ```
-PATCH http://your-server/api/brightness
-```
 
-#### Example `curl` Command:
-
+**Example:**
 ```bash
 curl -X PATCH "http://your-server/api/brightness?value=100"
 ```
 
-### Parameters
-
-- `value` (required): The brightness value (0..255).
-
-### Response
-
-- **Success:**
-
+**Response:**
 ```json
 {
   "status": "success",
@@ -254,204 +272,51 @@ curl -X PATCH "http://your-server/api/brightness?value=100"
 }
 ```
 
-- **Error (Invalid Brightness Value):**
+#### Get Display Data
 
-```json
-{
-  "error": true,
-  "errormessage": "Invalid brightness value: 300 - must be between 0 and 255."
-}
+Retrieve current display data as a byte-array. Each byte represents pixel brightness (0-255). Global brightness is applied after these values.
+
+```http
+GET /api/data
 ```
 
----
-
-## Get Current Display Data
-
-To get the current displayed data as a byte-array, each byte representing the brightness value. Be aware that the global brightness value gets applied AFTER these values.
-
-```
-GET http://your-server/api/data
-```
-
-#### Example `curl` Command:
-
+**Example:**
 ```bash
 curl http://your-server/api/data
 ```
 
-### Response (Raw Byte-Array Example)
-
-```json
-[255, 255, 255, 0, 128, 255, 255, 0, ...]
-```
-
----
-# Home Assistant
-
-## HACS Home Assistant Integration
-
-Use [this](https://github.com/HennieLP/ikea-led-obegraensad-Home-Assistant-Integration) Home Assistant Integration for easy Setup as well as seamless integration and instant updates via websockets.
-
-## Use HTTP API in Home Assistant
-
-An example configuration for an automation to set the brightness based on the sun's position. Dims the display when the sun is setting.
-
-- Add the following code to your `configuration.yaml`:
-  ```yaml
-  rest_command:
-    obegraensad_brightness_high:
-      url: "http://your-server/api/brightness/"
-      method: PATCH
-      content_type: "application/x-www-form-urlencoded"
-      payload: "value=100"
-    obegraensad_brightness_low:
-      url: "http://your-server/api/brightness/"
-      method: PATCH
-      content_type: "application/x-www-form-urlencoded"
-      payload: "value=1"
-  ```
-- Go to *Settings* --> *Automations* and create a new automation.
-- Select *Edit in YAML* and add the following content:
-  ```yaml
-  alias: Obegraensad low bightness
-  description: ""
-  triggers:
-    - trigger: sun
-      event: sunset
-      offset: 0
-  conditions: []
-  actions:
-    - action: rest_command.obegraensad_brightness_low
-      data: {}
-  mode: single
-  ```
-- To set the brightness back to bright, create e.g. another automation or a condition in which `rest_command.obegraensad_brightness_high` is called.
-
----
-
-# Plugin Scheduler
-
-It is possible to switch between plugins automatically.  
-You can define your schedule in the Web UI or just send an API call.
-
-### Set Schedule
-
-To define a schedule for switching between plugins automatically, make a POST request with your schedule data:
-
-```bash
-curl -X POST http://your-server/api/schedule -d 'schedule=[{"pluginId":10,"duration":2},{"pluginId":8,"duration":5}]'
-```
-
-#### Example Response
-
-```json
-{
-  "status": "success",
-  "message": "Schedule updated"
-}
-```
-
-### Clear Schedule
-
-To clear the existing schedule, make a GET request:
-
-```bash
-curl http://your-server/api/schedule/clear
-```
-
-#### Example Response
-
-```json
-{
-  "status": "success",
-  "message": "Schedule cleared"
-}
-```
-
-### Start Schedule
-
-To start the current schedule, make a GET request:
-
-```bash
-curl http://your-server/api/schedule/start
-```
-
-#### Example Response
-
-```json
-{
-  "status": "success",
-  "message": "Schedule started"
-}
-```
-
-### Stop Schedule
-
-To stop the current schedule, make a GET request:
-
-```bash
-curl http://your-server/api/schedule/stop
-```
-
-#### Example Response
-
-```json
-{
-  "status": "success",
-  "message": "Schedule stopped"
-}
-```
-
----
-
-## Get Display Data
-
-To retrieve the current display data as a byte-array, each byte representing the brightness value. The global brightness is applied after these values.
-
-```
-GET http://your-server/api/data
-```
-
-#### Example `curl` Command:
-
-```bash
-curl http://your-server/api/data
-```
-
-### Response (Raw Byte-Array Example)
-
+**Response:**
 ```json
 [255, 255, 255, 0, 128, 255, 255, 0, ...]
 ```
 
 ---
 
-## Message Display
+### Message Display
 
-To display a message on the LED display, users can make an HTTP GET request to the following endpoint:
+#### Display a Message
 
+Display scrolling text and/or graphs on the LED matrix.
+
+```http
+GET /api/message
 ```
-GET http://your-server/api/message
-```
 
-### Parameters
+**Parameters:**
+- `text` (optional): Text message to display
+- `graph` (optional): Comma-separated integers (0-15) representing a graph
+- `miny` (optional): Graph lower bound (default: 0)
+- `maxy` (optional): Graph upper bound (default: 15)
+- `repeat` (optional): Repetition count (default: 1, use `-1` for infinite)
+- `id` (optional): Unique identifier for the message
+- `delay` (optional): Scroll delay in ms (default: 50)
 
-- `text` (optional): The text message to be displayed on the LED display.
-- `graph` (optional): A comma-separated list of integers representing a graph (0-15).
-- `miny` (optional): Scaling for the lower end of the graph, defaults to 0.
-- `maxy` (optional): Scaling for the upper end of the graph, defaults to 15.
-- `repeat` (optional): Number of times the message should be repeated. Default is 1. Set to `-1` for infinite.
-- `id` (optional): A unique identifier for the message.
-- `delay` (optional): Delay in ms between every scroll movement. Default is 50ms.
-
-#### Example `curl` Command:
-
+**Example:**
 ```bash
 curl "http://your-server/api/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1&delay=60"
 ```
 
-### Response
-
+**Response:**
 ```json
 {
   "status": "success",
@@ -459,92 +324,249 @@ curl "http://your-server/api/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14
 }
 ```
 
----
+#### Remove a Message
 
-## Message Removal
-
-To remove a message from the display, users can make an HTTP GET request to the following endpoint:
-
-```
-GET http://your-server/api/removemessage
+```http
+GET /api/removemessage?id={message_id}
 ```
 
-### Parameters
-
-- `id` (required): The unique identifier of the message to be removed.
-
-#### Example `curl` Command:
-
+**Example:**
 ```bash
 curl "http://your-server/api/removemessage?id=1"
 ```
 
-### Response
+---
 
-```json
-{
-  "status": "success",
-  "message": "Message removed"
-}
+### Plugin Scheduler
+
+Automatically switch between plugins on a schedule.
+
+#### Set Schedule
+
+```http
+POST /api/schedule
+```
+
+**Example:**
+```bash
+curl -X POST http://your-server/api/schedule -d 'schedule=[{"pluginId":10,"duration":2},{"pluginId":8,"duration":5}]'
+```
+
+#### Start Schedule
+
+```http
+GET /api/schedule/start
+```
+
+#### Stop Schedule
+
+```http
+GET /api/schedule/stop
+```
+
+#### Clear Schedule
+
+```http
+GET /api/schedule/clear
 ```
 
 ---
 
-## Clear Storage
+### Storage Management
 
-To clear the data storage:
+#### Clear Storage
 
+```http
+GET /api/clearstorage
 ```
-GET http://your-server/api/clearstorage
-```
 
-#### Example `curl` Command:
-
+**Example:**
 ```bash
 curl http://your-server/api/clearstorage
 ```
 
-### Response
+---
 
-```json
-{
-  "status": "success",
-  "message": "Storage cleared"
-}
+## DDP (Display Data Protocol)
+
+DDP enables real-time LED matrix control via UDP packets. External applications can send pixel data directly over the network.
+
+### Quick Start
+
+1. **Enable DDP Plugin**
+   ```bash
+   curl -X PATCH "http://your-server/api/plugin?id=17"
+   ```
+
+2. **Send Pixels**
+   ```bash
+   python3 ddp.py --ip 192.168.178.50 --fill 128
+   ```
+
+### Using ddp.py
+
+The included Python script (`ddp.py`) simplifies DDP packet creation.
+
+**Clear all pixels:**
+```bash
+python3 ddp.py --ip 192.168.178.50 --clear
 ```
 
-# Development
+**Fill display with brightness value:**
+```bash
+python3 ddp.py --ip 192.168.178.50 --fill 128
+```
 
-- `src` contains the arduino code.
+**Set individual pixels (X, Y, brightness):**
+```bash
+python3 ddp.py --ip 192.168.178.50 --pixel 0 0 255 --pixel 15 15 128
+```
 
-  - Run it with platform io
-  - You can uncomment the OTA lines in `platformio.ini` if you want. Replace the IP with your device IP.
+**Options:**
+- `--ip`: Display IP address (default: 192.168.178.50)
+- `--port`: UDP port (default: 4048)
+- `--clear`: Clear all pixels
+- `--fill BRIGHTNESS`: Fill with brightness (0-255)
+- `--pixel X Y BRIGHTNESS`: Set pixel (can be used multiple times)
 
-- `frontend` contains the web code.
+**Coordinates:**
+- Matrix: 16×16 pixels
+- X: 0-15 (left to right)
+- Y: 0-15 (top to bottom)
+- Brightness: 0-255
 
-  - First run `pnpm install`
-  - Set your device IP inside the `.env` file
-  - Start the server with `pnpm dev`
-  - Build it with `pnpm build`. This command creates the `webgui.cpp` for you.
+### Protocol Specification
 
-- Build frontend using `Docker`
-  - From the root of the repo, run `docker compose run node`
+**Packet Structure:**
+```
+[Header: 10 bytes][RGB Data: 768 bytes for 16×16]
+```
 
-- Please use the provided pre-commit hooks
+**Header (10 bytes):**
+- Byte 0: `0x41` (Version 1)
+- Byte 1: `0x00` (Flags)
+- Bytes 2-9: `0x00` (Reserved)
 
-  - Install [pre-commit](https://pre-commit.com/)
-  - Activate the hooks by running
+**RGB Data:**
+- 3 bytes per pixel (R, G, B)
+- Total: 16 × 16 × 3 = 768 bytes
+- Order: Row-major (left to right, top to bottom)
+- Brightness calculated as: `(R + G + B) / 3`
 
-  ```bash
-  pre-commit install
-  ```
+**Single Pixel Mode:**
+Send only 3 RGB bytes (total: 13 bytes) to apply the same color to all pixels.
 
-# Plugin Development
+**Example (Python):**
+```python
+import socket
 
-1. Start by creating a new C++ file for your plugin. For example, let's call it plugins/MyPlugin.(cpp/h).
+# Create DDP packet
+header = bytearray([0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+pixels = bytearray([128, 128, 128] * 256)  # Fill with mid-brightness
+packet = header + pixels
 
-**plugins/MyPlugin.h**
+# Send packet
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.sendto(packet, ("192.168.178.50", 4048))
+sock.close()
+```
 
+---
+
+## Home Assistant Integration
+
+### HACS Integration (Recommended)
+
+Use [this Home Assistant Integration](https://github.com/HennieLP/ikea-led-obegraensad-Home-Assistant-Integration) for easy setup with seamless integration and instant updates via websockets.
+
+### HTTP API Integration
+
+Example automation to adjust brightness based on sun position:
+
+**configuration.yaml:**
+```yaml
+rest_command:
+  obegraensad_brightness_high:
+    url: "http://your-server/api/brightness/"
+    method: PATCH
+    content_type: "application/x-www-form-urlencoded"
+    payload: "value=100"
+  obegraensad_brightness_low:
+    url: "http://your-server/api/brightness/"
+    method: PATCH
+    content_type: "application/x-www-form-urlencoded"
+    payload: "value=1"
+```
+
+**Automation (Settings → Automations → Edit in YAML):**
+```yaml
+alias: Obegraensad low brightness
+description: ""
+triggers:
+  - trigger: sun
+    event: sunset
+    offset: 0
+conditions: []
+actions:
+  - action: rest_command.obegraensad_brightness_low
+    data: {}
+mode: single
+```
+
+Create a second automation or condition to call `rest_command.obegraensad_brightness_high` at sunrise.
+
+---
+
+## Development
+
+### Arduino/C++ Development
+
+**Structure:**
+- `src/` - Arduino code
+- `platformio.ini` - Build configuration
+  - Uncomment OTA lines for over-the-air updates (replace IP with your device)
+
+### Frontend Development
+
+**Structure:**
+- `frontend/` - Web UI code
+
+**Setup:**
+```bash
+cd frontend
+pnpm install
+```
+
+**Configuration:**
+- Set device IP in `.env`
+
+**Commands:**
+- `pnpm dev` - Start development server
+- `pnpm build` - Build and generate `webgui.cpp`
+
+**Docker Build:**
+```bash
+docker compose run node
+```
+
+### Code Quality
+
+**Pre-commit Hooks:**
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Activate hooks
+pre-commit install
+```
+
+---
+
+### Plugin Development
+
+**1. Create Plugin Files**
+
+**plugins/MyPlugin.h:**
 ```cpp
 #pragma once
 
@@ -564,8 +586,7 @@ public:
 };
 ```
 
-**plugins/MyPlugin.cpp**
-
+**plugins/MyPlugin.cpp:**
 ```cpp
 #include "plugins/MyPlugin.h"
 
@@ -586,15 +607,15 @@ const char* MyPlugin::getName() const {
 }
 
 void MyPlugin::teardown() {
-  // code if plugin gets deactivated
+    // code if plugin gets deactivated
 }
 
 void MyPlugin::websocketHook(DynamicJsonDocument &request) {
-  // handle websocket requests
+    // handle websocket requests
 }
 ```
 
-2. Add your plugin to the `main.cpp`.
+**2. Register Plugin in main.cpp**
 
 ```cpp
 #include "plugins/MyPlugin.h"
@@ -602,9 +623,12 @@ void MyPlugin::websocketHook(DynamicJsonDocument &request) {
 pluginManager.addPlugin(new MyPlugin());
 ```
 
-# Troubleshooting
+---
 
-## Flickering panel
+## Troubleshooting
 
-- Check all soldering points, especially VCC
-- Check if the board gets enough power
+### Flickering Panel
+
+- Verify all soldering points, especially VCC
+- Ensure adequate power supply to the board
+- Check for loose connections

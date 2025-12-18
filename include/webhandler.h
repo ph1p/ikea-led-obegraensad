@@ -2,6 +2,10 @@
 
 #include "ESPAsyncWebServer.h"
 
+// Helper functions for JSON responses
+void sendJsonSuccess(AsyncWebServerRequest *request, const char* message);
+void sendJsonError(AsyncWebServerRequest *request, int statusCode, const char* error);
+
 void handleMessage(AsyncWebServerRequest *request);
 void handleMessageRemove(AsyncWebServerRequest *request);
 void handleGetInfo(AsyncWebServerRequest *request);

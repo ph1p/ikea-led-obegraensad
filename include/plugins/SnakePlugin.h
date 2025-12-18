@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PluginManager.h"
+#include "timing.h"
 
 class SnakePlugin : public Plugin
 {
@@ -9,6 +10,7 @@ private:
   static const uint8_t LED_TYPE_ON = 1;
   static const uint8_t GAME_STATE_RUNNING = 1;
   static const uint8_t GAME_STATE_END = 2;
+  static const uint8_t GAME_STATE_DEATH_ANIMATION = 3;
 
   unsigned char gameState;
   unsigned char lastDirection = 0; // 0=unset 1=up 2=right 3=down 4 =left
@@ -17,11 +19,16 @@ private:
 
   uint8_t dot;
 
+  NonBlockingDelay moveTimer;
+  NonBlockingDelay animationTimer;
+  uint8_t animationStep = 0;
+
   void initGame();
   void newDot();
   void findDirection();
   void moveSnake(uint newpos);
   void end();
+  void updateDeathAnimation();
 
 public:
   void setup() override;

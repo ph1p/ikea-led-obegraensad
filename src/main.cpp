@@ -19,6 +19,8 @@
 #include "PluginManager.h"
 #include "scheduler.h"
 
+#include "plugins/ArtNet.h"
+#include "plugins/Blop.h"
 #include "plugins/BreakoutPlugin.h"
 #include "plugins/CirclePlugin.h"
 #include "plugins/DDPPlugin.h"
@@ -31,8 +33,6 @@
 #include "plugins/SnakePlugin.h"
 #include "plugins/StarsPlugin.h"
 #include "plugins/TickingClockPlugin.h"
-#include "plugins/ArtNet.h"
-#include "plugins/Blop.h"
 
 #ifdef ENABLE_SERVER
 #include "plugins/AnimationPlugin.h"
@@ -59,13 +59,15 @@ WiFiManager wifiManager;
 
 unsigned long lastConnectionAttempt = 0;
 const unsigned long connectionInterval = 10000;
+unsigned long reconnectionBackoff = 5000;            // Start with 5 seconds
+const unsigned long maxReconnectionBackoff = 300000; // Max 5 minutes
+uint8_t reconnectionAttempts = 0;
 
 void connectToWiFi()
 {
   // if a WiFi setup AP was started, reboot is required to clear routes
   bool wifiWebServerStarted = false;
-  wifiManager.setWebServerCallback([&wifiWebServerStarted]()
-                                   { wifiWebServerStarted = true; });
+  wifiManager.setWebServerCallback([&wifiWebServerStarted]() { wifiWebServerStarted = true; });
 
   wifiManager.setHostname(WIFI_HOSTNAME);
 
@@ -250,11 +252,27 @@ void loop()
     }
   }
 
-  if ((taskCounter % 16) == 0)
+  // Check WiFi less frequently with exponential backoff
+  if (WiFi.status() != WL_CONNECTED)
   {
-    if (WiFi.status() != WL_CONNECTED)
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastConnectionAttempt >= reconnectionBackoff)
     {
+      Serial.println("WiFi disconnected, attempting reconnection...");
       connectToWiFi();
+
+      // Exponential backoff: double the wait time, up to max
+      reconnectionAttempts++;
+      reconnectionBackoff = min(reconnectionBackoff * 2, maxReconnectionBackoff);
+    }
+  }
+  else
+  {
+    if (reconnectionAttempts > 0)
+    {
+      Serial.println("WiFi reconnected successfully");
+      reconnectionAttempts = 0;
+      reconnectionBackoff = 5000;
     }
   }
 

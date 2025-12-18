@@ -187,7 +187,8 @@ void Screen_::setPixel(uint8_t x, uint8_t y, uint8_t value, uint8_t brightness)
 {
   if (x >= COLS || y >= ROWS)
     return;
-  renderBuffer_[y * COLS + x] = value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
+  renderBuffer_[y * COLS + x] =
+      value <= 0 || brightness <= 0 ? 0 : (brightness > 255 ? 255 : brightness);
 }
 
 void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
@@ -206,6 +207,13 @@ void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 
 uint8_t *Screen_::getRotatedRenderBuffer()
 {
+  // No rotation needed - return original buffer directly
+  if (currentRotation == 0)
+  {
+    return renderBuffer_;
+  }
+
+  // Copy buffer for rotation
   for (int i = 0; i < ROWS * COLS; i++)
   {
     rotatedRenderBuffer_[i] = renderBuffer_[i];
@@ -224,9 +232,12 @@ void Screen_::rotate()
     {
       for (int r = 0; r < currentRotation; r++)
       {
-        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[col * ROWS + (ROWS - 1 - row)]);
-        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[(ROWS - 1 - row) * ROWS + (ROWS - 1 - col)]);
-        swap(rotatedRenderBuffer_[row * ROWS + col], rotatedRenderBuffer_[(ROWS - 1 - col) * ROWS + row]);
+        swap(rotatedRenderBuffer_[row * ROWS + col],
+             rotatedRenderBuffer_[col * ROWS + (ROWS - 1 - row)]);
+        swap(rotatedRenderBuffer_[row * ROWS + col],
+             rotatedRenderBuffer_[(ROWS - 1 - row) * ROWS + (ROWS - 1 - col)]);
+        swap(rotatedRenderBuffer_[row * ROWS + col],
+             rotatedRenderBuffer_[(ROWS - 1 - col) * ROWS + row]);
       }
     }
   }
@@ -242,7 +253,8 @@ ICACHE_RAM_ATTR void Screen_::_render()
   const auto buf = getRotatedRenderBuffer();
 
   // SPI data needs to be 32-bit aligned, round up before divide
-  static unsigned long spi_bits[(ROWS * COLS + 8 * sizeof(unsigned long) - 1) / 8 / sizeof(unsigned long)] = {0};
+  static unsigned long
+      spi_bits[(ROWS * COLS + 8 * sizeof(unsigned long) - 1) / 8 / sizeof(unsigned long)] = {0};
   unsigned char *bits = (unsigned char *)spi_bits;
   memset(bits, 0, ROWS * COLS / 8);
 
@@ -292,7 +304,13 @@ void Screen_::drawLine(int x1, int y1, int x2, int y2, int ledStatus, uint8_t br
   };
 };
 
-void Screen_::drawRectangle(int x, int y, int width, int height, bool fill, int ledStatus, uint8_t brightness)
+void Screen_::drawRectangle(int x,
+                            int y,
+                            int width,
+                            int height,
+                            bool fill,
+                            int ledStatus,
+                            uint8_t brightness)
 {
   if (!fill)
   {
@@ -388,9 +406,15 @@ void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness, ui
         if (xPos > -6 && xPos < ROWS)
         { // so are we somewhere on screen with the char?
           // ensure that we have a defined char, lets take the first
-          uint8_t currentChar = (((text[strPos] - currentFont.offset) < currentFont.data.size()) && (text[strPos] >= currentFont.offset)) ? text[strPos] : currentFont.offset;
+          uint8_t currentChar = (((text[strPos] - currentFont.offset) < currentFont.data.size()) &&
+                                 (text[strPos] >= currentFont.offset))
+                                    ? text[strPos]
+                                    : currentFont.offset;
 
-          Screen.drawCharacter(xPos, 4, Screen.readBytes(currentFont.data[currentChar - currentFont.offset]), 8);
+          Screen.drawCharacter(xPos,
+                               4,
+                               Screen.readBytes(currentFont.data[currentChar - currentFont.offset]),
+                               8);
         }
       }
     }
@@ -399,7 +423,11 @@ void Screen_::scrollText(std::string text, int delayTime, uint8_t brightness, ui
   }
 }
 
-void Screen_::scrollGraph(std::vector<int> graph, int miny, int maxy, int delayTime, uint8_t brightness)
+void Screen_::scrollGraph(std::vector<int> graph,
+                          int miny,
+                          int maxy,
+                          int delayTime,
+                          uint8_t brightness)
 {
   if (graph.size() <= 0)
   {

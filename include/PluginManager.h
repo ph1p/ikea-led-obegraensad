@@ -33,7 +33,7 @@ class PluginManager
 {
 private:
     std::vector<Plugin *> plugins;
-    Plugin *activePlugin;
+    Plugin *activePlugin = nullptr;
     int nextPluginId;
     int persistedPluginId = 1;
 
