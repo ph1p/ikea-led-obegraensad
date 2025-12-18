@@ -28,7 +28,7 @@ public:
 class MessagePool
 {
 private:
-  static const size_t POOL_SIZE = 10;
+  static constexpr size_t POOL_SIZE = 10;
   Message pool[POOL_SIZE];
   bool used[POOL_SIZE];
 

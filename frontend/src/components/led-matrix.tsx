@@ -152,7 +152,6 @@ export const LedMatrix: Component<Props> = (props) => {
   createEffect(() => {
     const data = props.data;
     const indexData = props.indexData;
-    const brightness = props.brightness;
 
     if (canvasRef && data.length && indexData.length) {
       drawMatrix(data, indexData);

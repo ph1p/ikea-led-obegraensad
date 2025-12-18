@@ -160,6 +160,7 @@ void baseSetup()
   initWebsocketServer(server);
   initWebServer();
 #endif
+
   pluginManager.addPlugin(new DrawPlugin());
   pluginManager.addPlugin(new BreakoutPlugin());
   pluginManager.addPlugin(new SnakePlugin());
@@ -182,6 +183,7 @@ void baseSetup()
   pluginManager.addPlugin(new ArtNetPlugin());
 #endif
 
+  Screen.clear();
   pluginManager.init();
   Scheduler.init();
 
@@ -246,7 +248,7 @@ void loop()
   {
     Scheduler.update();
 
-    if ((taskCounter % 4) == 0)
+    if ((taskCounter & 0x03) == 0)
     {
       Messages.scrollMessageEveryMinute();
     }

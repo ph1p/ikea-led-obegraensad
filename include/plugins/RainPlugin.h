@@ -5,11 +5,11 @@
 class RainPlugin : public Plugin
 {
 private:
-  static const uint8_t NUM_DROPS = 10;
-  static const uint8_t X_MAX = 16;
-  static const uint8_t Y_MAX = 16;
-  static const uint8_t LED_TYPE_OFF = 0;
-  static const uint8_t LED_TYPE_ON = 1;
+  static constexpr uint8_t NUM_DROPS = 10;
+  static constexpr uint8_t X_MAX = 16;
+  static constexpr uint8_t Y_MAX = 16;
+  static constexpr uint8_t LED_TYPE_OFF = 0;
+  static constexpr uint8_t LED_TYPE_ON = 1;
   struct Drop
   {
     unsigned char x;

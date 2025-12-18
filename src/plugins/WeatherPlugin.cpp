@@ -173,6 +173,11 @@ void WeatherPlugin::update()
   http.end();
 }
 
+void WeatherPlugin::teardown()
+{
+  http.end();
+}
+
 const char *WeatherPlugin::getName() const
 {
   return "Weather";

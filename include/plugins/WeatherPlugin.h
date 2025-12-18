@@ -47,5 +47,6 @@ public:
   void update();
   void setup() override;
   void loop() override;
+  void teardown() override;
   const char *getName() const override;
 };

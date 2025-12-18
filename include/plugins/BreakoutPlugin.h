@@ -5,22 +5,22 @@
 class BreakoutPlugin : public Plugin
 {
 private:
-  static const uint8_t DEBOUNCE_TIME = 100;
-  static const uint8_t X_MAX = 16;
-  static const uint8_t Y_MAX = 16;
-  static const uint8_t BRICK_AMOUNT = X_MAX * 4;
-  static const uint8_t BALL_DELAY_MAX = 200;
-  static const uint8_t BALL_DELAY_MIN = 100;
-  static const uint8_t BALL_DELAY_STEP = 5;
-  static const uint8_t PADDLE_WIDTH = 5;
-  static const uint8_t DIRECTION_NONE = 0;
-  static const uint8_t DIRECTION_LEFT = 1;
-  static const uint8_t DIRECTION_RIGHT = 2;
-  static const uint8_t LED_TYPE_OFF = 0;
-  static const uint8_t LED_TYPE_ON = 1;
-  static const uint8_t GAME_STATE_RUNNING = 1;
-  static const uint8_t GAME_STATE_END = 2;
-  static const uint8_t GAME_STATE_LEVEL = 3;
+  static constexpr uint8_t DEBOUNCE_TIME = 100;
+  static constexpr uint8_t X_MAX = 16;
+  static constexpr uint8_t Y_MAX = 16;
+  static constexpr uint8_t BRICK_AMOUNT = X_MAX * 4;
+  static constexpr uint8_t BALL_DELAY_MAX = 200;
+  static constexpr uint8_t BALL_DELAY_MIN = 100;
+  static constexpr uint8_t BALL_DELAY_STEP = 5;
+  static constexpr uint8_t PADDLE_WIDTH = 5;
+  static constexpr uint8_t DIRECTION_NONE = 0;
+  static constexpr uint8_t DIRECTION_LEFT = 1;
+  static constexpr uint8_t DIRECTION_RIGHT = 2;
+  static constexpr uint8_t LED_TYPE_OFF = 0;
+  static constexpr uint8_t LED_TYPE_ON = 1;
+  static constexpr uint8_t GAME_STATE_RUNNING = 1;
+  static constexpr uint8_t GAME_STATE_END = 2;
+  static constexpr uint8_t GAME_STATE_LEVEL = 3;
   struct Coords
   {
     unsigned char x;

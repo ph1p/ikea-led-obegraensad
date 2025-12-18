@@ -1,29 +1,23 @@
 #include "plugins/GameOfLifePlugin.h"
+#include "constants.h"
 
 uint8_t GameOfLifePlugin::countNeighbours(int row, int col)
 {
-  int i, j;
-  int count = 0;
-  for (i = row - 1; i <= row + 1; i++)
-  {
-    for (j = col - 1; j <= col + 1; j++)
-    {
-      int r = i;
-      int c = j;
-      // OOB handling
-      if (r > (ROWS - 1))
-        r = 0;
-      if (r < 0)
-        r = ROWS - 1;
-      if (c > (COLS - 1))
-        c = 0;
-      if (c < 0)
-        c = COLS - 1;
+  const int rowAbove = (row == 0) ? ROWS - 1 : row - 1;
+  const int rowBelow = (row == ROWS - 1) ? 0 : row + 1;
+  const int colLeft = (col == 0) ? COLS - 1 : col - 1;
+  const int colRight = (col == COLS - 1) ? 0 : col + 1;
 
-      count += this->previous[r * COLS + c];
-    }
-  }
-  count -= this->previous[row * COLS + col];
+  // sum all 8 neighbours
+  const uint8_t count = this->previous[rowAbove * COLS + colLeft] +  // top-left
+                        this->previous[rowAbove * COLS + col] +      // top
+                        this->previous[rowAbove * COLS + colRight] + // top-right
+                        this->previous[row * COLS + colLeft] +       // left
+                        this->previous[row * COLS + colRight] +      // right
+                        this->previous[rowBelow * COLS + colLeft] +  // bottom-left
+                        this->previous[rowBelow * COLS + col] +      // bottom
+                        this->previous[rowBelow * COLS + colRight];  // bottom-right
+
   return count;
 };
 

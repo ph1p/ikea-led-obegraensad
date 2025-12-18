@@ -1,10 +1,11 @@
 #include "plugins/SnakePlugin.h"
+#include "constants.h"
 
 void SnakePlugin::initGame()
 {
   Screen.clear();
 
-  this->position = {240, 241, 242};
+  this->position = {TOTAL_PIXELS - COLS, TOTAL_PIXELS - COLS + 1, TOTAL_PIXELS - COLS + 2};
   for (const int &n : this->position)
   {
     Screen.setPixelAtIndex(n, SnakePlugin::LED_TYPE_ON);
@@ -15,7 +16,7 @@ void SnakePlugin::initGame()
 
 void SnakePlugin::newDot()
 {
-  this->dot = random(0, 255);
+  this->dot = random(0, TOTAL_PIXELS);
   for (const uint &n : this->position)
   {
     if (n == this->dot)
@@ -41,25 +42,25 @@ void SnakePlugin::findDirection()
   int snakesize = this->position.size();
   uint snakehead = this->position[snakesize - 1];
 
-  uint up_pos = snakehead - 16;
-  uint down_pos = snakehead + 16;
+  uint up_pos = snakehead - COLS;
+  uint down_pos = snakehead + COLS;
   uint left_pos = snakehead - 1;
   uint right_pos = snakehead + 1;
 
   // remove possible directions by borders
-  if (snakehead <= 15)
+  if (snakehead <= COLS - 1)
   {
     up = 0;
   }
-  if (snakehead >= 240)
+  if (snakehead >= TOTAL_PIXELS - COLS)
   {
     down = 0;
   }
-  if (snakehead % 16 == 0)
+  if (snakehead % COLS == 0)
   {
     left = 0;
   }
-  if (snakehead % 16 == 15)
+  if (snakehead % COLS == COLS - 1)
   {
     right = 0;
   }
@@ -92,18 +93,18 @@ void SnakePlugin::findDirection()
   uint bestway_right = right;
 
   // left, right or stay in col?
-  if (snakehead % 16 == this->dot % 16)
+  if (snakehead % COLS == this->dot % COLS)
   {
     // stay in col
     bestway_left = 0;
     bestway_right = 0;
   }
-  else if (snakehead % 16 > this->dot % 16)
+  else if (snakehead % COLS > this->dot % COLS)
   {
     // go left
     if (bestway_left)
     {
-      bestway_left = snakehead % 16 - this->dot % 16;
+      bestway_left = snakehead % COLS - this->dot % COLS;
     }
     bestway_right = 0;
   }
@@ -112,24 +113,24 @@ void SnakePlugin::findDirection()
     // go right
     if (bestway_right)
     {
-      bestway_right = this->dot % 16 - snakehead % 16;
+      bestway_right = this->dot % COLS - snakehead % COLS;
     }
     bestway_left = 0;
   }
 
   // up, down or stay in row?
-  if (floor(snakehead / 16) == floor(this->dot / 16))
+  if (floor(snakehead / COLS) == floor(this->dot / COLS))
   {
     // stay in row
     bestway_up = 0;
     bestway_down = 0;
   }
-  else if (floor(snakehead / 16) > floor(this->dot / 16))
+  else if (floor(snakehead / COLS) > floor(this->dot / COLS))
   {
     // go up
     if (bestway_up)
     {
-      bestway_up = floor(snakehead / 16) - floor(this->dot / 16);
+      bestway_up = floor(snakehead / COLS) - floor(this->dot / COLS);
     }
     bestway_down = 0;
   }
@@ -138,7 +139,7 @@ void SnakePlugin::findDirection()
     // go down
     if (bestway_down)
     {
-      bestway_down = floor(this->dot / 16) - floor(snakehead / 16);
+      bestway_down = floor(this->dot / COLS) - floor(snakehead / COLS);
     }
     bestway_up = 0;
   }
@@ -146,7 +147,7 @@ void SnakePlugin::findDirection()
   // make the next step like the last if possible
   if (this->lastDirection == 1 && bestway_up)
   {
-    moveSnake(snakehead - 16);
+    moveSnake(snakehead - COLS);
     return;
   }
   else if (this->lastDirection == 2 && bestway_right)
@@ -156,7 +157,7 @@ void SnakePlugin::findDirection()
   }
   else if (this->lastDirection == 3 && bestway_down)
   {
-    moveSnake(snakehead + 16);
+    moveSnake(snakehead + COLS);
     return;
   }
   else if (this->lastDirection == 4 && bestway_left)
@@ -172,12 +173,12 @@ void SnakePlugin::findDirection()
     // there are no good (bestway) directions, what about other possible directions?!
     if (up)
     {
-      moveSnake(snakehead - 16);
+      moveSnake(snakehead - COLS);
       this->lastDirection = 1;
     }
     else if (down)
     {
-      moveSnake(snakehead + 16);
+      moveSnake(snakehead + COLS);
       this->lastDirection = 3;
     }
     else if (left)
@@ -199,7 +200,7 @@ void SnakePlugin::findDirection()
   else if (bestway_up > bestway_right && bestway_up > bestway_down && bestway_up > bestway_left)
   {
     // go up!
-    moveSnake(snakehead - 16);
+    moveSnake(snakehead - COLS);
     this->lastDirection = 1;
   }
   else if (bestway_right > bestway_down && bestway_right > bestway_left && bestway_right > bestway_up)
@@ -211,7 +212,7 @@ void SnakePlugin::findDirection()
   else if (bestway_down > bestway_left && bestway_down > bestway_up && bestway_down > bestway_right)
   {
     // go down!
-    moveSnake(snakehead + 16);
+    moveSnake(snakehead + COLS);
     this->lastDirection = 3;
   }
   else if (bestway_left > bestway_up && bestway_left > bestway_right && bestway_left > bestway_down)
@@ -226,12 +227,12 @@ void SnakePlugin::findDirection()
     // hmm, same distance - prio on up -> down -> left -> right
     if (bestway_up)
     {
-      moveSnake(snakehead - 16);
+      moveSnake(snakehead - COLS);
       this->lastDirection = 1;
     }
     else if (bestway_down)
     {
-      moveSnake(snakehead + 16);
+      moveSnake(snakehead + COLS);
       this->lastDirection = 3;
     }
     else if (bestway_left)
@@ -281,7 +282,7 @@ void SnakePlugin::updateDeathAnimation()
   case 0: // Blink off
   case 2:
   case 4:
-    if (animationTimer.isReady(200))
+    if (animationTimer.isReady(SnakePlugin::BLINK_SHORT_MS))
     {
       for (const int &n : this->position)
       {
@@ -293,7 +294,7 @@ void SnakePlugin::updateDeathAnimation()
 
   case 1: // Blink on
   case 3:
-    if (animationTimer.isReady(200))
+    if (animationTimer.isReady(SnakePlugin::BLINK_SHORT_MS))
     {
       for (const int &n : this->position)
       {
@@ -304,7 +305,7 @@ void SnakePlugin::updateDeathAnimation()
     break;
 
   case 5: // Last blink on (longer)
-    if (animationTimer.isReady(200))
+    if (animationTimer.isReady(SnakePlugin::BLINK_SHORT_MS))
     {
       for (const int &n : this->position)
       {
@@ -315,14 +316,14 @@ void SnakePlugin::updateDeathAnimation()
     break;
 
   case 6: // Wait before fade out
-    if (animationTimer.isReady(500))
+    if (animationTimer.isReady(SnakePlugin::BLINK_LONG_MS))
     {
       this->animationStep++;
     }
     break;
 
   case 7: // Fade out snake pixel by pixel
-    if (animationTimer.isReady(200))
+    if (animationTimer.isReady(SnakePlugin::BLINK_SHORT_MS))
     {
       if (this->position.size() > 0)
       {
@@ -337,7 +338,7 @@ void SnakePlugin::updateDeathAnimation()
     break;
 
   case 8: // Turn off dot
-    if (animationTimer.isReady(200))
+    if (animationTimer.isReady(SnakePlugin::BLINK_SHORT_MS))
     {
       Screen.setPixelAtIndex(this->dot, SnakePlugin::LED_TYPE_OFF);
       this->animationStep++;
@@ -345,7 +346,7 @@ void SnakePlugin::updateDeathAnimation()
     break;
 
   case 9: // Final delay
-    if (animationTimer.isReady(500))
+    if (animationTimer.isReady(SnakePlugin::BLINK_LONG_MS))
     {
       this->gameState = SnakePlugin::GAME_STATE_END;
       this->animationStep = 0;
@@ -364,7 +365,7 @@ void SnakePlugin::loop()
   switch (this->gameState)
   {
   case SnakePlugin::GAME_STATE_RUNNING:
-    if (moveTimer.isReady(100))
+    if (moveTimer.isReady(SnakePlugin::SNAKE_DELAY_MS))
     {
       this->findDirection();
     }

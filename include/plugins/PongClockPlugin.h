@@ -5,11 +5,11 @@
 class PongClockPlugin : public Plugin
 {
 private:
-  static const uint8_t X_MAX = 16;
-  static const uint8_t Y_MAX = 16;
-  static const uint8_t LED_TYPE_OFF = 0;
-  static const uint8_t LED_TYPE_ON = 1;
-  static const uint8_t SPEED = 100;
+  static constexpr uint8_t X_MAX = 16;
+  static constexpr uint8_t Y_MAX = 16;
+  static constexpr uint8_t LED_TYPE_OFF = 0;
+  static constexpr uint8_t LED_TYPE_ON = 1;
+  static constexpr uint8_t SPEED = 100;
 
   struct tm timeinfo;
 

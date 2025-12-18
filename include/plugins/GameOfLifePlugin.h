@@ -6,10 +6,10 @@
 class GameOfLifePlugin : public Plugin
 {
 private:
-  static const uint8_t STATE_RUNNING = 1;
-  static const uint8_t STATE_END = 2;
-  static const uint8_t STATE_INIT = 3;
-  static const uint8_t STATE_END_DELAY = 4;
+  static constexpr uint8_t STATE_RUNNING = 1;
+  static constexpr uint8_t STATE_END = 2;
+  static constexpr uint8_t STATE_INIT = 3;
+  static constexpr uint8_t STATE_END_DELAY = 4;
   uint8_t state;
   uint8_t previous2[ROWS * COLS];
   uint8_t previous[ROWS * COLS];
