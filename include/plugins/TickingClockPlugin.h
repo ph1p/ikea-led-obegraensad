@@ -5,14 +5,14 @@
 class TickingClockPlugin : public Plugin
 {
 private:
-    struct tm timeinfo;
+  struct tm timeinfo;
 
-    int previousMinutes;
-    int previousHour;
-    int previousSecond;
+  int previousMinutes;
+  int previousHour;
+  int previousSecond;
 
 public:
-    void setup() override;
-    void loop() override;
-    const char *getName() const override;
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
 };

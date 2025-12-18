@@ -17,50 +17,50 @@
 class NonBlockingDelay
 {
 private:
-    unsigned long previousMillis = 0;
-    bool firstRun = true;
+  unsigned long previousMillis = 0;
+  bool firstRun = true;
 
 public:
-    /**
-     * Check if the specified interval has elapsed
-     * @param interval Time in milliseconds
-     * @return true if interval has elapsed, false otherwise
-     */
-    bool isReady(unsigned long interval)
+  /**
+   * Check if the specified interval has elapsed
+   * @param interval Time in milliseconds
+   * @return true if interval has elapsed, false otherwise
+   */
+  bool isReady(unsigned long interval)
+  {
+    unsigned long currentMillis = millis();
+
+    // Allow first run to execute immediately
+    if (firstRun)
     {
-        unsigned long currentMillis = millis();
-
-        // Allow first run to execute immediately
-        if (firstRun)
-        {
-            previousMillis = currentMillis;
-            firstRun = false;
-            return true;
-        }
-
-        if (currentMillis - previousMillis >= interval)
-        {
-            previousMillis = currentMillis;
-            return true;
-        }
-
-        return false;
+      previousMillis = currentMillis;
+      firstRun = false;
+      return true;
     }
 
-    /**
-     * Reset the timer
-     */
-    void reset()
+    if (currentMillis - previousMillis >= interval)
     {
-        previousMillis = millis();
-        firstRun = false;
+      previousMillis = currentMillis;
+      return true;
     }
 
-    /**
-     * Force the next isReady() call to return true
-     */
-    void forceReady()
-    {
-        firstRun = true;
-    }
+    return false;
+  }
+
+  /**
+   * Reset the timer
+   */
+  void reset()
+  {
+    previousMillis = millis();
+    firstRun = false;
+  }
+
+  /**
+   * Force the next isReady() call to return true
+   */
+  void forceReady()
+  {
+    firstRun = true;
+  }
 };

@@ -7,8 +7,13 @@ Messages_ &Messages_::getInstance()
   return instance;
 }
 
-void Messages_::add(std::string text, int repeat, int id, int delay,
-                    std::vector<int> graph, int miny, int maxy)
+void Messages_::add(std::string text,
+                    int repeat,
+                    int id,
+                    int delay,
+                    std::vector<int> graph,
+                    int miny,
+                    int maxy)
 {
   // First remove any existing message with same id
   remove(id);
@@ -37,9 +42,9 @@ void Messages_::add(std::string text, int repeat, int id, int delay,
 void Messages_::remove(int id)
 {
   // Find and remove message with matching id
-  auto it = std::find_if(activeMessages.begin(), activeMessages.end(),
-                         [id](const Message *msg)
-                         { return msg->id == id; });
+  auto it = std::find_if(activeMessages.begin(), activeMessages.end(), [id](const Message *msg) {
+    return msg->id == id;
+  });
 
   if (it != activeMessages.end())
   {

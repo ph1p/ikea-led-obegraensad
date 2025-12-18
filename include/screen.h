@@ -1,11 +1,11 @@
 #pragma once
 
+#include "PluginManager.h"
+#include "constants.h"
+#include "signs.h"
+#include "storage.h"
 #include <Arduino.h>
 #include <vector>
-#include "PluginManager.h"
-#include "signs.h"
-#include "constants.h"
-#include "storage.h"
 class Screen_
 {
 private:
@@ -69,7 +69,13 @@ public:
   uint8_t getBufferIndex(int index);
 
   void drawLine(int x1, int y1, int x2, int y2, int ledStatus, uint8_t brightness = 255);
-  void drawRectangle(int x, int y, int width, int height, bool fill, int ledStatus, uint8_t brightness = 255);
+  void drawRectangle(int x,
+                     int y,
+                     int width,
+                     int height,
+                     bool fill,
+                     int ledStatus,
+                     uint8_t brightness = 255);
   void drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness = 255);
   void drawNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness = 255);
   void drawBigNumbers(int x, int y, std::vector<int> numbers, uint8_t brightness = 255);
@@ -77,7 +83,11 @@ public:
   std::vector<int> readBytes(std::vector<int> bytes);
 
   void scrollText(std::string text, int delayTime = 30, uint8_t brightness = 255, uint8_t fontid = 0);
-  void scrollGraph(std::vector<int> graph = {}, int miny = 0, int maxy = 15, int delayTime = 60, uint8_t brightness = 255);
+  void scrollGraph(std::vector<int> graph = {},
+                   int miny = 0,
+                   int maxy = 15,
+                   int delayTime = 60,
+                   uint8_t brightness = 255);
 };
 
 extern Screen_ &Screen;

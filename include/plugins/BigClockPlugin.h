@@ -5,13 +5,13 @@
 class BigClockPlugin : public Plugin
 {
 private:
-    struct tm timeinfo;
+  struct tm timeinfo;
 
-    int previousMinutes;
-    int previousHour;
+  int previousMinutes;
+  int previousHour;
 
 public:
-    void setup() override;
-    void loop() override;
-    const char *getName() const override;
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
 };

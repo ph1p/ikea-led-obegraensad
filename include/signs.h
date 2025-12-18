@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Arduino.h>
-#include <vector>
 #include "constants.h"
+#include <Arduino.h>
 #include <string>
+#include <vector>
 
 extern std::vector<int> letterU;
 extern std::vector<int> letterR;
@@ -18,11 +18,11 @@ extern std::vector<std::vector<int>> weatherIcons;
 
 struct font
 {
-    std::string name;
-    int sizeX;
-    int sizeY;
-    int offset;
-    std::vector<std::vector<int>> data;
+  std::string name;
+  int sizeX;
+  int sizeY;
+  int offset;
+  std::vector<std::vector<int>> data;
 };
 
 extern std::vector<font> fonts;

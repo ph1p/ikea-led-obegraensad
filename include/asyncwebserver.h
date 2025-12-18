@@ -4,9 +4,9 @@
 
 #ifdef ENABLE_SERVER
 
+#include "webgui.h"
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
-#include "webgui.h"
 
 extern AsyncWebServer server;
 void initWebServer();

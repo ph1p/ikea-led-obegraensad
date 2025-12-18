@@ -1,8 +1,8 @@
 #pragma once
 
 #include "PluginManager.h"
-#include <vector>
 #include <Arduino.h>
+#include <vector>
 
 struct ScheduleItem
 {
