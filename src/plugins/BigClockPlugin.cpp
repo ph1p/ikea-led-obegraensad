@@ -35,10 +35,10 @@ void BigClockPlugin::loop()
         Screen.drawBigNumbers(0, 0, hh);
         Screen.drawBigNumbers(0, ROWS / 2, mm);
       }
-    }
 
-    previousMinutes = timeinfo.tm_min;
-    previousHour = timeinfo.tm_hour;
+      previousMinutes = timeinfo.tm_min;
+      previousHour = timeinfo.tm_hour;
+    }
   }
 }
 
