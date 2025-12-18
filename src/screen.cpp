@@ -17,8 +17,8 @@ void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
   brightness_ = brightness;
 
 #ifndef ESP8266
-  // analogWrite disable the timer1 interrupt on esp8266
-  analogWrite(PIN_ENABLE, 255 - brightness);
+  pinMode(PIN_ENABLE, OUTPUT);
+  digitalWrite(PIN_ENABLE, LOW);
 #endif
 
 #ifdef ENABLE_STORAGE
@@ -157,6 +157,10 @@ void Screen_::setup()
 
   // TODO find proper unused pins for MISO and SS
 #ifdef ESP8266
+  // Initialize control pins
+  pinMode(PIN_LATCH, OUTPUT);
+  digitalWrite(PIN_LATCH, LOW);
+
   SPI.pins(PIN_CLOCK, 12, PIN_DATA, 15); // SCLK, MISO, MOSI, SS);
   SPI.begin();
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
@@ -167,7 +171,13 @@ void Screen_::setup()
 #endif
 
 #ifdef ESP32
-  SPI.begin(PIN_CLOCK, 34, PIN_DATA, 25); // SCLK, MISO, MOSI, SS
+  // Initialize control pins
+  pinMode(PIN_LATCH, OUTPUT);
+  pinMode(PIN_ENABLE, OUTPUT);
+  digitalWrite(PIN_LATCH, LOW);
+  digitalWrite(PIN_ENABLE, LOW);
+
+  SPI.begin(PIN_CLOCK, -1, PIN_DATA, -1); // SCLK, MISO, MOSI, SS (-1 for unused pins)
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
 
   hw_timer_t *Screen_timer = timerBegin(1000000);
@@ -262,7 +272,8 @@ ICACHE_RAM_ATTR void Screen_::_render()
 
   for (int idx = 0; idx < ROWS * COLS; idx++)
   {
-    bits[idx >> 3] |= (buf[positions[idx]] > counter ? 0x80 : 0) >> (idx & 7);
+    uint16_t scaledValue = ((uint16_t)buf[positions[idx]] * brightness_) / 255;
+    bits[idx >> 3] |= (scaledValue > counter ? 0x80 : 0) >> (idx & 7);
   }
 
   counter += (256 / GRAY_LEVELS);
