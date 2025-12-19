@@ -28,6 +28,8 @@ private:
   int previousMinutes, previousHour, ballAngle = 0, fadeLength = 0, current_minute = 0,
                                      current_hour = 0;
 
+  std::vector<int> previousDigits;
+
   void drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness = 255);
   byte getScreenIndex(byte x, byte y);
   void swapXdirection();

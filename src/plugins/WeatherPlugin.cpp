@@ -71,7 +71,7 @@ void WeatherPlugin::update()
   http.begin(wiFiClient, weatherApiString);
 #endif
 
-  http.setTimeout(15000);
+  http.setTimeout(20000);
 
   Serial.println("Sending HTTP GET request...");
   int code = http.GET();
@@ -84,7 +84,7 @@ void WeatherPlugin::update()
     Serial.print("Response size: ");
     Serial.println(payload.length());
 
-    DynamicJsonDocument doc(8192);
+    DynamicJsonDocument doc(3072);
     DeserializationError error = deserializeJson(doc, payload);
 
     if (error)
@@ -168,6 +168,24 @@ void WeatherPlugin::update()
   {
     Serial.print("HTTP request failed with code: ");
     Serial.println(code);
+
+    Screen.clear();
+
+    Screen.setPixel(7, 4, 1);
+    Screen.setPixel(8, 4, 1);
+    Screen.setPixel(7, 5, 1);
+    Screen.setPixel(8, 5, 1);
+    Screen.setPixel(7, 6, 1);
+    Screen.setPixel(8, 6, 1);
+    Screen.setPixel(7, 7, 1);
+    Screen.setPixel(8, 7, 1);
+    Screen.setPixel(7, 8, 1);
+    Screen.setPixel(8, 8, 1);
+
+    Screen.setPixel(7, 10, 1);
+    Screen.setPixel(8, 10, 1);
+    Screen.setPixel(7, 11, 1);
+    Screen.setPixel(8, 11, 1);
   }
 
   http.end();

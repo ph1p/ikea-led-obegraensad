@@ -50,18 +50,39 @@ int PongClockPlugin::realRandom(int min, int max)
 
 void PongClockPlugin::drawDigits()
 {
-  drawCharacter(0,
-                0,
-                Screen.readBytes(smallNumbers[(current_hour - current_hour % 10) / 10]),
-                4,
-                100);
-  drawCharacter(4, 0, Screen.readBytes(smallNumbers[current_hour % 10]), 4, 100);
-  drawCharacter(9,
-                0,
-                Screen.readBytes(smallNumbers[(current_minute - current_minute % 10) / 10]),
-                4,
-                100);
-  drawCharacter(13, 0, Screen.readBytes(smallNumbers[current_minute % 10]), 4, 100);
+  std::vector<int> currentDigits = {(current_hour - current_hour % 10) / 10,
+                                    current_hour % 10,
+                                    (current_minute - current_minute % 10) / 10,
+                                    current_minute % 10};
+
+  if (previousDigits.empty())
+  {
+    drawCharacter(0, 0, Screen.readBytes(smallNumbers[currentDigits[0]]), 4, 100);
+    drawCharacter(4, 0, Screen.readBytes(smallNumbers[currentDigits[1]]), 4, 100);
+    drawCharacter(9, 0, Screen.readBytes(smallNumbers[currentDigits[2]]), 4, 100);
+    drawCharacter(13, 0, Screen.readBytes(smallNumbers[currentDigits[3]]), 4, 100);
+  }
+  else
+  {
+    if (currentDigits[0] != previousDigits[0])
+    {
+      drawCharacter(0, 0, Screen.readBytes(smallNumbers[currentDigits[0]]), 4, 100);
+    }
+    if (currentDigits[1] != previousDigits[1])
+    {
+      drawCharacter(4, 0, Screen.readBytes(smallNumbers[currentDigits[1]]), 4, 100);
+    }
+    if (currentDigits[2] != previousDigits[2])
+    {
+      drawCharacter(9, 0, Screen.readBytes(smallNumbers[currentDigits[2]]), 4, 100);
+    }
+    if (currentDigits[3] != previousDigits[3])
+    {
+      drawCharacter(13, 0, Screen.readBytes(smallNumbers[currentDigits[3]]), 4, 100);
+    }
+  }
+
+  previousDigits = currentDigits;
 }
 
 float PongClockPlugin::degToRad(float deg)
@@ -204,6 +225,7 @@ void PongClockPlugin::reset()
   pongPaddleRightTarget = constrain(pong_predict_y(ballX, ballY, ballAngle), X_MAX, 255 - X_MAX);
   ballBrightness = 255;
   ballBrightnessStep = -1;
+  previousDigits.clear(); // Clear to force full redraw
   drawDigits();
 }
 

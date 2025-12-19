@@ -9,6 +9,8 @@ private:
 
   int previousMinutes;
   int previousHour;
+  std::vector<int> previousHH;
+  std::vector<int> previousMM;
 
 public:
   void setup() override;
