@@ -12,7 +12,7 @@ interface FrameTimelineProps {
 
 export const FrameTimeline: Component<FrameTimelineProps> = (props) => {
   return (
-    <div class="bg-white p-4">
+    <div class="bg-white p-4 rounded-2xl shadow-lg">
       <div ref={props.ref} class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: thin;">
         <For each={props.screenSignals}>
           {([screen], index) => (

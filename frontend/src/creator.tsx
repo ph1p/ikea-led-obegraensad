@@ -427,14 +427,16 @@ export const Creator: Component = () => {
               </div>
 
               {/* Timeline at Bottom */}
-              <FrameTimeline
-                screenSignals={screenSignals()}
-                focusedFrameIndex={focusedFrameIndex()}
-                onFrameClick={setFocusedFrameIndex}
-                ref={(el) => {
-                  timelineRef = el;
-                }}
-              />
+              <div class="p-6 pt-0">
+                <FrameTimeline
+                  screenSignals={screenSignals()}
+                  focusedFrameIndex={focusedFrameIndex()}
+                  onFrameClick={setFocusedFrameIndex}
+                  ref={(el) => {
+                    timelineRef = el;
+                  }}
+                />
+              </div>
             </>
           ) : (
             <ScreenInfo>
@@ -465,7 +467,6 @@ export const Creator: Component = () => {
                 >
                   <Tooltip text="Add new frame">
                     <Button
-                      disabled={!isAnimationPluginActive()}
                       onClick={handleAddScreen}
                       class="hover:bg-green-600 transition-colors"
                     >

@@ -11,7 +11,7 @@ export const Layout: Component<{
   const [store] = useStore();
 
   return (
-    <div class={`h-full ${store.connectionState() === 1 ? "grid grid-cols-[320px_1fr]" : ""}`}>
+    <div class={`h-full ${store.connectionState() === 1 ? "grid grid-cols-[320px_1fr] gap-6 p-6" : ""}`}>
       <Show
         when={store.connectionState() === 1}
         fallback={
@@ -22,7 +22,9 @@ export const Layout: Component<{
           </main>
         }
       >
-        <aside class="bg-white p-6 flex flex-col h-full">{props.sidebar}</aside>
+        <aside class="bg-white p-6 flex flex-col h-full rounded-2xl shadow-lg overflow-y-auto">
+          {props.sidebar}
+        </aside>
         <main class="h-full overflow-auto" ref={props.ref}>
           {props.content}
         </main>
