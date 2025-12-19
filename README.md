@@ -19,6 +19,10 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - [Software Setup](#software-setup)
   - [ESP32 Setup with VS Code and PlatformIO](#esp32-setup-with-vs-code-and-platformio)
   - [WiFi Configuration](#wifi-configuration)
+- [OTA Updates](#ota-updates)
+  - [Configuration](#configuration)
+  - [Upload Methods](#upload-methods)
+  - [Visual Feedback](#visual-feedback)
 - [HTTP API Reference](#http-api-reference)
   - [Device Information](#device-information)
   - [Plugin Control](#plugin-control)
@@ -177,6 +181,80 @@ This project uses [tzapu's WiFiManager](https://github.com/tzapu/WiFiManager). A
 **ESP8266 (Manual Configuration):**
 
 For ESP8266, WiFi Manager is not available. Set `WIFI_SSID` and `WIFI_PASSWORD` in `include/secrets.h`.
+
+---
+
+## OTA Updates
+
+Over-The-Air (OTA) updates allow you to upload new firmware wirelessly without a USB connection. This is powered by [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA).
+
+### Configuration
+
+Before using OTA, configure the following:
+
+1. **Set OTA Credentials** in `include/secrets.h`:
+   ```cpp
+   #define OTA_USERNAME "admin"
+   #define OTA_PASSWORD "your-password"
+   ```
+
+2. **Configure Upload Settings** in `platformio.ini` (for the `esp32dev` environment):
+   ```ini
+   extra_scripts = upload.py
+   upload_protocol = custom
+   custom_upload_url = http://192.168.178.50  # Your device IP
+   custom_username = admin
+   custom_password = your-password
+   ```
+
+**Note:** Replace `192.168.178.50` with your device's actual IP address.
+
+### Upload Methods
+
+#### Method 1: Web Interface (Manual Upload)
+
+1. Navigate to `http://your-device-ip/update` in your browser
+2. Login with your configured credentials (default: `admin` / `ikea-led-wall`)
+3. Select your firmware file (`.pio/build/esp32dev/firmware.bin`)
+4. Click "Update" and wait for completion
+5. Device will automatically reboot with new firmware
+
+#### Method 2: PlatformIO (Automated Upload)
+
+Upload directly from PlatformIO via the command line:
+
+```bash
+pio run -e esp32dev -t upload
+```
+
+Or use the PlatformIO Upload button in VS Code (bottom toolbar).
+
+**Requirements:**
+- Python packages: `requests_toolbelt` and `tqdm`
+- Install if needed: `pip install requests_toolbelt tqdm`
+
+### Visual Feedback
+
+During OTA updates, the LED matrix provides visual feedback:
+
+- **"U" letter displayed**: Update has started
+- **Serial output**: Progress updates every second
+- **"R" letter displayed**: Update completed (device will reboot)
+
+Monitor the serial output for detailed progress:
+```
+OTA update started!
+OTA Progress Current: 262144 bytes, Final: 1440655 bytes
+OTA Progress Current: 524288 bytes, Final: 1440655 bytes
+...
+OTA update finished successfully!
+```
+
+**Troubleshooting:**
+- Ensure device is connected to the same network
+- Verify IP address in `platformio.ini` matches device IP
+- Check credentials match in both `secrets.h` and `platformio.ini`
+- For upload failures, try the web interface method first
 
 ---
 
@@ -524,7 +602,7 @@ Create a second automation or condition to call `rest_command.obegraensad_bright
 **Structure:**
 - `src/` - Arduino code
 - `platformio.ini` - Build configuration
-  - Uncomment OTA lines for over-the-air updates (replace IP with your device)
+  - See [OTA Updates](#ota-updates) section for wireless firmware upload configuration
 
 ### Frontend Development
 

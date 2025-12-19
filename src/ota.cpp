@@ -9,7 +9,6 @@ unsigned long ota_progress_millis = 0;
 
 void onOTAStart()
 {
-  // Log when OTA has started
   Serial.println("OTA update started!");
   currentStatus = UPDATE;
 
@@ -56,12 +55,15 @@ void onOTAEnd(bool success)
 
 void initOTA(AsyncWebServer &server)
 {
-  ElegantOTA.begin(&server); // Start ElegantOTA
+  ElegantOTA.begin(&server);
+  ElegantOTA.setAutoReboot(true);
   ElegantOTA.setAuth(otaUser, otaPassword);
-  // ElegantOTA callbacks
-  ElegantOTA.onStart(onOTAStart);
-  ElegantOTA.onProgress(onOTAProgress);
-  ElegantOTA.onEnd(onOTAEnd);
+
+  ElegantOTA.onStart([]() { onOTAStart(); });
+
+  ElegantOTA.onProgress([](size_t current, size_t final) { onOTAProgress(current, final); });
+
+  ElegantOTA.onEnd([](bool success) { onOTAEnd(success); });
 }
 
 #endif
