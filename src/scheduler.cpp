@@ -129,7 +129,7 @@ bool PluginScheduler::setScheduleByJSONString(String scheduleJson)
     return false;
   }
 
-  DynamicJsonDocument doc(2048);
+  JsonDocument doc;
   DeserializationError error = deserializeJson(doc, scheduleJson);
 
   if (error)
@@ -149,7 +149,7 @@ bool PluginScheduler::setScheduleByJSONString(String scheduleJson)
 
   for (const auto &item : doc.as<JsonArray>())
   {
-    if (item.containsKey("pluginId") && item.containsKey("duration"))
+    if (item["pluginId"].is<int>() && item["duration"].is<unsigned long>())
     {
       int pluginId = item["pluginId"].as<int>();
       unsigned long duration = item["duration"].as<unsigned long>();
