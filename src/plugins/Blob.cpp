@@ -1,15 +1,21 @@
-#include "plugins/Blop.h"
-#include "screen.h" // Uses global Screen
+#include "plugins/Blob.h"
+#include "constants.h"
+#include "screen.h"
 
 BlobPlugin::BlobPlugin()
 {
-  // Nothing special here, setup() will handle init
+  // Initialize frame buffer
+  for (uint16_t i = 0; i < ROWS * COLS; ++i)
+  {
+    previousBrightness[i] = 0;
+  }
 }
 
 void BlobPlugin::setup()
 {
   Screen.clear();
 
+  // Initialize balls with random positions and velocities
   for (auto &b : balls)
   {
     b.x = static_cast<float>(rand() % X_MAX);
@@ -17,33 +23,53 @@ void BlobPlugin::setup()
     b.vx = ((rand() % 200) / 100.0f - 1.0f) * SPEED * 2;
     b.vy = ((rand() % 200) / 100.0f - 1.0f) * SPEED * 2;
   }
+
+  updateTimer.reset();
 }
 
 void BlobPlugin::loop()
 {
-  Screen.clear();
+  if (!updateTimer.isReady(UPDATE_INTERVAL_MS))
+  {
+    return;
+  }
+
+  render();
+  updatePositions();
+}
+
+void BlobPlugin::render()
+{
+  // Pre-compute aspect ratio scale
+  const float aspect_scale = aspect_ratio;
 
   for (uint8_t y = 0; y < ROWS; ++y)
   {
+    const float scaled_y = static_cast<float>(y) * aspect_scale;
+
     for (uint8_t x = 0; x < COLS; ++x)
     {
       float value = 0.0f;
+      const float fx = static_cast<float>(x);
 
       for (const auto &b : balls)
       {
-        float dx = b.x - static_cast<float>(x);
-        float dy = b.y - static_cast<float>(y * aspect_ratio);
-        float dist = std::sqrt(dx * dx + dy * dy);
-        value += attenuation(dist, RADIUS);
+        float dx = b.x - fx;
+        float dy = b.y - scaled_y;
+        float d_sq = dx * dx + dy * dy; // No sqrt needed!
+        value += attenuationSquared(d_sq, RADIUS_SQ);
       }
 
       uint8_t brightness = toneMap(value);
-      Screen.setPixel(x, y, 1, brightness);
+      uint16_t idx = y * COLS + x;
+
+      if (previousBrightness[idx] != brightness)
+      {
+        Screen.setPixel(x, y, 1, brightness);
+        previousBrightness[idx] = brightness;
+      }
     }
   }
-
-  updatePositions();
-  delay(50); // ~20 FPS
 }
 
 const char *BlobPlugin::getName() const
@@ -51,12 +77,13 @@ const char *BlobPlugin::getName() const
   return "Blobs";
 }
 
-float BlobPlugin::attenuation(float d, float radius) const
+float BlobPlugin::attenuationSquared(float d_sq, float radius_sq) const
 {
-  if (d > radius)
+  if (d_sq > radius_sq)
     return 0.0f;
-  float ratio = d / radius;
-  return (1.0f - ratio * ratio) * (1.0f - ratio * ratio);
+
+  float ratio = d_sq / radius_sq;
+  return (1.0f - ratio) * (1.0f - ratio);
 }
 
 uint8_t BlobPlugin::toneMap(float v) const

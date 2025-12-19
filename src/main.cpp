@@ -20,7 +20,7 @@
 #include "scheduler.h"
 
 #include "plugins/ArtNet.h"
-#include "plugins/Blop.h"
+#include "plugins/Blob.h"
 #include "plugins/BreakoutPlugin.h"
 #include "plugins/CirclePlugin.h"
 #include "plugins/DDPPlugin.h"

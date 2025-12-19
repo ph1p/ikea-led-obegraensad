@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PluginManager.h"
+#include "timing.h"
 #include <cmath>
 #include <cstdlib>
 
@@ -32,11 +33,17 @@ private:
   Ball balls[NUM_BALLS];
 
   static constexpr float RADIUS = 7.0f;
+  static constexpr float RADIUS_SQ = RADIUS * RADIUS;
   static constexpr float SPEED = 0.2f;
   static constexpr float CAP_VALUE = 3.0f;
   static constexpr float GAMMA = 0.7f;
+  static constexpr uint16_t UPDATE_INTERVAL_MS = 50;
 
-  float attenuation(float d, float radius) const;
+  uint8_t previousBrightness[ROWS * COLS];
+  NonBlockingDelay updateTimer;
+
+  float attenuationSquared(float d_sq, float radius_sq) const;
   uint8_t toneMap(float v) const;
   void updatePositions();
+  void render();
 };

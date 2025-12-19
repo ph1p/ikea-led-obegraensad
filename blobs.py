@@ -2,7 +2,6 @@
 import socket
 import numpy as np
 import time
-import math
 
 # ==============================
 # Config
@@ -17,104 +16,109 @@ SPEED = 0.6 * SIM_SCALE                 # Speed in simulation pixels/frame
 GAMMA = 1.7
 CAP_VALUE = 3.0              # Max field value before tone-mapping
 
-IP = "192.168.1.112"
+IP = "192.168.178.50"
 PORT = 4048
 FPS = 40
 
 # ==============================
 # DDP sender
 # ==============================
-def create_packet(pixels=None):
-    packet = bytearray([
-        0x41,  # Version 1
-        0x00,  # Flags
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    ])
-    data = bytearray([0] * (WIDTH * HEIGHT * 3))
-    if pixels:
-        for x, y, brightness in pixels:
-            if 0 <= x < WIDTH and 0 <= y < HEIGHT and 0 <= brightness <= 255:
-                idx = (y * WIDTH + x) * 3
-                data[idx:idx + 3] = [brightness] * 3
-    packet.extend(data)
-    return packet
-
-def send_ddp_packet(ip, port, packet):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        sock.sendto(packet, (ip, port))
-    finally:
-        sock.close()
+def send_ddp_packet(sock, ip, port, packet):
+    sock.sendto(packet, (ip, port))
 
 # ==============================
 # Metaball simulation
 # ==============================
-balls = []
-for _ in range(NUM_BALLS):
-    x = np.random.uniform(0, SIM_W)
-    y = np.random.uniform(0, SIM_H)
-    vx = np.random.uniform(-SPEED, SPEED)
-    vy = np.random.uniform(-SPEED, SPEED)
-    balls.append([x, y, vx, vy])
+balls = np.random.uniform(0, [SIM_W, SIM_H], size=(NUM_BALLS, 2))
+velocities = np.random.uniform(-SPEED, SPEED, size=(NUM_BALLS, 2))
 
-def attenuation_fn(d, radius=RADIUS):
-    if d > radius:
-        return 0.0
-    return (1 - (d / radius)**2)**2
+# Pre-compute coordinate grids for vectorized rendering
+y_coords, x_coords = np.mgrid[0:SIM_H, 0:SIM_W]
+coords = np.stack([x_coords, y_coords], axis=-1).astype(float)
 
-def tone_map(v, gamma=GAMMA):
-    v_capped = min(v, CAP_VALUE)
-    n = v_capped / CAP_VALUE
-    return int(pow(n, 1 / gamma) * 255)
+def attenuation_fn(d_squared, radius=RADIUS):
+    """Vectorized attenuation using squared distance"""
+    mask = d_squared <= radius * radius
+    ratio = d_squared / (radius * radius)
+    result = np.where(mask, (1 - ratio)**2, 0.0)
+    return result
+
+def tone_map(grid, gamma=GAMMA):
+    """Vectorized tone mapping"""
+    capped = np.minimum(grid, CAP_VALUE)
+    normalized = capped / CAP_VALUE
+    return (normalized ** (1 / gamma) * 255).astype(np.uint8)
 
 def update_positions():
-    for b in balls:
-        b[0] += b[2]
-        b[1] += b[3]
-        if b[0] < 0 or b[0] >= SIM_W:
-            b[2] *= -1
-        if b[1] < 0 or b[1] >= SIM_H:
-            b[3] *= -1
+    global balls, velocities
+    balls += velocities
+
+    # Bounce off walls
+    out_of_bounds_x = (balls[:, 0] < 0) | (balls[:, 0] >= SIM_W)
+    out_of_bounds_y = (balls[:, 1] < 0) | (balls[:, 1] >= SIM_H)
+    velocities[out_of_bounds_x, 0] *= -1
+    velocities[out_of_bounds_y, 1] *= -1
+
+    # Clamp positions
+    balls[:, 0] = np.clip(balls[:, 0], 0, SIM_W - 1)
+    balls[:, 1] = np.clip(balls[:, 1], 0, SIM_H - 1)
 
 def render_highres():
+    """Vectorized metaball rendering - ~100x faster"""
     grid = np.zeros((SIM_H, SIM_W), dtype=float)
-    for y in range(SIM_H):
-        for x in range(SIM_W):
-            val = 0.0
-            for bx, by, _, _ in balls:
-                d = math.dist((x, y), (bx, by))
-                val += attenuation_fn(d)
-            grid[y, x] = val
+
+    for ball_pos in balls:
+        # Calculate squared distances to all pixels (avoids sqrt)
+        diff = coords - ball_pos
+        d_squared = np.sum(diff * diff, axis=-1)
+        grid += attenuation_fn(d_squared)
+
     return grid
 
-def downsample(grid):
-    """Average SIM_SCALE×SIM_SCALE blocks into one pixel"""
-    pixels = []
-    for y in range(HEIGHT):
-        for x in range(WIDTH):
-            block = grid[
-                y*SIM_SCALE:(y+1)*SIM_SCALE,
-                x*SIM_SCALE:(x+1)*SIM_SCALE
-            ]
-            avg_val = block.mean()
-            brightness = tone_map(avg_val)
-            pixels.append((x, y, brightness))
-    return pixels
+def downsample_and_create_packet(grid):
+    """Combined downsampling and packet creation - avoids intermediate list"""
+    # Tone map the entire grid at once
+    tone_mapped = tone_map(grid)
+
+    # Downsample using reshape and mean
+    reshaped = tone_mapped.reshape(HEIGHT, SIM_SCALE, WIDTH, SIM_SCALE)
+    downsampled = reshaped.mean(axis=(1, 3)).astype(np.uint8)
+
+    # Create packet header
+    packet = bytearray([0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+
+    # Flatten and interleave RGB (all same value for grayscale)
+    flat = downsampled.flatten()
+    data = np.repeat(flat, 3)
+    packet.extend(data.tobytes())
+
+    return packet
 
 # ==============================
 # Main loop
 # ==============================
 def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    frame_time = 1.0 / FPS
+
     try:
         while True:
+            start_time = time.time()
+
             update_positions()
             highres = render_highres()
-            pixels = downsample(highres)
-            packet = create_packet(pixels)
-            send_ddp_packet(IP, PORT, packet)
-            time.sleep(1 / FPS)
+            packet = downsample_and_create_packet(highres)
+            send_ddp_packet(sock, IP, PORT, packet)
+
+            # Compensate for processing time
+            elapsed = time.time() - start_time
+            sleep_time = max(0, frame_time - elapsed)
+            time.sleep(sleep_time)
+
     except KeyboardInterrupt:
         pass
+    finally:
+        sock.close()
 
 if __name__ == "__main__":
     main()
