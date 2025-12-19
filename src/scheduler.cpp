@@ -44,11 +44,7 @@ void PluginScheduler::start()
     currentIndex = 0;
     lastSwitch = millis();
     isActive = true;
-#ifdef ENABLE_STORAGE
-    storage.begin("led-wall", false);
-    storage.putInt("scheduleactive", 1);
-    storage.end();
-#endif
+    requestPersist();
     switchToCurrentPlugin();
   }
 }
@@ -56,15 +52,34 @@ void PluginScheduler::start()
 void PluginScheduler::stop()
 {
   isActive = false;
+  requestPersist();
+}
+
+void PluginScheduler::requestPersist()
+{
+  needsPersist = true;
+  lastPersistRequest = millis();
+}
+
+void PluginScheduler::checkAndPersist()
+{
 #ifdef ENABLE_STORAGE
-  storage.begin("led-wall", false);
-  storage.putInt("scheduleactive", 0);
-  storage.end();
+  if (needsPersist && (millis() - lastPersistRequest >= PERSIST_DELAY_MS))
+  {
+    storage.begin("led-wall", false);
+    storage.putInt("scheduleactive", isActive ? 1 : 0);
+    storage.end();
+    needsPersist = false;
+  }
+#else
+  needsPersist = false;
 #endif
 }
 
 void PluginScheduler::update()
 {
+  checkAndPersist();
+
   if (!isActive || schedule.empty())
     return;
 

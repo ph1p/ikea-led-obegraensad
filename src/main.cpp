@@ -199,7 +199,7 @@ void screenDrawingTask(void *parameter)
   for (;;)
   {
     pluginManager.runActivePlugin();
-    vTaskDelay(10);
+    vTaskDelay(1);
   }
 }
 

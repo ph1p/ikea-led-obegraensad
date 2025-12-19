@@ -14,6 +14,9 @@ void RainPlugin::setup()
 
 void RainPlugin::loop()
 {
+  if (!timer.isReady(96))
+    return;
+
   // dim the trail
   for (uint8_t x = 0; x < RainPlugin::X_MAX; x++)
   {
@@ -59,8 +62,6 @@ void RainPlugin::loop()
       Screen.setPixel(this->drops[i].x, this->drops[i].y, RainPlugin::LED_TYPE_ON, 255);
     }
   }
-
-  delay(96);
 }
 
 const char *RainPlugin::getName() const

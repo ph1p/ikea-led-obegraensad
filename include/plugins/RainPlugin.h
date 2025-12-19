@@ -1,10 +1,12 @@
 #pragma once
 
 #include "PluginManager.h"
+#include "timing.h"
 
 class RainPlugin : public Plugin
 {
 private:
+  NonBlockingDelay timer;
   static constexpr uint8_t NUM_DROPS = 10;
   static constexpr uint8_t X_MAX = 16;
   static constexpr uint8_t Y_MAX = 16;

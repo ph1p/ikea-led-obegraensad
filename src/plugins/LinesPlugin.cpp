@@ -7,6 +7,9 @@ void LinesPlugin::setup()
 
 void LinesPlugin::loop()
 {
+  if (!timer.isReady(200))
+    return;
+
   std::vector<int> bits = Screen.readBytes(this->frames[this->count]);
   for (int row = 0; row < ROWS; row++)
   {
@@ -21,7 +24,6 @@ void LinesPlugin::loop()
   {
     this->count = 0;
   }
-  delay(200);
 }
 
 const char *LinesPlugin::getName() const
