@@ -24,13 +24,14 @@ def create_packet(pixels=None):
     packet.extend(data)
     return packet
 
-def send_ddp_packet(ip, port, packet):
+def send_ddp_packet(ip, port, packet, debug=False):
     """Send a DDP packet to the specified IP and port"""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         sock.sendto(packet, (ip, port))
-        print(f"Sent DDP packet to {ip}:{port}")
-        print(f"Packet size: {len(packet)} bytes")
+        if debug:
+            print(f"Sent DDP packet to {ip}:{port}")
+            print(f"Packet size: {len(packet)} bytes")
     except Exception as e:
         print(f"Error: {e}")
     finally:
