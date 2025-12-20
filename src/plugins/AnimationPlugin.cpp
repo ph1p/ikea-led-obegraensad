@@ -52,7 +52,7 @@ void AnimationPlugin::websocketHook(JsonDocument &request)
   if (!strcmp(event, "upload"))
   {
     int size = (int)request["screens"];
-    if (request["frameDelay"].is<float>())
+    if (request["frameDelay"].is<int>())
     {
       frameDelay = request["frameDelay"].as<int>();
       if (frameDelay < 10)
