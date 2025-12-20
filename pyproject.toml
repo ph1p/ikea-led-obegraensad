@@ -1,0 +1,21 @@
+[project]
+name = "ikea-led-obegraensad"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Solmath",email = "33658856+Solmath@users.noreply.github.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "imageio[pyav] (>=2.37.2,<3.0.0)",
+    "numpy (>=2.4.0,<3.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
