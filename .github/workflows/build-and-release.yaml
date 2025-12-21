@@ -66,7 +66,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        environment: [nodemcuv2, d1_mini_pro-ota, ESP32-wemos, esp32c3]
+        environment: [nodemcuv2, d1_mini_pro-ota, ESP32-wemos, esp32c3, esp32s3]
         include:
           - environment: nodemcuv2
             artifact_name: nodemcuv2_firmware
@@ -76,6 +76,8 @@ jobs:
             artifact_name: ESP32-wemos_firmware
           - environment: esp32c3
             artifact_name: esp32c3_firmware
+          - environment: esp32s3
+            artifact_name: esp32s3_firmware
 
     steps:
       - name: Checkout Repository
@@ -168,6 +170,13 @@ jobs:
         continue-on-error: true
         with:
           name: esp32c3_firmware
+          path: ./builds/ # specify a target directory
+
+      - name: Download ESP32-S3 firmware
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: esp32s3_firmware
           path: ./builds/ # specify a target directory
 
       - name: Create GitHub Release

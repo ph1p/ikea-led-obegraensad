@@ -125,7 +125,7 @@ Connect the pins as shown below. Remember to configure them in `include/constant
 |       VCC        |   5V   |     5V      |    VIN    |       USB       |     VUSB     |
 | EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 |     GPIO26      |  D4 (GPIO5)  |
 |  IN (PIN_DATA)   | GPIO27 |    IO23     | GPIO13 D7 |     GPIO27      |  D10 (MOSI)  |
-| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |     GPIO14      |  D8 (SCK)    |
+| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |     GPIO14      |   D8 (SCK)   |
 | CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  |     GPIO12      |  D5 (GPIO6)  |
 |  BUTTON one end  | GPIO16 |    IO21     | GPIO2 D4  |     GPIO25      |  D3 (GPIO4)  |
 | BUTTON other end |  GND   |     GND     |    GND    |       GND       |     GND      |
@@ -143,6 +143,7 @@ You can use the original button wiring without adding external connections. See 
 ### ESP32 Setup with VS Code and PlatformIO
 
 1. **Prerequisites**
+
    - Install [Visual Studio Code](https://code.visualstudio.com/)
    - Install the PlatformIO IDE extension from VS Code Extensions Marketplace
 
@@ -157,15 +158,18 @@ You can use the original button wiring without adding external connections. See 
    PlatformIO will automatically load dependencies.
 
 3. **Connect ESP32**
+
    - Connect your ESP32 via USB
    - Verify the COM port in the PlatformIO Devices tab
 
 4. **Configure the Project**
+
    - Run `PlatformIO: Clean` (Recycle bin icon in bottom toolbar)
    - Edit `include/secrets.h` with your WiFi credentials (ESP8266 only; ESP32 can use WiFi Manager)
    - Configure variables in `include/constants.h`
 
 5. **Build the Project**
+
    - Click the `PlatformIO Build` icon (bottom toolbar)
    - If libraries are missing, install them via the PlatformIO Libraries tab
    - Repeat `Clean` and `Build` until successful
@@ -178,13 +182,14 @@ You can use the original button wiring without adding external connections. See 
 **ESP32 (WiFi Manager - Recommended):**
 
 This project uses [tzapu's WiFiManager](https://github.com/tzapu/WiFiManager). After booting:
+
 1. Device attempts to connect to known access points
 2. If none available, creates network named `Ikea Display Setup WiFi`
 3. Connect to this network on any device
 4. Captive portal guides you through WiFi configuration
 5. Device reboots and connects to your network
 
-**Network name can be changed via `WIFI_MANAGER_SSID` in `include/constants.h`.*
+\*_Network name can be changed via `WIFI_MANAGER_SSID` in `include/constants.h`._
 
 **ESP8266 (Manual Configuration):**
 
@@ -201,6 +206,7 @@ Over-The-Air (OTA) updates allow you to upload new firmware wirelessly without a
 Before using OTA, configure the following:
 
 1. **Set OTA Credentials** in `include/secrets.h`:
+
    ```cpp
    #define OTA_USERNAME "admin"
    #define OTA_PASSWORD "your-password"
@@ -238,6 +244,7 @@ pio run -e esp32dev -t upload
 Or use the PlatformIO Upload button in VS Code (bottom toolbar).
 
 **Requirements:**
+
 - Python packages: `requests_toolbelt` and `tqdm`
 - Install if needed: `pip install requests_toolbelt tqdm`
 
@@ -250,6 +257,7 @@ During OTA updates, the LED matrix provides visual feedback:
 - **"R" letter displayed**: Update completed (device will reboot)
 
 Monitor the serial output for detailed progress:
+
 ```
 OTA update started!
 OTA Progress Current: 262144 bytes, Final: 1440655 bytes
@@ -259,6 +267,7 @@ OTA update finished successfully!
 ```
 
 **Troubleshooting:**
+
 - Ensure device is connected to the same network
 - Verify IP address in `platformio.ini` matches device IP
 - Check credentials match in both `secrets.h` and `platformio.ini`
@@ -279,11 +288,13 @@ GET /api/info
 ```
 
 **Example:**
+
 ```bash
 curl http://your-server/api/info
 ```
 
 **Response:**
+
 ```json
 {
   "rows": 16,
@@ -294,12 +305,12 @@ curl http://your-server/api/info
   "brightness": 255,
   "scheduleActive": true,
   "schedule": [
-    {"pluginId": 2, "duration": 60},
-    {"pluginId": 4, "duration": 120}
+    { "pluginId": 2, "duration": 60 },
+    { "pluginId": 4, "duration": 120 }
   ],
   "plugins": [
-    {"id": 1, "name": "Plugin One"},
-    {"id": 2, "name": "Plugin Two"}
+    { "id": 1, "name": "Plugin One" },
+    { "id": 2, "name": "Plugin Two" }
   ]
 }
 ```
@@ -315,11 +326,13 @@ PATCH /api/plugin?id={plugin_id}
 ```
 
 **Example:**
+
 ```bash
 curl -X PATCH "http://your-server/api/plugin?id=7"
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -328,6 +341,7 @@ curl -X PATCH "http://your-server/api/plugin?id=7"
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": true,
@@ -346,11 +360,13 @@ PATCH /api/brightness?value={0-255}
 ```
 
 **Example:**
+
 ```bash
 curl -X PATCH "http://your-server/api/brightness?value=100"
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -367,11 +383,13 @@ GET /api/data
 ```
 
 **Example:**
+
 ```bash
 curl http://your-server/api/data
 ```
 
 **Response:**
+
 ```json
 [255, 255, 255, 0, 128, 255, 255, 0, ...]
 ```
@@ -389,6 +407,7 @@ GET /api/message
 ```
 
 **Parameters:**
+
 - `text` (optional): Text message to display
 - `graph` (optional): Comma-separated integers (0-15) representing a graph
 - `miny` (optional): Graph lower bound (default: 0)
@@ -398,11 +417,13 @@ GET /api/message
 - `delay` (optional): Scroll delay in ms (default: 50)
 
 **Example:**
+
 ```bash
 curl "http://your-server/api/message?text=Hello&graph=8,5,2,1,0,0,1,4,7,10,13,14,15,15,14,11&repeat=3&id=1&delay=60"
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -417,6 +438,7 @@ GET /api/removemessage?id={message_id}
 ```
 
 **Example:**
+
 ```bash
 curl "http://your-server/api/removemessage?id=1"
 ```
@@ -434,6 +456,7 @@ POST /api/schedule
 ```
 
 **Example:**
+
 ```bash
 curl -X POST http://your-server/api/schedule -d 'schedule=[{"pluginId":10,"duration":2},{"pluginId":8,"duration":5}]'
 ```
@@ -467,6 +490,7 @@ GET /api/clearstorage
 ```
 
 **Example:**
+
 ```bash
 curl http://your-server/api/clearstorage
 ```
@@ -480,6 +504,7 @@ DDP enables real-time LED matrix control via UDP packets. External applications 
 ### Quick Start
 
 1. **Enable DDP Plugin**
+
    ```bash
    curl -X PATCH "http://your-server/api/plugin?id=17"
    ```
@@ -494,21 +519,25 @@ DDP enables real-time LED matrix control via UDP packets. External applications 
 The included Python script (`ddp.py`) simplifies DDP packet creation.
 
 **Clear all pixels:**
+
 ```bash
 python3 ddp.py --ip 192.168.178.50 --clear
 ```
 
 **Fill display with brightness value:**
+
 ```bash
 python3 ddp.py --ip 192.168.178.50 --fill 128
 ```
 
 **Set individual pixels (X, Y, brightness):**
+
 ```bash
 python3 ddp.py --ip 192.168.178.50 --pixel 0 0 255 --pixel 15 15 128
 ```
 
 **Options:**
+
 - `--ip`: Display IP address (default: 192.168.178.50)
 - `--port`: UDP port (default: 4048)
 - `--clear`: Clear all pixels
@@ -516,6 +545,7 @@ python3 ddp.py --ip 192.168.178.50 --pixel 0 0 255 --pixel 15 15 128
 - `--pixel X Y BRIGHTNESS`: Set pixel (can be used multiple times)
 
 **Coordinates:**
+
 - Matrix: 16×16 pixels
 - X: 0-15 (left to right)
 - Y: 0-15 (top to bottom)
@@ -524,16 +554,19 @@ python3 ddp.py --ip 192.168.178.50 --pixel 0 0 255 --pixel 15 15 128
 ### Protocol Specification
 
 **Packet Structure:**
+
 ```
 [Header: 10 bytes][RGB Data: 768 bytes for 16×16]
 ```
 
 **Header (10 bytes):**
+
 - Byte 0: `0x41` (Version 1)
 - Byte 1: `0x00` (Flags)
 - Bytes 2-9: `0x00` (Reserved)
 
 **RGB Data:**
+
 - 3 bytes per pixel (R, G, B)
 - Total: 16 × 16 × 3 = 768 bytes
 - Order: Row-major (left to right, top to bottom)
@@ -543,6 +576,7 @@ python3 ddp.py --ip 192.168.178.50 --pixel 0 0 255 --pixel 15 15 128
 Send only 3 RGB bytes (total: 13 bytes) to apply the same color to all pixels.
 
 **Example (Python):**
+
 ```python
 import socket
 
@@ -570,24 +604,26 @@ Use [this Home Assistant Integration](https://github.com/HennieLP/ikea-led-obegr
 Example automation to adjust brightness based on sun position:
 
 **configuration.yaml:**
+
 ```yaml
 rest_command:
   obegraensad_brightness_high:
-    url: "http://your-server/api/brightness/"
+    url: 'http://your-server/api/brightness/'
     method: PATCH
-    content_type: "application/x-www-form-urlencoded"
-    payload: "value=100"
+    content_type: 'application/x-www-form-urlencoded'
+    payload: 'value=100'
   obegraensad_brightness_low:
-    url: "http://your-server/api/brightness/"
+    url: 'http://your-server/api/brightness/'
     method: PATCH
-    content_type: "application/x-www-form-urlencoded"
-    payload: "value=1"
+    content_type: 'application/x-www-form-urlencoded'
+    payload: 'value=1'
 ```
 
 **Automation (Settings → Automations → Edit in YAML):**
+
 ```yaml
 alias: Obegraensad low brightness
-description: ""
+description: ''
 triggers:
   - trigger: sun
     event: sunset
@@ -608,6 +644,7 @@ Create a second automation or condition to call `rest_command.obegraensad_bright
 ### Arduino/C++ Development
 
 **Structure:**
+
 - `src/` - Arduino code
 - `platformio.ini` - Build configuration
   - See [OTA Updates](#ota-updates) section for wireless firmware upload configuration
@@ -615,22 +652,27 @@ Create a second automation or condition to call `rest_command.obegraensad_bright
 ### Frontend Development
 
 **Structure:**
+
 - `frontend/` - Web UI code
 
 **Setup:**
+
 ```bash
 cd frontend
 pnpm install
 ```
 
 **Configuration:**
+
 - Set device IP in `.env`
 
 **Commands:**
+
 - `pnpm dev` - Start development server
 - `pnpm build` - Build and generate `webgui.cpp`
 
 **Docker Build:**
+
 ```bash
 docker compose run node
 ```
@@ -638,6 +680,7 @@ docker compose run node
 ### Code Quality
 
 **Pre-commit Hooks:**
+
 ```bash
 # Install pre-commit
 pip install pre-commit
@@ -653,6 +696,7 @@ pre-commit install
 **1. Create Plugin Files**
 
 **plugins/MyPlugin.h:**
+
 ```cpp
 #pragma once
 
@@ -673,6 +717,7 @@ public:
 ```
 
 **plugins/MyPlugin.cpp:**
+
 ```cpp
 #include "plugins/MyPlugin.h"
 
