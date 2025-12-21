@@ -3,7 +3,7 @@ import { createContext, createSignal, type ParentComponent, Show, useContext } f
 import type { IToastContext } from "../types";
 
 const Toast = (props: { text?: string }) => (
-  <div class="fixed left-4 bottom-4 px-4 py-3 bg-gray-800 text-white shadow-lg border border-gray-700 flex items-center space-x-2 z-50 animate-toast-slide-up rounded-md">
+  <div class="fixed left-4 bottom-4 px-4 py-3 bg-gray-800 text-white shadow-lg border border-gray-700 flex items-center space-x-2 z-[100] animate-toast-slide-up rounded-md">
     <i class="fa-solid fa-info-circle text-blue-400 mr-2" />
     <span>{props.text}</span>
   </div>

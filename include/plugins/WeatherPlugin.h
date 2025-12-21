@@ -23,6 +23,13 @@ private:
   WiFiClient wiFiClient;
 #endif
 
+  // Cached weather data
+  bool hasCachedData = false;
+  int cachedTemperature = 0;
+  int cachedWeatherIcon = 0;
+  int cachedIconY = 1;
+  int cachedTempY = 10;
+
   std::vector<int> thunderCodes = {200, 386, 389, 392, 395};
   std::vector<int> cloudyCodes = {119, 122};
   std::vector<int> partyCloudyCodes = {116};
@@ -31,6 +38,9 @@ private:
   std::vector<int> rainCodes =
       {176, 293, 296, 299, 302, 305, 308, 311, 314, 353, 356, 359, 386, 389, 263, 266, 281, 284, 185};
   std::vector<int> snowCodes = {179, 227, 323, 326, 329, 332, 335, 338, 368, 371, 392, 395, 230, 350};
+
+private:
+  void drawWeather();
 
 public:
   ~WeatherPlugin()

@@ -22,13 +22,21 @@ void FireworkPlugin::explode(int x, int y)
   for (int radius = 1; radius <= maxRadius; radius++)
   {
     drawExplosion(x, y, radius, 255);
+#ifdef ESP32
+    vTaskDelay(pdMS_TO_TICKS(explosionDelay));
+#else
     delay(explosionDelay);
+#endif
   }
 
   for (int brightness = 248; brightness >= 0; brightness -= 8)
   {
     drawExplosion(x, y, maxRadius, brightness);
+#ifdef ESP32
+    vTaskDelay(pdMS_TO_TICKS(fadeDelay));
+#else
     delay(fadeDelay);
+#endif
   }
 }
 

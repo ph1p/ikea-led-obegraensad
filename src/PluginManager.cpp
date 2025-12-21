@@ -37,6 +37,48 @@ void PluginManager::init()
   activatePersistedPlugin();
 }
 
+void PluginManager::renderPluginId(int pluginId)
+{
+  if (Scheduler.isActive)
+  {
+    return;
+  }
+
+  Screen.clear();
+
+  std::vector<int> digits;
+
+  if (pluginId >= 10)
+  {
+    digits.push_back((pluginId - pluginId % 10) / 10);
+    digits.push_back(pluginId % 10);
+  }
+  else
+  {
+    digits.push_back(pluginId);
+  }
+
+  if (pluginId >= 10)
+  {
+    Screen.drawNumbers(3, 6, digits, MAX_BRIGHTNESS);
+  }
+  else
+  {
+    Screen.drawNumbers(6, 6, digits, MAX_BRIGHTNESS);
+  }
+
+  unsigned long startTime = millis();
+  while (millis() - startTime < 800)
+  {
+    yield();
+#ifdef ESP32
+    vTaskDelay(pdMS_TO_TICKS(10));
+#else
+    delay(10);
+#endif
+  }
+}
+
 void PluginManager::activatePersistedPlugin()
 {
   std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
@@ -91,7 +133,6 @@ void PluginManager::setActivePlugin(const char *pluginName)
   if (activePlugin)
   {
     activePlugin->teardown();
-    delay(100);
     activePlugin = nullptr;
   }
 
@@ -99,8 +140,10 @@ void PluginManager::setActivePlugin(const char *pluginName)
   {
     if (strcmp(plugin->getName(), pluginName) == 0)
     {
-      Screen.clear();
+      currentStatus = LOADING; // Prevent plugin loop from drawing during ID display
       activePlugin = plugin;
+      renderPluginId(activePlugin->getId());
+      currentStatus = NONE; // Allow plugin to start drawing
       activePlugin->setup();
       break;
     }
@@ -122,6 +165,7 @@ void PluginManager::setupActivePlugin()
 {
   if (activePlugin)
   {
+    renderPluginId(activePlugin->getId());
     activePlugin->setup();
   }
 }

@@ -446,9 +446,9 @@ export const Creator: Component = () => {
         </div>
       }
       sidebar={
-        <>
-          <div class="space-y-6">
-            <div class="space-y-3">
+        <div class="h-full">
+          <div class="grid grid-rows-[calc(100vh-10rem)_auto]">
+            <div class="overflow-y-auto space-y-3">
               <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Controls</h3>
               <div class="flex gap-2 items-center flex-wrap">
                 <Show
@@ -458,7 +458,7 @@ export const Creator: Component = () => {
                       <Button
                         disabled={screenSignals().length === 0}
                         onClick={togglePlay}
-                        class="hover:bg-red-600 transition-colors"
+                        class="hover:bg-gray-700 transition-colors"
                       >
                         <i class="fa-solid fa-stop" />
                       </Button>
@@ -466,10 +466,7 @@ export const Creator: Component = () => {
                   }
                 >
                   <Tooltip text="Add new frame">
-                    <Button
-                      onClick={handleAddScreen}
-                      class="hover:bg-green-600 transition-colors"
-                    >
+                    <Button onClick={handleAddScreen} class="hover:bg-gray-700 transition-colors">
                       <i class="fa-solid fa-plus" />
                     </Button>
                   </Tooltip>
@@ -478,7 +475,7 @@ export const Creator: Component = () => {
                     <Button
                       disabled={screenSignals().length === 0}
                       onClick={togglePlay}
-                      class="hover:bg-green-600 transition-colors"
+                      class="hover:bg-gray-700 transition-colors"
                     >
                       <i class="fa-solid fa-play" />
                     </Button>
@@ -488,7 +485,7 @@ export const Creator: Component = () => {
                     <Button
                       disabled={!canUndo()}
                       onClick={handleUndo}
-                      class="hover:bg-gray-600 transition-colors"
+                      class="hover:bg-gray-700 transition-colors"
                     >
                       <i class="fa-solid fa-undo" />
                     </Button>
@@ -498,7 +495,7 @@ export const Creator: Component = () => {
                     <Button
                       disabled={!canRedo()}
                       onClick={handleRedo}
-                      class="hover:bg-gray-600 transition-colors"
+                      class="hover:bg-gray-700 transition-colors"
                     >
                       <i class="fa-solid fa-redo" />
                     </Button>
@@ -507,10 +504,7 @@ export const Creator: Component = () => {
                   <div class="w-full border-t border-gray-200 my-2" />
 
                   <Tooltip text="Import JSON">
-                    <Button
-                      onClick={handleImportJSON}
-                      class="hover:bg-purple-600 transition-colors"
-                    >
+                    <Button onClick={handleImportJSON} class="hover:bg-gray-700 transition-colors">
                       <i class="fa-solid fa-file-import mr-1" />
                       <span class="text-xs">Import</span>
                     </Button>
@@ -520,65 +514,69 @@ export const Creator: Component = () => {
                     <Button
                       disabled={screenSignals().length === 0}
                       onClick={handleExportJSON}
-                      class="hover:bg-purple-600 transition-colors"
+                      class="hover:bg-gray-700 transition-colors"
                     >
                       <i class="fa-solid fa-file-export mr-1" />
                       <span class="text-xs">Export</span>
                     </Button>
                   </Tooltip>
 
-                  <Tooltip text="Upload to device">
-                    <Button
-                      disabled={screenSignals().length === 0}
-                      onClick={handleUploadData}
-                      class="hover:bg-blue-700 transition-colors"
-                    >
-                      <i class="fa-solid fa-upload" />
-                    </Button>
-                  </Tooltip>
+                  <Show when={isAnimationPluginActive()}>
+                    <div class="w-full border-t border-gray-200 my-2" />
+
+                    <Tooltip text="Upload to device">
+                      <Button
+                        disabled={screenSignals().length === 0}
+                        onClick={handleUploadData}
+                        class=" hover:bg-green-600 transition-colors"
+                      >
+                        <i class="fa-solid fa-upload" />
+                      </Button>
+                    </Tooltip>
+                  </Show>
                 </Show>
               </div>
+
+              <Show when={!isAnimationPluginActive()}>
+                <div class="space-y-3">
+                  <p class="text-sm text-gray-500 font-bold">
+                    The "Animation" plugin needs to be active to use this feature.
+                  </p>
+                  <Button
+                    onClick={handleSwitchToAnimationPlugin}
+                    class="hover:bg-gray-700 transition-colors w-full"
+                  >
+                    <i class="fa-solid fa-play mr-2" />
+                    Activate Animation
+                  </Button>
+                </div>
+              </Show>
+
+              <Show when={screenSignals().length > 0}>
+                <AnimationSettings
+                  frameDurationId={frameDurationId}
+                  animationDelayMs={animationDelayMs()}
+                  onDelayChange={setAnimationDelayMs}
+                  totalFrames={screenSignals().length}
+                />
+              </Show>
+
+              <KeyboardShortcutsHelp />
             </div>
 
-            <Show when={!isAnimationPluginActive()}>
-              <div class="space-y-3">
-                <p class="text-sm text-gray-500 font-bold">
-                  The "Animation" plugin needs to be active to use this feature.
-                </p>
-                <Button
-                  onClick={handleSwitchToAnimationPlugin}
-                  class="hover:bg-green-600 transition-colors w-full"
+            <div class="mt-2 shrink-0 pt-6 border-t border-gray-200 flex align-bottom">
+              <Tooltip text="Return to main editor">
+                <a
+                  href="#/"
+                  class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
                 >
-                  <i class="fa-solid fa-play mr-2" />
-                  Switch to Animation Mode
-                </Button>
-              </div>
-            </Show>
-
-            <Show when={screenSignals().length > 0}>
-              <AnimationSettings
-                frameDurationId={frameDurationId}
-                animationDelayMs={animationDelayMs()}
-                onDelayChange={setAnimationDelayMs}
-                totalFrames={screenSignals().length}
-              />
-            </Show>
-
-            <KeyboardShortcutsHelp />
+                  <i class="fa-solid fa-arrow-left mr-2" />
+                  Back
+                </a>
+              </Tooltip>
+            </div>
           </div>
-
-          <div class="mt-auto pt-6 border-t border-gray-200">
-            <Tooltip text="Return to main editor">
-              <a
-                href="#/"
-                class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-              >
-                <i class="fa-solid fa-arrow-left mr-2" />
-                Back
-              </a>
-            </Tooltip>
-          </div>
-        </>
+        </div>
       }
     />
   );

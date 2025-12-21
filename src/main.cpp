@@ -287,5 +287,9 @@ void loop()
 #ifdef ENABLE_SERVER
   cleanUpClients();
 #endif
+#ifdef ESP32
+  vTaskDelay(1);
+#else
   delay(1);
+#endif
 }

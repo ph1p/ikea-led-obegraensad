@@ -425,7 +425,11 @@ void Screen_::scrollText(const std::string &text, int delayTime, uint8_t brightn
       }
     }
 
+#ifdef ESP32
+    vTaskDelay(pdMS_TO_TICKS(delayTime));
+#else
     delay(delayTime);
+#endif
   }
 }
 
@@ -466,7 +470,11 @@ void Screen_::scrollGraph(const std::vector<int> &graph,
         y1 = y2; // this value is next values previous value
       }
     }
+#ifdef ESP32
+    vTaskDelay(pdMS_TO_TICKS(delayTime));
+#else
     delay(delayTime);
+#endif
   }
 }
 
