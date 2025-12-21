@@ -34,167 +34,175 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
   return (
     <>
-      <Show
-        when={!store?.isActiveScheduler}
-        fallback={
-          <Show when={store.schedule.length > 0}>
-            <ToggleScheduleButton />
-          </Show>
-        }
-      >
-        <SidebarSection title="Display Mode">
-          <div class="flex flex-col gap-2.5">
-            <select
-              class="flex-1 px-2.5 py-2.5 bg-gray-50 border border-gray-200 rounded"
-              onChange={(e) => props.onPluginChange(parseInt(e.currentTarget.value, 10))}
-              value={store?.plugin}
-            >
-              <For each={store?.plugins}>
-                {(plugin) => <option value={plugin.id}>{plugin.name}</option>}
-              </For>
-            </select>
-            <Tooltip text="Save current display mode as default startup mode">
+      {/* Scrollable Section */}
+      <div class="flex-1 min-h-0 overflow-y-auto">
+        <Show
+          when={!store?.isActiveScheduler}
+          fallback={
+            <Show when={store.schedule.length > 0}>
+              <ToggleScheduleButton />
+            </Show>
+          }
+        >
+          <SidebarSection title="Display Mode">
+            <div class="flex flex-col gap-2.5">
+              <select
+                class="flex-1 px-2.5 py-2.5 bg-gray-50 border border-gray-200 rounded"
+                onChange={(e) => props.onPluginChange(parseInt(e.currentTarget.value, 10))}
+                value={store?.plugin}
+              >
+                <For each={store?.plugins}>
+                  {(plugin) => <option value={plugin.id}>{plugin.name}</option>}
+                </For>
+              </select>
+              <Tooltip text="Save current display mode as default startup mode">
+                <button
+                  type="button"
+                  onClick={props.onPersistPlugin}
+                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                >
+                  Set Default
+                </button>
+              </Tooltip>
+            </div>
+          </SidebarSection>
+        </Show>
+
+        <div class="my-6 border-t border-gray-200" />
+
+        <SidebarSection title={`Rotation (${[0, 90, 180, 270][store?.rotation || 0]}°)`}>
+          <div class="flex gap-2.5">
+            <Tooltip text="Rotate display counter-clockwise">
               <button
                 type="button"
-                onClick={props.onPersistPlugin}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                onClick={() => props.onRotate(false)}
+                class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
               >
-                Set Default
+                <i class="fa-solid fa-rotate-left" />
+              </button>
+            </Tooltip>
+            <Tooltip text="Rotate display clockwise">
+              <button
+                type="button"
+                onClick={() => props.onRotate(true)}
+                class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+              >
+                <i class="fa-solid fa-rotate-right" />
               </button>
             </Tooltip>
           </div>
         </SidebarSection>
-      </Show>
 
-      <div class="my-6 border-t border-gray-200" />
-
-      <SidebarSection title={`Rotation (${[0, 90, 180, 270][store?.rotation || 0]}°)`}>
-        <div class="flex gap-2.5">
-          <Tooltip text="Rotate display counter-clockwise">
-            <button
-              type="button"
-              onClick={() => props.onRotate(false)}
-              class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
-            >
-              <i class="fa-solid fa-rotate-left" />
-            </button>
-          </Tooltip>
-          <Tooltip text="Rotate display clockwise">
-            <button
-              type="button"
-              onClick={() => props.onRotate(true)}
-              class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
-            >
-              <i class="fa-solid fa-rotate-right" />
-            </button>
-          </Tooltip>
-        </div>
-      </SidebarSection>
-
-      <div class="my-6 border-t border-gray-200" />
-
-      <SidebarSection title="Brightness">
-        <div class="space-y-2">
-          <input
-            type="range"
-            min="0"
-            max="255"
-            value={store?.brightness}
-            class="w-full"
-            onInput={(e) => props.onBrightnessChange(parseInt(e.currentTarget.value, 10))}
-            onPointerUp={(e) => props.onBrightnessChange(parseInt(e.currentTarget.value, 10), true)}
-          />
-          <div class="text-sm text-gray-600 text-right">
-            {Math.round(((store?.brightness ?? 255) / 255) * 100)}%
-          </div>
-        </div>
-      </SidebarSection>
-
-      <Show when={store?.plugin === 17 && !store?.isActiveScheduler}>
         <div class="my-6 border-t border-gray-200" />
 
-        <SidebarSection title="ArtNet Universe">
+        <SidebarSection title="Brightness">
           <div class="space-y-2">
             <input
               type="range"
               min="0"
               max="255"
-              value={store?.artnetUniverse}
+              value={store?.brightness}
               class="w-full"
-              onInput={(e) => props.onArtnetChange(parseInt(e.currentTarget.value, 10))}
-              onPointerUp={(e) => props.onArtnetChange(parseInt(e.currentTarget.value, 10), true)}
+              onInput={(e) => props.onBrightnessChange(parseInt(e.currentTarget.value, 10))}
+              onPointerUp={(e) =>
+                props.onBrightnessChange(parseInt(e.currentTarget.value, 10), true)
+              }
             />
-            <div class="text-sm text-gray-600 text-right">{store?.artnetUniverse}</div>
+            <div class="text-sm text-gray-600 text-right">
+              {Math.round(((store?.brightness ?? 255) / 255) * 100)}%
+            </div>
           </div>
         </SidebarSection>
-      </Show>
 
-      <Show when={store?.plugin === 4 && !store?.isActiveScheduler}>
-        <div class="my-6 border-t border-gray-200" />
+        <Show when={store?.plugin === 17 && !store?.isActiveScheduler}>
+          <div class="my-6 border-t border-gray-200" />
 
-        <SidebarSection title="Time Step Delay">
-          <div class="space-y-2">
-            <input
-              type="range"
-              min="1"
-              max="4000"
-              value={store?.GOLDelay}
-              class="w-full"
-              onInput={(e) => props.onGOLDelayChange(parseInt(e.currentTarget.value, 10))}
-              onPointerUp={(e) => props.onGOLDelayChange(parseInt(e.currentTarget.value, 10), true)}
-            />
-            <div class="text-sm text-gray-600 text-right">{store?.GOLDelay}</div>
-          </div>
-        </SidebarSection>
-      </Show>
+          <SidebarSection title="ArtNet Universe">
+            <div class="space-y-2">
+              <input
+                type="range"
+                min="0"
+                max="255"
+                value={store?.artnetUniverse}
+                class="w-full"
+                onInput={(e) => props.onArtnetChange(parseInt(e.currentTarget.value, 10))}
+                onPointerUp={(e) => props.onArtnetChange(parseInt(e.currentTarget.value, 10), true)}
+              />
+              <div class="text-sm text-gray-600 text-right">{store?.artnetUniverse}</div>
+            </div>
+          </SidebarSection>
+        </Show>
 
-      <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
-        <div class="my-6 border-t border-gray-200" />
+        <Show when={store?.plugin === 4 && !store?.isActiveScheduler}>
+          <div class="my-6 border-t border-gray-200" />
 
-        <SidebarSection title="Matrix Controls">
-          <div class="grid grid-cols-2 gap-2">
-            <Tooltip text="Import image from your device">
-              <button
-                type="button"
-                onClick={props.onLoadImage}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
-              >
-                <i class="fa-solid fa-file-import" />
-              </button>
-            </Tooltip>
-            <Tooltip text="Clear all pixels">
-              <button
-                type="button"
-                onClick={props.onClear}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded hover:bg-red-600"
-              >
-                <i class="fa-solid fa-trash" />
-              </button>
-            </Tooltip>
-            <Tooltip text="Save current display state">
-              <button
-                type="button"
-                onClick={props.onPersist}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
-              >
-                <i class="fa-solid fa-floppy-disk" />
-              </button>
-            </Tooltip>
-            <Tooltip text="Load last saved state">
-              <button
-                type="button"
-                onClick={props.onLoad}
-                class="w-full bg-blue-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
-              >
-                <i class="fa-solid fa-refresh" />
-              </button>
-            </Tooltip>
-          </div>
-        </SidebarSection>
-      </Show>
+          <SidebarSection title="Time Step Delay">
+            <div class="space-y-2">
+              <input
+                type="range"
+                min="1"
+                max="4000"
+                value={store?.GOLDelay}
+                class="w-full"
+                onInput={(e) => props.onGOLDelayChange(parseInt(e.currentTarget.value, 10))}
+                onPointerUp={(e) =>
+                  props.onGOLDelayChange(parseInt(e.currentTarget.value, 10), true)
+                }
+              />
+              <div class="text-sm text-gray-600 text-right">{store?.GOLDelay}</div>
+            </div>
+          </SidebarSection>
+        </Show>
 
-      <div class="mt-auto">
-        <div class="mt-auto pt-6 border-t border-gray-200">
+        <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
+          <div class="my-6 border-t border-gray-200" />
+
+          <SidebarSection title="Matrix Controls">
+            <div class="grid grid-cols-2 gap-2">
+              <Tooltip text="Import image from your device">
+                <button
+                  type="button"
+                  onClick={props.onLoadImage}
+                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                >
+                  <i class="fa-solid fa-file-import" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Clear all pixels">
+                <button
+                  type="button"
+                  onClick={props.onClear}
+                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded hover:bg-red-600"
+                >
+                  <i class="fa-solid fa-trash" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Save current display state">
+                <button
+                  type="button"
+                  onClick={props.onPersist}
+                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                >
+                  <i class="fa-solid fa-floppy-disk" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Load last saved state">
+                <button
+                  type="button"
+                  onClick={props.onLoad}
+                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                >
+                  <i class="fa-solid fa-refresh" />
+                </button>
+              </Tooltip>
+            </div>
+          </SidebarSection>
+        </Show>
+      </div>
+
+      {/* Fixed Navigation Section */}
+      <div class="flex-shrink-0 pt-6 border-t border-gray-200 space-y-6">
+        <Show when={store?.plugins.some((p) => p.name.includes("Animation"))}>
           <Tooltip text="Create and edit animations">
             <a
               href="#/creator"
@@ -204,19 +212,27 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               Animation Creator
             </a>
           </Tooltip>
-        </div>
+        </Show>
 
-        <div class="pt-6">
-          <Tooltip text="Schedule multiple plugins">
-            <a
-              href="#/scheduler"
-              class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-            >
-              <i class="fa-regular fa-clock fa- mr-2" />
-              Plugin Scheduler ({store.schedule.length})
-            </a>
-          </Tooltip>
-        </div>
+        <Tooltip text="Schedule multiple plugins">
+          <a
+            href="#/scheduler"
+            class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+          >
+            <i class="fa-regular fa-clock fa- mr-2" />
+            Plugin Scheduler ({store.schedule.length})
+          </a>
+        </Tooltip>
+
+        <Tooltip text="Update firmware">
+          <a
+            href="/update"
+            class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+          >
+            <i class="fa-solid fa-download mr-2" />
+            Firmware Update
+          </a>
+        </Tooltip>
       </div>
     </>
   );
