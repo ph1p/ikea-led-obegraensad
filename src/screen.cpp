@@ -361,7 +361,7 @@ std::vector<int> Screen_::readBytes(const std::vector<int> &bytes)
   }
 
   return bits;
-};
+}
 
 void Screen_::drawNumbers(int x, int y, const std::vector<int> &numbers, uint8_t brightness)
 {

@@ -42,6 +42,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   <summary>Click to expand feature list</summary>
 
 **General Features:**
+
 - Persist your drawing
 - Rotate image
 - Live Drawing
@@ -53,6 +54,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Schedule Plugins to switch after "n" seconds
 
 **Available Plugins:**
+
 - Draw
 - Game of Life
 - Breakout
@@ -76,6 +78,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 https://github.com/user-attachments/assets/ddf91be1-2c95-4adc-b178-05b0781683cc
 
 Control the lamp using the built-in web GUI. Find the device IP address via:
+
 - Serial monitor output
 - Router admin panel
 
@@ -86,6 +89,7 @@ Control the lamp using the built-in web GUI. Find the device IP address via:
 This software is designed for ESP32 Dev Boards but can work with other Arduino boards (WiFi, OTA, and web server features will need to be removed for non-ESP boards).
 
 **Supported Boards:**
+
 - ESP32 Dev Board (recommended)
 - TTGO LoRa32 V2.1 (T3_V1.6.1)
 - ESP8266 (with limitations: per-pixel brightness only works when storage and global brightness are disabled)
@@ -95,6 +99,7 @@ This software is designed for ESP32 Dev Boards but can work with other Arduino b
 ### Opening the Lamp
 
 IKEA uses rivets instead of regular screws. To open:
+
 1. Insert a screwdriver between the rivets and back panel
 2. Carefully pry open with a second object
 3. Alternative: Drill out the rivets (cleaner but permanent)
@@ -104,6 +109,7 @@ IKEA uses rivets instead of regular screws. To open:
 <img src="https://user-images.githubusercontent.com/15351728/200183585-39c1668d-665b-4c12-bcbb-387aec1d3874.JPG" width="60%" />
 
 Inside you'll find 4 identical plates with 64 LEDs each (in 4 fields). Focus on the lowest plate:
+
 - 6 connectors at the bottom edge (connection points for your board)
 - Original microcontroller at the top (must be removed)
 
@@ -113,16 +119,16 @@ Inside you'll find 4 identical plates with 64 LEDs each (in 4 fields). Focus on 
 
 Connect the pins as shown below. Remember to configure them in `include/constants.h` according to your board.
 
-|       LCD        | ESP32  | TTGO LoRa32 | NodeMCUv2 | Lolin D32 (Pro) |
-| :--------------: | :----: | :---------: | :-------: | :-------------: |
-|       GND        |  GND   |     GND     |    GND    |       GND       |
-|       VCC        |   5V   |     5V      |    VIN    |       USB       |
-| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 |     GPIO26      |
-|  IN (PIN_DATA)   | GPIO27 |    IO23     | GPIO13 D7 |     GPIO27      |
-| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |     GPIO14      |
-| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  |     GPIO12      |
-|  BUTTON one end  | GPIO16 |    IO21     | GPIO2 D4  |     GPIO25      |
-| BUTTON other end |  GND   |     GND     |    GND    |       GND       |
+|       LCD        | ESP32  | TTGO LoRa32 | NodeMCUv2 | Lolin D32 (Pro) | Xiao ESP32S3 |
+| :--------------: | :----: | :---------: | :-------: | :-------------: | :----------: |
+|       GND        |  GND   |     GND     |    GND    |       GND       |     GND      |
+|       VCC        |   5V   |     5V      |    VIN    |       USB       |     VUSB     |
+| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 |     GPIO26      |  D4 (GPIO5)  |
+|  IN (PIN_DATA)   | GPIO27 |    IO23     | GPIO13 D7 |     GPIO27      |  D10 (MOSI)  |
+| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |     GPIO14      |  D8 (SCK)    |
+| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  |     GPIO12      |  D5 (GPIO6)  |
+|  BUTTON one end  | GPIO16 |    IO21     | GPIO2 D4  |     GPIO25      |  D3 (GPIO4)  |
+| BUTTON other end |  GND   |     GND     |    GND    |       GND       |     GND      |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
@@ -141,11 +147,13 @@ You can use the original button wiring without adding external connections. See 
    - Install the PlatformIO IDE extension from VS Code Extensions Marketplace
 
 2. **Clone the Project**
+
    ```bash
    git clone git@github.com:ph1p/ikea-led-obegraensad.git
    cd ikea-led-obegraensad
    code .
    ```
+
    PlatformIO will automatically load dependencies.
 
 3. **Connect ESP32**
