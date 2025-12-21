@@ -1,51 +1,102 @@
-from ddp import create_packet, send_ddp_packet
+import argparse
+from ddp import create_packet
 
-import os
 import imageio.v3 as iio
+import logging
 import numpy as np
+import socket
 import time
 
-path = "C:\\Users\\Thomas\\Dev\\bad-apple"
-file = "badapple_480_16x16.mp4"
+logger = logging.getLogger(__name__)
 
-im = iio.imread(os.path.join(path, file), plugin="pyav")
 
-# manually convert the video to grayscale
-gray_frames = np.dot(im[..., :3], [0.2989, 0.5870, 0.1140])
+def play_video(video_file_path, ip, port=4048):
+    # Load video frames using imageio with pyav plugin
+    im = iio.imread(video_file_path, plugin="pyav")
 
-# Get video metadata for proper playback timing
-video_meta = iio.immeta(os.path.join(path, file), plugin="pyav")
-fps = video_meta.get("fps", 30)  # Default to 30 if not found
-frame_delay = 1.0 / fps
+    # manually convert the video to grayscale
+    gray_frames = np.dot(im[..., :3], [0.2989, 0.5870, 0.1140])
 
-print(f"Playing at {fps} FPS")
+    # Get video metadata for proper playback timing
+    video_meta = iio.immeta(video_file_path, plugin="pyav")
+    fps = video_meta.get("fps", 30)  # Default to 30 if not found
+    frame_delay = 1.0 / fps
 
-# Track timing
-start_time = time.perf_counter()
+    logger.info(f"Playing at {fps} FPS")
 
-# Iterate over frames with enumerate
-for frame_count, frame in enumerate(gray_frames):
-    # Convert frame to pixels list
-    pixels = []
-    for y in range(16):
-        for x in range(16):
-            brightness = int(frame[y, x])
-            pixels.append((x, y, brightness))
+    # Track timing
+    start_time = time.perf_counter()
 
-    # Create and send the DDP packet
-    packet = create_packet(pixels)
-    send_ddp_packet("192.168.1.51", 4048, packet)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    # Calculate when the next frame should be displayed
-    target_time = start_time + ((frame_count + 1) * frame_delay)
-    current_time = time.perf_counter()
+    try:
+        # Iterate over frames with enumerate
+        for frame_count, frame in enumerate(gray_frames):
+            # Convert frame to pixels list
+            pixels = []
+            for y in range(16):
+                for x in range(16):
+                    brightness = int(frame[y, x])
+                    pixels.append((x, y, brightness))
 
-    # Sleep only if we're ahead of schedule
-    sleep_time = target_time - current_time
-    if sleep_time > 0:
-        time.sleep(sleep_time)
-    elif sleep_time < -frame_delay:
-        # Warn if we're falling behind by more than one frame
-        print(f"Warning: Frame {frame_count} is {-sleep_time:.3f}s behind")
+            # Create and send the DDP packet
+            packet = create_packet(pixels)
+            sock.sendto(packet, (ip, port))
 
-print(f"Playback complete. Total time: {time.perf_counter() - start_time:.2f}s")
+            # Calculate when the next frame should be displayed
+            target_time = start_time + ((frame_count + 1) * frame_delay)
+            current_time = time.perf_counter()
+
+            # Sleep only if we're ahead of schedule
+            sleep_time = target_time - current_time
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+            elif sleep_time < -frame_delay:
+                # Warn if we're falling behind by more than one frame
+                logger.warning(
+                    f"Warning: Frame {frame_count} is {-sleep_time:.3f}s behind"
+                )
+
+        logger.info(
+            f"Playback complete. Total time: {time.perf_counter() - start_time:.2f}s"
+        )
+    except KeyboardInterrupt:
+        logger.warning("Playback interrupted by user.")
+    finally:
+        sock.close()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Play video on LED matrix via DDP")
+
+    parser.add_argument(
+        "--ip", default="192.168.178.50", help="IP address of the display"
+    )
+    parser.add_argument("--port", type=int, default=4048, help="UDP port")
+    parser.add_argument("-i", "--input", required=True, help="Path to input video file")
+    parser.add_argument(
+        "-d", "--debug", action="store_true", help="Enable debug logging"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose logging"
+    )
+
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.DEBUG
+        if args.debug
+        else logging.INFO
+        if args.verbose
+        else logging.WARNING
+    )
+
+    video_file_path = args.input
+    ip = args.ip
+    port = args.port
+
+    play_video(video_file_path, ip, port)
+
+
+if __name__ == "__main__":
+    main()
