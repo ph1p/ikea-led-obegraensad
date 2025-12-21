@@ -50,7 +50,11 @@ void DDPPlugin::teardown()
 
 void DDPPlugin::loop()
 {
+#ifdef ESP32
+  vTaskDelay(1);
+#else
   delay(1);
+#endif
 }
 
 const char *DDPPlugin::getName() const

@@ -39,6 +39,8 @@ private:
   int nextPluginId;
   int persistedPluginId = 1;
 
+  void renderPluginId(int pluginId);
+
 public:
   PluginManager();
 

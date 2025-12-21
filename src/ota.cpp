@@ -48,7 +48,11 @@ void onOTAEnd(bool success)
     Screen.setPixelAtIndex(i, bits[i]);
   }
 
+#ifdef ESP32
+  vTaskDelay(pdMS_TO_TICKS(1000));
+#else
   delay(1000);
+#endif
   currentStatus = NONE;
   Screen.loadFromStorage();
 }

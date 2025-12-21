@@ -2,7 +2,11 @@
 
 void DrawPlugin::setup()
 {
+#ifdef ESP32
+  vTaskDelay(pdMS_TO_TICKS(50));
+#else
   delay(50);
+#endif
   Screen.clear();
   Screen.loadFromStorage();
 #ifdef ENABLE_SERVER

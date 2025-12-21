@@ -42,7 +42,11 @@ void AnimationPlugin::loop()
     {
       this->step = 0;
     }
+#ifdef ESP32
+    vTaskDelay(pdMS_TO_TICKS(frameDelay));
+#else
     delay(frameDelay);
+#endif
   }
 }
 

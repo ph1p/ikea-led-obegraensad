@@ -11,15 +11,7 @@ WiFiClient wiFiClient;
 
 void WeatherPlugin::setup()
 {
-  // loading screen
   Screen.clear();
-  currentStatus = LOADING;
-  Screen.setPixel(4, 7, 1);
-  Screen.setPixel(5, 7, 1);
-  Screen.setPixel(7, 7, 1);
-  Screen.setPixel(8, 7, 1);
-  Screen.setPixel(10, 7, 1);
-  Screen.setPixel(11, 7, 1);
 
 #ifdef ESP32
   if (secureClient == nullptr)
@@ -29,8 +21,28 @@ void WeatherPlugin::setup()
   }
 #endif
 
-  this->lastUpdate = 0;
-  currentStatus = NONE;
+  // If we have cached data and it's still fresh (< 30 minutes old), redraw it
+  if (hasCachedData && lastUpdate > 0 && millis() >= lastUpdate &&
+      millis() - lastUpdate < (1000UL * 60 * 30))
+  {
+    Serial.println("Using cached weather data");
+    drawWeather();
+  }
+  else
+  {
+    // Show loading screen - data needs to be fetched
+    currentStatus = LOADING;
+    Screen.setPixel(4, 7, 1);
+    Screen.setPixel(5, 7, 1);
+    Screen.setPixel(7, 7, 1);
+    Screen.setPixel(8, 7, 1);
+    Screen.setPixel(10, 7, 1);
+    Screen.setPixel(11, 7, 1);
+    currentStatus = NONE;
+
+    // Clear lastUpdate to force immediate fetch on first loop
+    this->lastUpdate = 0;
+  }
 }
 
 void WeatherPlugin::loop()
@@ -137,32 +149,15 @@ void WeatherPlugin::update()
       iconY = 2;
     }
 
-    Screen.clear();
-    Screen.drawWeather(0, iconY, weatherIcon, 100);
+    // Cache the weather data
+    hasCachedData = true;
+    cachedTemperature = temperature;
+    cachedWeatherIcon = weatherIcon;
+    cachedIconY = iconY;
+    cachedTempY = tempY;
 
-    if (temperature >= 10)
-    {
-      Screen.drawCharacter(9, tempY, Screen.readBytes(degreeSymbol), 4, 50);
-      Screen.drawNumbers(1, tempY, {(temperature - temperature % 10) / 10, temperature % 10});
-    }
-    else if (temperature <= -10)
-    {
-      Screen.drawCharacter(0, tempY, Screen.readBytes(minusSymbol), 4);
-      Screen.drawCharacter(11, tempY, Screen.readBytes(degreeSymbol), 4, 50);
-      temperature *= -1;
-      Screen.drawNumbers(3, tempY, {(temperature - temperature % 10) / 10, temperature % 10});
-    }
-    else if (temperature >= 0)
-    {
-      Screen.drawCharacter(7, tempY, Screen.readBytes(degreeSymbol), 4, 50);
-      Screen.drawNumbers(4, tempY, {temperature});
-    }
-    else
-    {
-      Screen.drawCharacter(0, tempY, Screen.readBytes(minusSymbol), 4);
-      Screen.drawCharacter(9, tempY, Screen.readBytes(degreeSymbol), 4, 50);
-      Screen.drawNumbers(3, tempY, {-temperature});
-    }
+    // Draw the weather
+    drawWeather();
   }
   else
   {
@@ -194,6 +189,39 @@ void WeatherPlugin::update()
 void WeatherPlugin::teardown()
 {
   http.end();
+}
+
+void WeatherPlugin::drawWeather()
+{
+  Screen.clear();
+  Screen.drawWeather(0, cachedIconY, cachedWeatherIcon, 100);
+
+  int temperature = cachedTemperature;
+  int tempY = cachedTempY;
+
+  if (temperature >= 10)
+  {
+    Screen.drawCharacter(9, tempY, Screen.readBytes(degreeSymbol), 4, 50);
+    Screen.drawNumbers(1, tempY, {(temperature - temperature % 10) / 10, temperature % 10});
+  }
+  else if (temperature <= -10)
+  {
+    Screen.drawCharacter(0, tempY, Screen.readBytes(minusSymbol), 4);
+    Screen.drawCharacter(11, tempY, Screen.readBytes(degreeSymbol), 4, 50);
+    temperature *= -1;
+    Screen.drawNumbers(3, tempY, {(temperature - temperature % 10) / 10, temperature % 10});
+  }
+  else if (temperature >= 0)
+  {
+    Screen.drawCharacter(7, tempY, Screen.readBytes(degreeSymbol), 4, 50);
+    Screen.drawNumbers(4, tempY, {temperature});
+  }
+  else
+  {
+    Screen.drawCharacter(0, tempY, Screen.readBytes(minusSymbol), 4);
+    Screen.drawCharacter(9, tempY, Screen.readBytes(degreeSymbol), 4, 50);
+    Screen.drawNumbers(3, tempY, {-temperature});
+  }
 }
 
 const char *WeatherPlugin::getName() const
