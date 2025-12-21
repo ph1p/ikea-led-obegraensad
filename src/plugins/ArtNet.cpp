@@ -40,7 +40,7 @@ void ArtNetPlugin::onDmxFrame(uint16_t universe, uint16_t length, uint16_t outgo
   }
 }
 
-void ArtNetPlugin::websocketHook(DynamicJsonDocument &request)
+void ArtNetPlugin::websocketHook(JsonDocument &request)
 {
   const char *event = request["event"];
 

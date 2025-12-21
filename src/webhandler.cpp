@@ -5,7 +5,7 @@
 
 void sendJsonSuccess(AsyncWebServerRequest *request, const char *message)
 {
-  StaticJsonDocument<256> jsonResponse;
+  JsonDocument jsonResponse;
   jsonResponse["status"] = "success";
   jsonResponse["message"] = message;
 
@@ -16,7 +16,7 @@ void sendJsonSuccess(AsyncWebServerRequest *request, const char *message)
 
 void sendJsonError(AsyncWebServerRequest *request, int statusCode, const char *error)
 {
-  StaticJsonDocument<256> jsonResponse;
+  JsonDocument jsonResponse;
   jsonResponse["error"] = true;
   jsonResponse["message"] = error;
 
@@ -134,7 +134,7 @@ void handleGetData(AsyncWebServerRequest *request)
 
 void handleGetInfo(AsyncWebServerRequest *request)
 {
-  DynamicJsonDocument jsonDocument(6144);
+  JsonDocument jsonDocument;
   jsonDocument["rows"] = ROWS;
   jsonDocument["cols"] = COLS;
   jsonDocument["status"] = currentStatus;
@@ -143,21 +143,21 @@ void handleGetInfo(AsyncWebServerRequest *request)
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
   jsonDocument["scheduleActive"] = Scheduler.isActive;
 
-  JsonArray scheduleArray = jsonDocument.createNestedArray("schedule");
+  JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
   for (const auto &item : Scheduler.schedule)
   {
-    JsonObject scheduleItem = scheduleArray.createNestedObject();
+    JsonObject scheduleItem = scheduleArray.add<JsonObject>();
     scheduleItem["pluginId"] = item.pluginId;
     scheduleItem["duration"] = item.duration / 1000; // Convert milliseconds to seconds
   }
 
-  JsonArray plugins = jsonDocument.createNestedArray("plugins");
+  JsonArray plugins = jsonDocument["plugins"].to<JsonArray>();
 
   std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
 
   for (Plugin *plugin : allPlugins)
   {
-    JsonObject object = plugins.createNestedObject();
+    JsonObject object = plugins.add<JsonObject>();
     object["id"] = plugin->getId();
     object["name"] = plugin->getName();
   }

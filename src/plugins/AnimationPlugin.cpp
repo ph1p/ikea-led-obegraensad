@@ -46,15 +46,15 @@ void AnimationPlugin::loop()
   }
 }
 
-void AnimationPlugin::websocketHook(DynamicJsonDocument &request)
+void AnimationPlugin::websocketHook(JsonDocument &request)
 {
   const char *event = request["event"];
   if (!strcmp(event, "upload"))
   {
     int size = (int)request["screens"];
-    if (request.containsKey("frameDelay"))
+    if (request["frameDelay"].is<int>())
     {
-      frameDelay = (int)request["frameDelay"];
+      frameDelay = request["frameDelay"].as<int>();
       if (frameDelay < 10)
         frameDelay = 10;
       if (frameDelay > 10000)

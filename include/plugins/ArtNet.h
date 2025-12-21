@@ -17,5 +17,5 @@ public:
   void loop() override;
   const char* getName() const override;
   static void onDmxFrame(uint16_t universe, uint16_t length, uint16_t outgoing, uint8_t* data);
-  void websocketHook(DynamicJsonDocument& request) override;
+  void websocketHook(JsonDocument& request) override;
 };

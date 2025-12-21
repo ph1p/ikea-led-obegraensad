@@ -7,7 +7,7 @@ AsyncWebSocket ws("/ws");
 
 void sendInfo()
 {
-  DynamicJsonDocument jsonDocument(6144);
+  JsonDocument jsonDocument;
   if (currentStatus == NONE)
   {
     for (int j = 0; j < ROWS * COLS; j++)
@@ -24,20 +24,20 @@ void sendInfo()
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
   jsonDocument["scheduleActive"] = Scheduler.isActive;
 
-  JsonArray scheduleArray = jsonDocument.createNestedArray("schedule");
+  JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
   for (const auto &item : Scheduler.schedule)
   {
-    JsonObject scheduleItem = scheduleArray.createNestedObject();
+    JsonObject scheduleItem = scheduleArray.add<JsonObject>();
     scheduleItem["pluginId"] = item.pluginId;
     scheduleItem["duration"] = item.duration / 1000; // Convert milliseconds to seconds
   }
 
-  JsonArray plugins = jsonDocument.createNestedArray("plugins");
+  JsonArray plugins = jsonDocument["plugins"].to<JsonArray>();
 
   std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
   for (Plugin *plugin : allPlugins)
   {
-    JsonObject object = plugins.createNestedObject();
+    JsonObject object = plugins.add<JsonObject>();
 
     object["id"] = plugin->getId();
     object["name"] = plugin->getName();
@@ -73,7 +73,7 @@ void onWsEvent(AsyncWebSocket *server,
       {
         data[len] = 0;
 
-        DynamicJsonDocument wsRequest(6144);
+        JsonDocument wsRequest;
         DeserializationError error = deserializeJson(wsRequest, data);
 
         if (error)

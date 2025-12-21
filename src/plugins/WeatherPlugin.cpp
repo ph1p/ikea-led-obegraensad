@@ -84,7 +84,7 @@ void WeatherPlugin::update()
     Serial.print("Response size: ");
     Serial.println(payload.length());
 
-    DynamicJsonDocument doc(3072);
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, payload);
 
     if (error)

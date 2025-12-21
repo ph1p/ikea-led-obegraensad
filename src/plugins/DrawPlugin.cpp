@@ -10,7 +10,7 @@ void DrawPlugin::setup()
 #endif
 }
 
-void DrawPlugin::websocketHook(DynamicJsonDocument &request)
+void DrawPlugin::websocketHook(JsonDocument &request)
 {
   const char *event = request["event"];
 

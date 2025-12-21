@@ -13,5 +13,5 @@ public:
   void setup() override;
   void loop() override;
   const char *getName() const override;
-  void websocketHook(DynamicJsonDocument &request) override;
+  void websocketHook(JsonDocument &request) override;
 };

@@ -171,7 +171,7 @@ const char *GameOfLifePlugin::getName() const
   return "GameOfLife";
 }
 
-void GameOfLifePlugin::websocketHook(DynamicJsonDocument &request)
+void GameOfLifePlugin::websocketHook(JsonDocument &request)
 {
   const char *event = request["event"];
 
