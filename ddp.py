@@ -98,14 +98,13 @@ def create_packet(pixels=None):
     return packet
 
 
-def send_ddp_packet(ip, port, packet, debug=False):
+def send_ddp_packet(ip, port, packet):
     """Send a DDP packet to the specified IP and port"""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         sock.sendto(packet, (ip, port))
-        if debug:
-            logger.info(f"Sent DDP packet to {ip}:{port}")
-            logger.info(f"Packet size: {len(packet)} bytes")
+        logger.info(f"Sent DDP packet to {ip}:{port}")
+        logger.info(f"Packet size: {len(packet)} bytes")
     except Exception as e:
         logger.error(f"Error: {e}")
     finally:
