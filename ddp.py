@@ -167,7 +167,9 @@ def main():
     video_parser = subparsers.add_parser(
         "video", help="Play video on LED matrix via DDP", parents=[parent_parser]
     )
-    video_parser.add_argument("video_file", type=str, help="Path to input video file")
+    video_parser.add_argument(
+        "video_file", type=str, metavar="VIDEO_FILE", help="Path to input video file"
+    )
 
     # Deprecated arguments for backward compatibility
     parser.add_argument(
