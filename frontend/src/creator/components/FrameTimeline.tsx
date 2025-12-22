@@ -12,14 +12,14 @@ interface FrameTimelineProps {
 
 export const FrameTimeline: Component<FrameTimelineProps> = (props) => {
   return (
-    <div class="bg-white p-4 rounded-2xl shadow-lg">
+    <div class="bg-white p-4 lg:rounded-2xl shadow-lg">
       <div ref={props.ref} class="flex gap-2 overflow-x-auto" style="scrollbar-width: thin;">
         <For each={props.screenSignals}>
           {([screen], index) => (
             <button
               type="button"
               onClick={() => props.onFrameClick(index())}
-              class={`shrink-0 p-1 rounded border-2 transition-all hover:border-gray-700 border-gray-400 ${
+              class={`shrink-0 p-1 rounded border-2 transition-all hover:border-gray-700 border-gray-400 flex flex-col items-center ${
                 props.focusedFrameIndex === index() ? "" : "opacity-50"
               }`}
               title={`Frame ${index() + 1}`}
@@ -29,7 +29,7 @@ export const FrameTimeline: Component<FrameTimelineProps> = (props) => {
                   {(pixel) => <div class={`w-0.5 h-0.5 ${pixel ? "bg-white" : "bg-gray-900"}`} />}
                 </For>
               </div>
-              <div class="text-xs text-center mt-1 text-gray-400">{index() + 1}</div>
+              <div class="text-xs text-center mt-1 text-gray-400 w-full">{index() + 1}</div>
             </button>
           )}
         </For>

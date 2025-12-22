@@ -2,7 +2,6 @@ import { type Component, For, Index, Show } from "solid-js";
 
 import Button from "./components/button";
 import { Layout } from "./components/layout/layout";
-import { Tooltip } from "./components/tooltip";
 import { useStore } from "./contexts/store";
 import { useToast } from "./contexts/toast";
 
@@ -27,7 +26,7 @@ export const ResetScheduleButton = () => {
           toast("Failed to reset schedule", 2000);
         }
       }}
-      class="w-full bg-gray-600 hover:bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+      class="w-full bg-gray-600 hover:bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded"
     >
       Reset Scheduler
     </button>
@@ -53,7 +52,6 @@ export const ToggleScheduleButton = () => {
             toast("Failed to stop schedule", 2000);
           }
         } else {
-          // Validate schedule before starting
           if (store.schedule.length === 0) {
             toast("Cannot start empty schedule", 2000);
             return;
@@ -77,9 +75,9 @@ export const ToggleScheduleButton = () => {
           }
         }
       }}
-      class="w-full bg-gray-600 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+      class="w-full bg-gray-600 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded"
     >
-      {store.isActiveScheduler ? "Stop" : "Start"} Scheduler
+      {store.isActiveScheduler ? "Stop Scheduler" : "Start Scheduler"}
     </button>
   );
 };
@@ -89,7 +87,6 @@ const Scheduler: Component = () => {
   const { toast } = useToast();
 
   const handleAddItem = () => {
-    // Ensure plugins array is not empty before accessing first plugin
     const defaultPluginId = store.plugins.length > 0 ? store.plugins[0].id : 1;
     actions.setSchedule([...store.schedule, { pluginId: defaultPluginId, duration: 1 }]);
   };
@@ -122,7 +119,6 @@ const Scheduler: Component = () => {
         toast("Failed to stop schedule", 2000);
       }
     } else {
-      // Validate schedule before starting
       if (store.schedule.length === 0) {
         toast("Cannot start empty schedule", 2000);
         return;
@@ -163,7 +159,7 @@ const Scheduler: Component = () => {
                     <button
                       type="button"
                       onClick={handleAddItem}
-                      class="bg-gray-700 hover:bg-gray-800 text-white px-6 py-3 rounded-lg transition-all duration-200 font-medium"
+                      class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-all duration-200 font-semibold text-sm"
                     >
                       <i class="fa-solid fa-plus mr-2" />
                       Add First Plugin
@@ -248,7 +244,7 @@ const Scheduler: Component = () => {
                     <button
                       type="button"
                       onClick={handleToggleScheduler}
-                      class={`flex-1 px-4 py-4 lg:py-3 rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 ${
+                      class={`flex-1 px-3 py-2 rounded-lg transition-all duration-200 font-semibold text-sm flex items-center justify-center gap-2 ${
                         store.isActiveScheduler
                           ? "bg-red-600 hover:bg-red-700 text-white"
                           : "bg-green-600 hover:bg-green-700 text-white"
@@ -262,7 +258,7 @@ const Scheduler: Component = () => {
                     <button
                       type="button"
                       onClick={handleAddItem}
-                      class="flex-1 bg-gray-700 hover:bg-gray-800 text-white px-4 py-4 lg:py-3 rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2"
+                      class="flex-1 bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 rounded-lg transition-all duration-200 font-semibold text-sm flex items-center justify-center gap-2"
                     >
                       <i class="fa-solid fa-plus" />
                       <span>Add Plugin</span>
@@ -293,23 +289,19 @@ const Scheduler: Component = () => {
 
                 <Show when={store.isActiveScheduler}>
                   <div class="my-6 border-t border-gray-200" />
-                  <Tooltip text="Removes all items and resets state">
-                    <ResetScheduleButton />
-                  </Tooltip>
+                  <ResetScheduleButton />
                 </Show>
               </div>
             </div>
           </div>
           <div class="mt-auto pt-6 border-t border-gray-200">
-            <Tooltip text="Return to main editor">
-              <a
-                href="#/"
-                class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-              >
-                <i class="fa-solid fa-arrow-left mr-2" />
-                Back
-              </a>
-            </Tooltip>
+            <a
+              href="#/"
+              class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+            >
+              <i class="fa-solid fa-arrow-left mr-2" />
+              Back to Main
+            </a>
           </div>
         </>
       }

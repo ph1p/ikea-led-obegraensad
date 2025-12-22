@@ -7,7 +7,11 @@ import { type ScheduleItem, type Store, type StoreActions, SYSTEM_STATUS } from 
 import { ToastProvider } from "./toast";
 
 const ws = createReconnectingWS(
-  `${import.meta.env.PROD ? `ws://${window.location.host}/` : import.meta.env.VITE_WS_URL}ws`,
+  `${
+    import.meta.env.PROD
+      ? `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/`
+      : import.meta.env.VITE_WS_URL
+  }ws`,
 );
 
 const wsState = createWSState(ws);
@@ -49,7 +53,6 @@ const store: [Store, StoreActions] = [mainStore, actions] as const;
 
 const StoreContext = createContext<[Store, StoreActions]>(store);
 
-// WebSocket message validation helpers
 const isValidNumber = (value: unknown): value is number =>
   typeof value === "number" && !Number.isNaN(value);
 
@@ -59,12 +62,31 @@ const isValidArray = (value: unknown): value is unknown[] => Array.isArray(value
 
 export const StoreProvider = (props?: { value?: Store; children?: JSX.Element }) => {
   const messageEvent = createEventSignal<{ message: MessageEvent }>(ws, "message");
+  const errorEvent = createEventSignal<{ error: Event }>(ws, "error");
+
+  createEffect(() => {
+    const state = wsState();
+
+    if (state >= 0 && state < connectionStatus.length) {
+      setStore("connectionStatus", connectionStatus[state]);
+    }
+
+    if (state === WebSocket.CLOSED || state === WebSocket.CLOSING) {
+      console.warn("WebSocket disconnected. Will attempt to reconnect...");
+    }
+  });
+
+  createEffect(() => {
+    const error = errorEvent();
+    if (error) {
+      console.error("WebSocket error occurred:", error);
+    }
+  });
 
   createEffect(() => {
     try {
       const json = JSON.parse(messageEvent()?.data || "{}");
 
-      // Validate event type
       if (!json.event || typeof json.event !== "string") {
         return;
       }
@@ -72,7 +94,6 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
       switch (json.event) {
         case "info":
           batch(() => {
-            // Validate and set system status
             if (
               isValidNumber(json.status) &&
               json.status >= 0 &&
@@ -81,42 +102,34 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
               actions.setSystemStatus(Object.values(SYSTEM_STATUS)[json.status]);
             }
 
-            // Validate and set rotation
             if (isValidNumber(json.rotation)) {
               actions.setRotation(json.rotation);
             }
 
-            // Validate and set brightness
             if (isValidNumber(json.brightness)) {
               actions.setBrightness(json.brightness);
             }
 
-            // Validate and set scheduler active status
             if (isValidBoolean(json.scheduleActive)) {
               actions.setIsActiveScheduler(json.scheduleActive);
             }
 
-            // Validate and set schedule
             if (isValidArray(json.schedule)) {
               actions.setSchedule(json.schedule as ScheduleItem[]);
             }
 
-            // Validate and set plugins (only if not already loaded)
             if (!mainStore.plugins.length && isValidArray(json.plugins)) {
               actions.setPlugins(json.plugins);
             }
 
-            // Validate and set current plugin
             if (isValidNumber(json.plugin)) {
               actions.setPlugin(json.plugin);
             }
 
-            // Reset index matrix for plugin 1
             if (mainStore.plugin === 1) {
               actions.setIndexMatrix([...new Array(256)].map((_, i) => i));
             }
 
-            // Validate and set LED data
             if (isValidArray(json.data)) {
               actions.setLeds(json.data as number[]);
             }

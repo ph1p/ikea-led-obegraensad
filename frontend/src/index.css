@@ -14,6 +14,17 @@
   body,
   #app {
     @apply h-full w-full m-0 p-0;
+    /* iOS safe area support */
+    height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for better mobile support */
+  }
+
+  /* Handle safe area insets on iOS */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
   }
 
   body {

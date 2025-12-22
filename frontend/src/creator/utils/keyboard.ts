@@ -89,19 +89,14 @@ export function createKeyboardHandler(
   return (e: KeyboardEvent) => {
     if (shouldIgnoreKeyboard(e)) return;
 
-    // Undo/Redo works even with no frames or while playing
     if (handleUndoRedoShortcuts(e, handlers)) return;
 
-    // Don't handle if there are no frames (except undo/redo which is handled above)
     if (!options.hasFrames()) return;
 
-    // Space and Enter always work (to toggle play/stop)
     if (handlePlaybackShortcuts(e, handlers)) return;
 
-    // Don't handle other keyboard shortcuts if playing
     if (options.isPlaying()) return;
 
-    // Navigation shortcuts only when not playing and have frames
     if (
       handlers.onPreviousFrame &&
       handlers.onNextFrame &&

@@ -13,7 +13,6 @@ import { Button } from "./components/button";
 import { Layout } from "./components/layout/layout";
 import { LedMatrix } from "./components/led-matrix";
 import { ScreenInfo } from "./components/screen-info";
-import { Tooltip } from "./components/tooltip";
 import { useStore } from "./contexts/store";
 import { useToast } from "./contexts/toast";
 import { AnimationSettings } from "./creator/components/AnimationSettings";
@@ -46,22 +45,18 @@ export const Creator: Component = () => {
   const [animationDelayMs, setAnimationDelayMs] = createSignal(DEFAULT_FRAME_DELAY_MS);
   const [focusedFrameIndex, setFocusedFrameIndex] = createSignal(0);
 
-  // Storage hook
   const { saveToLocalStorage, loadFromLocalStorage, hasLoadedFromStorage } =
     useAnimationStorage(createNewScreen);
 
-  // History hook
   const { saveToHistory, undo, redo, canUndo, canRedo, isUndoRedoing } = useHistory<number[][]>({
     onUndo: () => toast("Undo", 1000),
     onRedo: () => toast("Redo", 1000),
   });
 
-  // Animation hook
   const { isPlaying, currentFrame, togglePlay } = useAnimation(screenSignals, animationDelayMs);
 
   let timelineRef!: HTMLDivElement;
 
-  // Get current focused frame safely with bounds checking
   const currentFrameSignals = () => {
     const index = focusedFrameIndex();
     const signals = screenSignals();
@@ -71,12 +66,10 @@ export const Creator: Component = () => {
     return null;
   };
 
-  // Helper to scroll timeline
   const scrollToFrame = (frameIndex: number) => {
     scrollTimelineToFrame(timelineRef, frameIndex, screenSignals().length);
   };
 
-  // Frame manipulation handlers
   const handleAddScreen = () => {
     setScreenSignals((signals): FrameSignals => {
       const lastScreen = signals.length > 0 ? signals[signals.length - 1][0]() : undefined;
@@ -140,7 +133,6 @@ export const Creator: Component = () => {
     focusFrame(setFocusedFrameIndex, scrollToFrame, newIndex);
   };
 
-  // Navigation handlers
   const handlePreviousFrame = () => {
     const prevIndex = focusedFrameIndex() - 1;
     if (prevIndex >= 0) {
@@ -157,7 +149,6 @@ export const Creator: Component = () => {
     }
   };
 
-  // Import/Export handlers
   const handleUploadData = () => {
     if (isAnimationPluginActive()) {
       const screens = screenSignals().map(([screen]) => screen());
@@ -246,7 +237,6 @@ export const Creator: Component = () => {
     }
   };
 
-  // History integration with undo/redo
   const handleUndo = () => {
     const previousState = undo();
     if (!previousState) return;
@@ -271,7 +261,6 @@ export const Creator: Component = () => {
     }
   };
 
-  // Keyboard handler setup
   const handleKeyDown = createKeyboardHandler(
     {
       onUndo: handleUndo,
@@ -296,7 +285,6 @@ export const Creator: Component = () => {
     },
   );
 
-  // Load from local storage on mount
   onMount(() => {
     const loaded = loadFromLocalStorage();
     if (loaded) {
@@ -306,7 +294,6 @@ export const Creator: Component = () => {
       }
     }
 
-    // Save initial state to history after loading
     setTimeout(() => {
       if (screenSignals().length > 0) {
         const currentState = screenSignals().map(([screen]) => [...screen()]);
@@ -315,19 +302,15 @@ export const Creator: Component = () => {
     }, INITIAL_HISTORY_SAVE_DELAY_MS);
   });
 
-  // Save to history when frames change (with debouncing)
   createEffect(() => {
     const signals = screenSignals();
 
-    // Track all frame data as dependencies
     for (const [screen] of signals) {
       screen();
     }
 
     if (hasLoadedFromStorage() && signals.length > 0) {
-      // Debounce: save to history after a short delay
       const timeoutId = setTimeout(() => {
-        // Check isUndoRedoing again when timeout fires, not just when scheduling
         if (!isUndoRedoing()) {
           const currentState = signals.map(([screen]) => [...screen()]);
           saveToHistory(currentState);
@@ -338,7 +321,6 @@ export const Creator: Component = () => {
     }
   });
 
-  // Ensure focusedFrameIndex stays in bounds when frames change
   createEffect(() => {
     const signals = screenSignals();
     const focused = focusedFrameIndex();
@@ -352,7 +334,6 @@ export const Creator: Component = () => {
     }
   });
 
-  // Auto-save to local storage when frames or delay changes
   createEffect(() => {
     const signals = screenSignals();
     const delay = animationDelayMs();
@@ -363,7 +344,6 @@ export const Creator: Component = () => {
     saveToLocalStorage(frames, delay);
   });
 
-  // Keyboard event listener
   createEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     onCleanup(() => {
@@ -374,15 +354,15 @@ export const Creator: Component = () => {
   return (
     <Layout
       content={
-        <div class="h-full flex flex-col">
+        <div class="h-full flex flex-col overflow-hidden">
           {screenSignals().length ? (
             <>
               {/* Main Frame Display */}
-              <div class="flex-1 flex flex-col items-center justify-center p-8">
+              <div class="flex-1 flex items-center justify-center p-4 min-h-0">
                 <Show
                   when={!isPlaying()}
                   fallback={
-                    <div class="animate-fade-in">
+                    <div class="animate-fade-in w-full h-full flex items-center justify-center">
                       <LedMatrix
                         data={currentFrame()}
                         indexData={store.indexMatrix}
@@ -393,41 +373,38 @@ export const Creator: Component = () => {
                 >
                   <Show when={currentFrameSignals()}>
                     {(frameSignals) => (
-                      <>
-                        <div class="max-w-2xl">
-                          <FrameControls
-                            focusedFrameIndex={focusedFrameIndex()}
-                            totalFrames={screenSignals().length}
-                            onMoveLeft={() => handleMoveFrame(focusedFrameIndex(), "up")}
-                            onMoveRight={() => handleMoveFrame(focusedFrameIndex(), "down")}
-                            onDuplicate={() => handleDuplicateFrame(focusedFrameIndex())}
-                            onEmpty={() => handleEmptyMatrix(focusedFrameIndex())}
-                            onRemove={() => handleRemoveScreen(focusedFrameIndex())}
-                          />
-                          <LedMatrix
-                            data={frameSignals()[0]()}
-                            indexData={store.indexMatrix}
-                            brightness={store.brightness || 255}
-                            onSetLed={(data) => {
-                              const [screen, setScreen] = frameSignals();
-                              const currentScreen = [...screen()];
-                              currentScreen[data.index] = Number(data.status);
-                              setScreen(currentScreen);
-                            }}
-                            onSetMatrix={(data) => {
-                              const [_, setScreen] = frameSignals();
-                              setScreen([...data]);
-                            }}
-                          />
-                        </div>
-                      </>
+                      <div class="w-full h-full flex flex-col items-center justify-center gap-2">
+                        <FrameControls
+                          focusedFrameIndex={focusedFrameIndex()}
+                          totalFrames={screenSignals().length}
+                          onMoveLeft={() => handleMoveFrame(focusedFrameIndex(), "up")}
+                          onMoveRight={() => handleMoveFrame(focusedFrameIndex(), "down")}
+                          onDuplicate={() => handleDuplicateFrame(focusedFrameIndex())}
+                          onEmpty={() => handleEmptyMatrix(focusedFrameIndex())}
+                          onRemove={() => handleRemoveScreen(focusedFrameIndex())}
+                        />
+                        <LedMatrix
+                          data={frameSignals()[0]()}
+                          indexData={store.indexMatrix}
+                          brightness={store.brightness || 255}
+                          onSetLed={(data) => {
+                            const [screen, setScreen] = frameSignals();
+                            const currentScreen = [...screen()];
+                            currentScreen[data.index] = Number(data.status);
+                            setScreen(currentScreen);
+                          }}
+                          onSetMatrix={(data) => {
+                            const [_, setScreen] = frameSignals();
+                            setScreen([...data]);
+                          }}
+                        />
+                      </div>
                     )}
                   </Show>
                 </Show>
               </div>
 
-              {/* Timeline at Bottom */}
-              <div class="p-6 pt-0">
+              <div class="shrink-0 pt-0">
                 <FrameTimeline
                   screenSignals={screenSignals()}
                   focusedFrameIndex={focusedFrameIndex()}
@@ -454,63 +431,59 @@ export const Creator: Component = () => {
                 <Show
                   when={!isPlaying()}
                   fallback={
-                    <Tooltip text="Stop animation">
-                      <Button
-                        disabled={screenSignals().length === 0}
-                        onClick={togglePlay}
-                        class="hover:bg-gray-700 transition-colors"
-                      >
-                        <i class="fa-solid fa-stop" />
-                      </Button>
-                    </Tooltip>
-                  }
-                >
-                  <Tooltip text="Add new frame">
-                    <Button onClick={handleAddScreen} class="hover:bg-gray-700 transition-colors">
-                      <i class="fa-solid fa-plus" />
-                    </Button>
-                  </Tooltip>
-
-                  <Tooltip text="Play animation">
                     <Button
                       disabled={screenSignals().length === 0}
                       onClick={togglePlay}
                       class="hover:bg-gray-700 transition-colors"
                     >
-                      <i class="fa-solid fa-play" />
+                      <i class="fa-solid fa-stop mr-1" />
+                      <span class="text-xs">Stop</span>
                     </Button>
-                  </Tooltip>
+                  }
+                >
+                  <div class="flex gap-2 grow">
+                    <Button onClick={handleAddScreen} class="hover:bg-gray-700 transition-colors">
+                      <i class="fa-solid fa-plus mr-1" />
+                      <span class="text-xs">Add</span>
+                    </Button>
 
-                  <Tooltip text="Undo (Ctrl+Z)">
+                    <Button
+                      disabled={screenSignals().length === 0}
+                      onClick={togglePlay}
+                      class="hover:bg-gray-700 transition-colors"
+                    >
+                      <i class="fa-solid fa-play mr-1" />
+                      <span class="text-xs">Play</span>
+                    </Button>
+                  </div>
+
+                  <div class="flex gap-2 grow">
                     <Button
                       disabled={!canUndo()}
                       onClick={handleUndo}
                       class="hover:bg-gray-700 transition-colors"
                     >
-                      <i class="fa-solid fa-undo" />
+                      <i class="fa-solid fa-undo mr-1" />
+                      <span class="text-xs">Undo</span>
                     </Button>
-                  </Tooltip>
 
-                  <Tooltip text="Redo (Ctrl+Shift+Z)">
                     <Button
                       disabled={!canRedo()}
                       onClick={handleRedo}
                       class="hover:bg-gray-700 transition-colors"
                     >
-                      <i class="fa-solid fa-redo" />
+                      <i class="fa-solid fa-redo mr-1" />
+                      <span class="text-xs">Redo</span>
                     </Button>
-                  </Tooltip>
-
+                  </div>
                   <div class="w-full border-t border-gray-200 my-2" />
 
-                  <Tooltip text="Import JSON">
+                  <div class="flex gap-2 grow">
                     <Button onClick={handleImportJSON} class="hover:bg-gray-700 transition-colors">
                       <i class="fa-solid fa-file-import mr-1" />
                       <span class="text-xs">Import</span>
                     </Button>
-                  </Tooltip>
 
-                  <Tooltip text="Export as JSON">
                     <Button
                       disabled={screenSignals().length === 0}
                       onClick={handleExportJSON}
@@ -519,20 +492,19 @@ export const Creator: Component = () => {
                       <i class="fa-solid fa-file-export mr-1" />
                       <span class="text-xs">Export</span>
                     </Button>
-                  </Tooltip>
+                  </div>
 
                   <Show when={isAnimationPluginActive()}>
                     <div class="w-full border-t border-gray-200 my-2" />
 
-                    <Tooltip text="Upload to device">
-                      <Button
-                        disabled={screenSignals().length === 0}
-                        onClick={handleUploadData}
-                        class=" hover:bg-green-600 transition-colors"
-                      >
-                        <i class="fa-solid fa-upload" />
-                      </Button>
-                    </Tooltip>
+                    <Button
+                      disabled={screenSignals().length === 0}
+                      onClick={handleUploadData}
+                      class=" hover:bg-green-600 transition-colors"
+                    >
+                      <i class="fa-solid fa-upload mr-1" />
+                      <span class="text-xs">Upload</span>
+                    </Button>
                   </Show>
                 </Show>
               </div>
@@ -565,15 +537,13 @@ export const Creator: Component = () => {
             </div>
 
             <div class="mt-2 shrink-0 pt-6 border-t border-gray-200 flex align-bottom">
-              <Tooltip text="Return to main editor">
-                <a
-                  href="#/"
-                  class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-                >
-                  <i class="fa-solid fa-arrow-left mr-2" />
-                  Back
-                </a>
-              </Tooltip>
+              <a
+                href="#/"
+                class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+              >
+                <i class="fa-solid fa-arrow-left mr-2" />
+                Back to Main
+              </a>
             </div>
           </div>
         </div>

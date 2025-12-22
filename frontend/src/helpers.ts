@@ -1,6 +1,5 @@
-// Image conversion constants
 const MATRIX_SIZE = 16;
-const BRIGHTNESS_THRESHOLD = 383; // ~50% of max RGB sum (255*3=765)
+const BRIGHTNESS_THRESHOLD = 383;
 
 export const loadImageAndGetDataArray = (cb: (data: number[]) => void) => {
   const tempFileInput = document.createElement("input");

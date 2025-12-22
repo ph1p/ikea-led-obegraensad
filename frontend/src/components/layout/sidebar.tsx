@@ -2,7 +2,6 @@ import { type Component, For, type JSX, Show } from "solid-js";
 
 import { useStore } from "../../contexts/store";
 import { ToggleScheduleButton } from "../../scheduler";
-import { Tooltip } from "../tooltip";
 
 interface SidebarSectionProps {
   title: string;
@@ -34,7 +33,6 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
   return (
     <>
-      {/* Scrollable Section */}
       <div class="flex-1 min-h-0 overflow-y-auto">
         <Show
           when={!store?.isActiveScheduler}
@@ -55,15 +53,13 @@ export const Sidebar: Component<SidebarProps> = (props) => {
                   {(plugin) => <option value={plugin.id}>{plugin.name}</option>}
                 </For>
               </select>
-              <Tooltip text="Save current display mode as default startup mode">
-                <button
-                  type="button"
-                  onClick={props.onPersistPlugin}
-                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
-                >
-                  Set Default
-                </button>
-              </Tooltip>
+              <button
+                type="button"
+                onClick={props.onPersistPlugin}
+                class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded"
+              >
+                Set as Default
+              </button>
             </div>
           </SidebarSection>
         </Show>
@@ -72,24 +68,22 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
         <SidebarSection title={`Rotation (${[0, 90, 180, 270][store?.rotation || 0]}°)`}>
           <div class="flex gap-2.5">
-            <Tooltip text="Rotate display counter-clockwise">
-              <button
-                type="button"
-                onClick={() => props.onRotate(false)}
-                class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
-              >
-                <i class="fa-solid fa-rotate-left" />
-              </button>
-            </Tooltip>
-            <Tooltip text="Rotate display clockwise">
-              <button
-                type="button"
-                onClick={() => props.onRotate(true)}
-                class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
-              >
-                <i class="fa-solid fa-rotate-right" />
-              </button>
-            </Tooltip>
+            <button
+              type="button"
+              onClick={() => props.onRotate(false)}
+              class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded flex items-center justify-center gap-2"
+            >
+              <i class="fa-solid fa-rotate-left" />
+              <span class="hidden xl:inline">Left</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => props.onRotate(true)}
+              class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded flex items-center justify-center gap-2"
+            >
+              <i class="fa-solid fa-rotate-right" />
+              <span class="hidden xl:inline">Right</span>
+            </button>
           </div>
         </SidebarSection>
 
@@ -155,84 +149,72 @@ export const Sidebar: Component<SidebarProps> = (props) => {
         </Show>
 
         <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
-          <div class="my-6 border-t border-gray-200" />
+          <div class="my-6 border-t border-gray-200 hidden lg:block" />
 
-          <SidebarSection title="Matrix Controls">
-            <div class="grid grid-cols-2 gap-2">
-              <Tooltip text="Import image from your device">
+          <div class="hidden lg:block">
+            <SidebarSection title="Matrix Controls">
+              <div class="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={props.onLoadImage}
-                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                  class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded flex flex-col items-center gap-1"
                 >
-                  <i class="fa-solid fa-file-import" />
+                  <i class="fa-solid fa-file-import text-base" />
+                  <span class="text-xs">Import</span>
                 </button>
-              </Tooltip>
-              <Tooltip text="Clear all pixels">
                 <button
                   type="button"
                   onClick={props.onClear}
-                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded hover:bg-red-600"
+                  class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded hover:bg-red-600 flex flex-col items-center gap-1"
                 >
-                  <i class="fa-solid fa-trash" />
+                  <i class="fa-solid fa-trash text-base" />
+                  <span class="text-xs">Clear</span>
                 </button>
-              </Tooltip>
-              <Tooltip text="Save current display state">
                 <button
                   type="button"
                   onClick={props.onPersist}
-                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                  class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded flex flex-col items-center gap-1"
                 >
-                  <i class="fa-solid fa-floppy-disk" />
+                  <i class="fa-solid fa-floppy-disk text-base" />
+                  <span class="text-xs">Save</span>
                 </button>
-              </Tooltip>
-              <Tooltip text="Load last saved state">
                 <button
                   type="button"
                   onClick={props.onLoad}
-                  class="w-full bg-gray-700 text-white border-0 px-4 py-3 uppercase text-sm leading-6 tracking-wider cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                  class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded flex flex-col items-center gap-1"
                 >
-                  <i class="fa-solid fa-refresh" />
+                  <i class="fa-solid fa-refresh text-base" />
+                  <span class="text-xs">Load</span>
                 </button>
-              </Tooltip>
-            </div>
-          </SidebarSection>
+              </div>
+            </SidebarSection>
+          </div>
         </Show>
       </div>
 
-      {/* Fixed Navigation Section */}
-      <div class="flex-shrink-0 pt-6 border-t border-gray-200 space-y-6">
+      <div class="flex flex-col shrink-0 pt-6 border-t border-gray-200 space-y-6">
         <Show when={store?.plugins.some((p) => p.name.includes("Animation"))}>
-          <Tooltip text="Create and edit animations">
-            <a
-              href="#/creator"
-              class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-            >
-              <i class="fa-solid fa-pencil mr-2" />
-              Animation Creator
-            </a>
-          </Tooltip>
+          <a
+            href="#/creator"
+            class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+          >
+            <i class="fa-solid fa-pencil mr-2" />
+            Animation Creator
+          </a>
         </Show>
 
-        <Tooltip text="Schedule multiple plugins">
-          <a
-            href="#/scheduler"
-            class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-          >
-            <i class="fa-regular fa-clock fa- mr-2" />
-            Plugin Scheduler ({store.schedule.length})
-          </a>
-        </Tooltip>
+        <a href="#/scheduler" class=" items-center text-gray-700 hover:text-gray-900 font-medium">
+          <i class="fa-regular fa-clock fa- mr-2" />
+          Plugin Scheduler ({store.schedule.length})
+        </a>
 
-        <Tooltip text="Update firmware">
-          <a
-            href="/update"
-            class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-          >
-            <i class="fa-solid fa-download mr-2" />
-            Firmware Update
-          </a>
-        </Tooltip>
+        <a
+          href="/update"
+          class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+        >
+          <i class="fa-solid fa-download mr-2" />
+          Firmware Update
+        </a>
       </div>
     </>
   );

@@ -12,7 +12,6 @@ export function useAnimation(screenSignals: () => FrameSignals, animationDelayMs
   };
 
   createEffect(() => {
-    // Always clear any existing interval first (untracked to avoid dependency)
     const existingId = untrack(intervalId);
     if (existingId) {
       clearInterval(existingId);
@@ -45,7 +44,6 @@ export function useAnimation(screenSignals: () => FrameSignals, animationDelayMs
     };
   });
 
-  // Cleanup on unmount
   onCleanup(() => {
     clearInterval(intervalId());
   });

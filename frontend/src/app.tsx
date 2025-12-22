@@ -1,4 +1,4 @@
-import { type Component, createMemo, Show } from "solid-js";
+import { type Component, createMemo, onCleanup, Show } from "solid-js";
 
 import { Layout } from "./components/layout/layout";
 import Sidebar from "./components/layout/sidebar";
@@ -11,6 +11,56 @@ import { loadImageAndGetDataArray, rotateArray } from "./helpers";
 export const App: Component = () => {
   const [store, actions] = useStore();
   const { toast } = useToast();
+
+  // Fix iOS Safari WebSocket hanging bug using alternating RAF/setTimeout pattern
+  // Source - https://stackoverflow.com/a/42036303
+  // iOS has a bug where rapid WebSocket sends during pointer events can hang the connection
+  // Solution: alternate between requestAnimationFrame and setTimeout to break the pattern
+  let scheduledId: number | undefined;
+  let pendingLedData: { index: number; status: number } | null = null;
+  let useRaf = true;
+  let frametime = 0;
+  let lastframe = Date.now();
+
+  const deferredLedSend = (data: { index: number; status: number }) => {
+    pendingLedData = data;
+
+    if (scheduledId) return;
+
+    const sendLed = () => {
+      frametime = Date.now() - lastframe;
+      lastframe = Date.now();
+
+      if (pendingLedData) {
+        actions.send(
+          JSON.stringify({
+            event: "led",
+            ...pendingLedData,
+          }),
+        );
+        pendingLedData = null;
+      }
+
+      scheduledId = undefined;
+      useRaf = !useRaf;
+    };
+
+    if (useRaf) {
+      scheduledId = requestAnimationFrame(sendLed);
+    } else {
+      scheduledId = setTimeout(sendLed, Math.max(0, frametime)) as unknown as number;
+    }
+  };
+
+  onCleanup(() => {
+    if (scheduledId) {
+      if (useRaf) {
+        cancelAnimationFrame(scheduledId);
+      } else {
+        clearTimeout(scheduledId);
+      }
+    }
+  });
 
   const rotatedMatrix = createMemo(() => rotateArray(store.indexMatrix, store.rotation));
 
@@ -120,18 +170,57 @@ export const App: Component = () => {
           </Show>
         }
       >
-        <LedMatrix
-          disabled={store.plugin !== 1}
-          data={store.leds || []}
-          indexData={rotatedMatrix()}
-          brightness={store.brightness ?? 255}
-          onSetLed={(data) => {
-            wsMessage("led", data);
-          }}
-          onSetMatrix={(data) => {
-            actions?.setLeds([...data]);
-          }}
-        />
+        <div class="flex flex-col items-center gap-6">
+          <LedMatrix
+            disabled={store.plugin !== 1}
+            data={store.leds || []}
+            indexData={rotatedMatrix()}
+            brightness={store.brightness ?? 255}
+            onSetLed={(data) => {
+              deferredLedSend(data);
+            }}
+            onSetMatrix={(data) => {
+              actions?.setLeds([...data]);
+            }}
+          />
+
+          <div class="lg:hidden w-full max-w-100 sm:max-w-125">
+            <div class="grid grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={handleLoadImage}
+                class="flex flex-col items-center justify-center gap-1 bg-gray-700 text-white border-0 p-2 cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded text-xs"
+              >
+                <i class="fa-solid fa-file-import text-base" />
+                <span>Import</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                class="flex flex-col items-center justify-center gap-1 bg-gray-700 text-white border-0 p-2 cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded hover:bg-red-600 text-xs"
+              >
+                <i class="fa-solid fa-trash text-base" />
+                <span>Clear</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePersist}
+                class="flex flex-col items-center justify-center gap-1 bg-gray-700 text-white border-0 p-2 cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded text-xs"
+              >
+                <i class="fa-solid fa-floppy-disk text-base" />
+                <span>Save</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleLoad}
+                class="flex flex-col items-center justify-center gap-1 bg-gray-700 text-white border-0 p-2 cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded text-xs"
+              >
+                <i class="fa-solid fa-refresh text-base" />
+                <span>Load</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </Show>
     </div>
   );

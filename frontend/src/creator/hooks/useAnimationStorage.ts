@@ -10,7 +10,6 @@ export function useAnimationStorage(
 
   const saveToLocalStorage = (frames: number[][], animationDelayMs: number) => {
     try {
-      // Clear storage if no frames
       if (frames.length === 0) {
         localStorage.removeItem(STORAGE_KEY);
         return;
