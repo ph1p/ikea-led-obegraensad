@@ -3,6 +3,7 @@ repos:
     rev: v6.0.0
     hooks:
     -   id: check-yaml
+    -   id: check-toml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/pre-commit/mirrors-clang-format
@@ -15,8 +16,8 @@ repos:
     # Ruff version.
     rev: v0.14.10
     hooks:
-        # Run the linter.
-        - id: ruff-check
-          args: [ --fix ]
-        # Run the formatter.
-        - id: ruff-format
+    # Run the linter.
+    - id: ruff-check
+      args: [ --fix ]
+    # Run the formatter.
+    - id: ruff-format

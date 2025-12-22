@@ -2,9 +2,6 @@
 name = "ikea-led-obegraensad"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Solmath",email = "33658856+Solmath@users.noreply.github.com"}
-]
 license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.12"
