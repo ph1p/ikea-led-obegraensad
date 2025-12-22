@@ -1,11 +1,69 @@
 #!/usr/bin/env python3
 
+import imageio.v3 as iio
 import logging
+import numpy as np
 import socket
 import argparse
-import sys
+import time
 
 logger = logging.getLogger(__name__)
+
+
+def play_video(video_file_path, ip, port=4048):
+    # Load video frames using imageio with pyav plugin
+    im = iio.imread(video_file_path, plugin="pyav")
+
+    # manually convert the video to grayscale
+    gray_frames = np.dot(im[..., :3], [0.2989, 0.5870, 0.1140])
+
+    # Get video metadata for proper playback timing
+    video_meta = iio.immeta(video_file_path, plugin="pyav")
+    fps = video_meta.get("fps", 30)  # Default to 30 if not found
+    frame_delay = 1.0 / fps
+
+    logger.info(f"Playing at {fps} FPS")
+
+    # Track timing
+    start_time = time.perf_counter()
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    try:
+        # Iterate over frames with enumerate
+        for frame_count, frame in enumerate(gray_frames):
+            # Convert frame to pixels list
+            pixels = []
+            for y in range(16):
+                for x in range(16):
+                    brightness = int(frame[y, x])
+                    pixels.append((x, y, brightness))
+
+            # Create and send the DDP packet
+            packet = create_packet(pixels)
+            sock.sendto(packet, (ip, port))
+
+            # Calculate when the next frame should be displayed
+            target_time = start_time + ((frame_count + 1) * frame_delay)
+            current_time = time.perf_counter()
+
+            # Sleep only if we're ahead of schedule
+            sleep_time = target_time - current_time
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+            elif sleep_time < -frame_delay:
+                # Warn if we're falling behind by more than one frame
+                logger.warning(
+                    f"Warning: Frame {frame_count} is {-sleep_time:.3f}s behind"
+                )
+
+        logger.info(
+            f"Playback complete. Total time: {time.perf_counter() - start_time:.2f}s"
+        )
+    except KeyboardInterrupt:
+        logger.warning("Playback interrupted by user.")
+    finally:
+        sock.close()
 
 
 def create_packet(pixels=None):
@@ -46,35 +104,44 @@ def send_ddp_packet(ip, port, packet, debug=False):
     try:
         sock.sendto(packet, (ip, port))
         if debug:
-            print(f"Sent DDP packet to {ip}:{port}")
-            print(f"Packet size: {len(packet)} bytes")
+            logger.info(f"Sent DDP packet to {ip}:{port}")
+            logger.info(f"Packet size: {len(packet)} bytes")
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
     finally:
         sock.close()
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Send DDP packets to control LED matrix"
+    # Use parent parser for common arguments
+    parent_parser = argparse.ArgumentParser(
+        description="The parent parser", add_help=False
     )
-    parser.add_argument(
+
+    parent_parser.add_argument(
         "--ip", default="192.168.178.50", help="IP address of the display"
     )
-    parser.add_argument("--port", type=int, default=4048, help="UDP port")
-    parser.add_argument(
+    parent_parser.add_argument("--port", type=int, default=4048, help="UDP port")
+    parent_parser.add_argument(
         "-d", "--debug", action="store_true", help="Enable debug logging"
     )
-    parser.add_argument(
+    parent_parser.add_argument(
         "-v", "--verbose", action="store_true", help="Enable verbose logging"
+    )
+
+    # Main parser with subcommands
+    parser = argparse.ArgumentParser(
+        description="Send DDP packets to control LED matrix", parents=[parent_parser]
     )
 
     subparsers = parser.add_subparsers(help="help for subcommand", dest="subcommand")
 
-    subparsers.add_parser("clear", help="Clear all pixels")
+    subparsers.add_parser("clear", help="Clear all pixels", parents=[parent_parser])
 
     fill_parser = subparsers.add_parser(
-        "fill", help="Fill all pixels with specified brightness"
+        "fill",
+        help="Fill all pixels with specified brightness",
+        parents=[parent_parser],
     )
     fill_parser.add_argument(
         "brightness",
@@ -85,7 +152,7 @@ def main():
     )
 
     pixels_parser = subparsers.add_parser(
-        "pixels", help="Set individual pixel brightness"
+        "pixels", help="Set individual pixel brightness", parents=[parent_parser]
     )
     pixels_parser.add_argument(
         "-p",
@@ -98,7 +165,7 @@ def main():
     )
 
     video_parser = subparsers.add_parser(
-        "video", help="Play video on LED matrix via DDP"
+        "video", help="Play video on LED matrix via DDP", parents=[parent_parser]
     )
     video_parser.add_argument("video_file", type=str, help="Path to input video file")
 
@@ -137,7 +204,12 @@ def main():
     pixels = []
 
     # Validate fill brightness
-    if args.subcommand == "fill" or args.fill is not None:
+    if args.fill is not None:
+        if not 0 <= args.fill <= 255:
+            parser.error("Fill brightness must be between 0 and 255")
+        pixels = [(x, y, args.fill) for x in range(16) for y in range(16)]
+
+    if args.subcommand == "fill":
         if not 0 <= args.brightness <= 255:
             parser.error("Fill brightness must be between 0 and 255")
             return
@@ -150,10 +222,8 @@ def main():
         for x, y, brightness in args.pixel:
             if not (0 <= x < 16 and 0 <= y < 16):
                 parser.error(f"Invalid coordinates: {x},{y} (must be 0-15)")
-                sys.exit(1)
             if not (0 <= brightness <= 255):
                 parser.error(f"Invalid brightness: {brightness} (must be 0-255)")
-                sys.exit(1)
 
             logger.info(f"Setting pixel ({x},{y}) to brightness {brightness}")
             pixels.append((x, y, brightness))
@@ -162,8 +232,6 @@ def main():
         logger.info("Clearing all pixels")
 
     if args.subcommand == "video":
-        from videoplayer import play_video
-
         play_video(args.video_file, args.ip, args.port)
     else:
         packet = create_packet(pixels)
