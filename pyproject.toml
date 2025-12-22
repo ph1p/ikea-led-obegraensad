@@ -2,7 +2,7 @@
 name = "ikea-led-obegraensad"
 version = "0.1.0"
 description = ""
-license = {text = "MIT"}
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
