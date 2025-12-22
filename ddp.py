@@ -3,6 +3,7 @@
 import logging
 import socket
 import argparse
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -133,44 +134,42 @@ def main():
         else logging.WARNING
     )
 
+    pixels = []
+
     # Validate fill brightness
-    if args.subcommand == "fill":
-        pixels = []
+    if args.subcommand == "fill" or args.fill is not None:
         if not 0 <= args.brightness <= 255:
             parser.error("Fill brightness must be between 0 and 255")
             return
 
+        logger.info(f"Filling all pixels with brightness {args.brightness}")
         pixels = [(x, y, args.brightness) for x in range(16) for y in range(16)]
 
     # Validate pixel coordinates and brightness
-    if args.subcommand == "pixel":
-        if not (0 <= args.x < 16 and 0 <= args.y < 16):
-            parser.error(f"Invalid coordinates: {args.x},{args.y} (must be 0-15)")
-
-        if not (0 <= args.brightness <= 255):
-            parser.error(f"Invalid brightness: {args.brightness} (must be 0-255)")
-
-        pixels = [(args.x, args.y, args.brightness)]
-
+    if args.subcommand == "pixels" or args.pixel is not None:
         for x, y, brightness in args.pixel:
             if not (0 <= x < 16 and 0 <= y < 16):
                 parser.error(f"Invalid coordinates: {x},{y} (must be 0-15)")
+                sys.exit(1)
             if not (0 <= brightness <= 255):
                 parser.error(f"Invalid brightness: {brightness} (must be 0-255)")
+                sys.exit(1)
+
+            logger.info(f"Setting pixel ({x},{y}) to brightness {brightness}")
             pixels.append((x, y, brightness))
 
-    if args.subcommand == "clear":
-        pixels = []
-
-    if args.subcommand in ["clear", "fill", "pixel"]:
-        packet = create_packet(pixels)
-        send_ddp_packet(args.ip, args.port, packet)
+    if args.subcommand == "clear" or args.clear:
+        logger.info("Clearing all pixels")
 
     if args.subcommand == "video":
         from videoplayer import play_video
 
-        play_video(args.video_file, args.ip, args.port, args.debug, args.verbose)
-        return
+        play_video(args.video_file, args.ip, args.port)
+    else:
+        packet = create_packet(pixels)
+        send_ddp_packet(args.ip, args.port, packet)
+
+    return
 
 
 if __name__ == "__main__":
