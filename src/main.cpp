@@ -54,7 +54,11 @@ unsigned long previousMillis = 0;
 unsigned long interval = 30000;
 
 PluginManager pluginManager;
-SYSTEM_STATUS currentStatus = NONE;
+#ifdef ESP32
+DRAM_ATTR volatile SYSTEM_STATUS currentStatus = NONE;
+#else
+volatile SYSTEM_STATUS currentStatus = NONE;
+#endif
 WiFiManager wifiManager;
 
 unsigned long lastConnectionAttempt = 0;

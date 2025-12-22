@@ -66,4 +66,4 @@ enum SYSTEM_STATUS
   LOADING,
 };
 
-extern SYSTEM_STATUS currentStatus;
+extern volatile SYSTEM_STATUS currentStatus;

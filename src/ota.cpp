@@ -12,11 +12,12 @@ void onOTAStart()
   Serial.println("OTA update started!");
   currentStatus = UPDATE;
 
+  Screen.clear();
   std::vector<int> bits = Screen.readBytes(letterU);
 
   for (int i = 0; i < bits.size(); i++)
   {
-    Screen.setPixelAtIndex(i, bits[i]);
+    Screen.setPixelAtIndex(i, bits[i], MAX_BRIGHTNESS);
   }
 }
 
@@ -41,6 +42,7 @@ void onOTAEnd(bool success)
   {
     Serial.println("There was an error during OTA update!");
   }
+
   std::vector<int> bits = Screen.readBytes(letterR);
 
   for (int i = 0; i < bits.size(); i++)
@@ -53,6 +55,7 @@ void onOTAEnd(bool success)
 #else
   delay(1000);
 #endif
+
   currentStatus = NONE;
   Screen.loadFromStorage();
 }

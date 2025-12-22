@@ -187,7 +187,7 @@ void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 #endif
 }
 
-uint8_t *Screen_::getRotatedRenderBuffer()
+IRAM_ATTR uint8_t *Screen_::getRotatedRenderBuffer()
 {
   // No rotation needed - return original buffer directly
   if (currentRotation == 0)
@@ -206,7 +206,7 @@ uint8_t *Screen_::getRotatedRenderBuffer()
   return rotatedRenderBuffer_;
 }
 
-void Screen_::rotate()
+IRAM_ATTR void Screen_::rotate()
 {
   if (currentRotation == 1)
   {
@@ -244,14 +244,14 @@ void Screen_::rotate()
   }
 }
 
-void Screen_::onScreenTimer()
+IRAM_ATTR void Screen_::onScreenTimer()
 {
   Screen._render();
 }
 
-ICACHE_RAM_ATTR void Screen_::_render()
+IRAM_ATTR void Screen_::_render()
 {
-  const auto buf = getRotatedRenderBuffer();
+  const auto buf = (currentStatus == UPDATE) ? renderBuffer_ : getRotatedRenderBuffer();
 
   // SPI data needs to be 32-bit aligned, round up before divide
   static unsigned long
@@ -261,13 +261,26 @@ ICACHE_RAM_ATTR void Screen_::_render()
 
   static unsigned char counter = 0;
 
-  for (int idx = 0; idx < ROWS * COLS; idx++)
+  if (currentStatus == UPDATE)
   {
-    uint16_t scaledValue = ((uint16_t)buf[positions[idx]] * brightness_) / MAX_BRIGHTNESS;
-    bits[idx >> 3] |= (scaledValue > counter ? 0x80 : 0) >> (idx & 7);
+    for (int idx = 0; idx < ROWS * COLS; idx++)
+    {
+      if (buf[positions[idx]] > 0)
+      {
+        bits[idx >> 3] |= (0x80 >> (idx & 7));
+      }
+    }
   }
-
-  counter += ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS);
+  else
+  {
+    // Normal rendering with PWM for grayscale
+    for (int idx = 0; idx < ROWS * COLS; idx++)
+    {
+      uint16_t scaledValue = ((uint16_t)buf[positions[idx]] * brightness_) / MAX_BRIGHTNESS;
+      bits[idx >> 3] |= (scaledValue > counter ? 0x80 : 0) >> (idx & 7);
+    }
+    counter += ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS);
+  }
 
   digitalWrite(PIN_LATCH, LOW);
   SPI.writeBytes(bits, sizeof(spi_bits));
