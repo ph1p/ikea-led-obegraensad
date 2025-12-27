@@ -32,7 +32,7 @@ def create_packet(pixels: list[tuple[int, int, int]] | None = None) -> bytearray
     if pixels:
         for x, y, brightness in pixels:
             if 0 <= x < 16 and 0 <= y < 16 and 0 <= brightness <= 255:
-                index = (y * 16 + x) * 3
+                index: int = (y * 16 + x) * 3
                 data[index : index + 3] = [brightness] * 3
 
     packet.extend(data)
@@ -52,14 +52,14 @@ def send_ddp_packet(ip: str, port: int, packet: bytearray) -> None:
         sock.close()
 
 
-def main() -> None:
+def create_arg_parser() -> argparse.ArgumentParser:
     # Use parent parser for common arguments
     parent_parser = argparse.ArgumentParser(
         description="The parent parser", add_help=False
     )
 
     parent_parser.add_argument(
-        "--ip", default="192.168.178.50", help="IP address of the display"
+        "--ip", type=str, default="192.168.178.50", help="IP address of the display"
     )
     parent_parser.add_argument("--port", type=int, default=4048, help="UDP port")
     parent_parser.add_argument(
@@ -126,6 +126,11 @@ def main() -> None:
         deprecated=True,
     )
 
+    return parser
+
+
+def main() -> None:
+    parser: argparse.ArgumentParser = create_arg_parser()
     args: argparse.Namespace = parser.parse_args()
 
     logging.basicConfig(
@@ -139,24 +144,24 @@ def main() -> None:
     pixels: list[tuple[int, int, int]] = []
 
     # Validate fill brightness
-    if args.fill is not None:
-        if not 0 <= args.fill <= 255:
-            parser.error("Fill brightness must be between 0 and 255")
-        pixels = [(x, y, args.fill) for x in range(16) for y in range(16)]
+    if args.subcommand == "fill" or args.fill is not None:
+        if args.subcommand == "fill":
+            fill_brightness: int = args.brightness
+        else:
+            fill_brightness: int = args.fill
 
-    if args.subcommand == "fill":
-        if not 0 <= args.brightness <= 255:
+        if not 0 <= fill_brightness <= 255:
             parser.error("Fill brightness must be between 0 and 255")
-            return
 
-        logger.info(f"Filling all pixels with brightness {args.brightness}")
-        pixels = [(x, y, args.brightness) for x in range(16) for y in range(16)]
+        logger.info(f"Filling all pixels with brightness {fill_brightness}")
+        pixels = [(x, y, fill_brightness) for x in range(16) for y in range(16)]
 
     # Validate pixel coordinates and brightness
     if args.subcommand == "pixels" or args.pixel is not None:
         for x, y, brightness in args.pixel:
             if not (0 <= x < 16 and 0 <= y < 16):
                 parser.error(f"Invalid coordinates: {x},{y} (must be 0-15)")
+
             if not (0 <= brightness <= 255):
                 parser.error(f"Invalid brightness: {brightness} (must be 0-255)")
 
