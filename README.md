@@ -558,7 +558,6 @@ python3 ddp.py pixels --ip 192.168.178.50 -p 0 0 255 -p 15 15 128
 - `clear`: Clear all pixels
 - `fill BRIGHTNESS`: Fill with brightness (0-255)
 - `pixels -p X Y BRIGHTNESS`: Set pixel (-p can be used multiple times)
-- `video VIDEO_FILE`: Play a video in format 16x16 on the display
 
 **Options (for all subcommands):**
 

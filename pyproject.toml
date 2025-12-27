@@ -6,8 +6,6 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "imageio[pyav] (>=2.37.2,<3.0.0)",
-    "numpy (>=2.4.0,<3.0.0)",
     "requests (>=2.32.5,<3.0.0)",
     "requests-toolbelt (>=1.0.0,<2.0.0)",
     "tqdm (>=4.67.1,<5.0.0)",
