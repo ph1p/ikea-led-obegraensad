@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD024 -->
+
 # IKEA OBEGRÄNSAD Hack/Mod
 
 Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
