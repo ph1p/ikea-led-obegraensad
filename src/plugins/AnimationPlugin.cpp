@@ -1,4 +1,5 @@
 #include "plugins/AnimationPlugin.h"
+#include "websocket.h"
 
 void AnimationPlugin::setup()
 {
@@ -95,6 +96,15 @@ void AnimationPlugin::websocketHook(JsonDocument &request)
         customAnimationFrames[i][k] = (int)request["data"][i][k];
       }
     }
+  } else if (!strcmp(event, "animationStatus")) {
+    JsonDocument jsonDocument;
+    jsonDocument["event"] = "animationStatus";
+    jsonDocument["screens"] = customAnimationFrames.size();
+    jsonDocument["frameDelay"] = frameDelay;
+    String output;
+    serializeJson(jsonDocument, output);
+    sendWSMessage(output);
+    jsonDocument.clear();
   }
 }
 
