@@ -53,9 +53,7 @@ void AnimationPlugin::loop()
 void AnimationPlugin::websocketHook(JsonDocument &request)
 {
   const char *event = request["event"];
-  if (!strcmp(event, "upload"))
-  {
-    int size = (int)request["screens"];
+  if (!strcmp(event, "upload") || !strcmp(event, "resetFrames") || !strcmp(event, "configAnimation")) {
     if (request["frameDelay"].is<int>())
     {
       frameDelay = request["frameDelay"].as<int>();
@@ -64,6 +62,26 @@ void AnimationPlugin::websocketHook(JsonDocument &request)
       if (frameDelay > 10000)
         frameDelay = 10000;
     }
+  }
+
+  if (!strcmp(event, "resetFrames")) {
+    customAnimationFrames.resize(0);
+  } else if (!strcmp(event, "addFrame")) {
+    int currentSize = customAnimationFrames.size();
+    int targetSize = currentSize + 1;
+    customAnimationFrames.resize(targetSize);
+
+    for (int k = 0; k < 32; k++)
+    {
+      if (k == 0)
+      {
+        customAnimationFrames[currentSize].resize(32);
+      }
+      customAnimationFrames[currentSize][k] = (int)request["data"][k];
+    }
+    
+  } else if (!strcmp(event, "upload")) {
+    int size = (int)request["screens"];
 
     customAnimationFrames.resize(size);
     for (int i = 0; i < size; i++)
