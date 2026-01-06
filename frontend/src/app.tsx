@@ -1,4 +1,4 @@
-import { type Component, createMemo, onCleanup, Show } from "solid-js";
+import { type Component, createMemo, Show } from "solid-js";
 
 import { Layout } from "./components/layout/layout";
 import Sidebar from "./components/layout/sidebar";
@@ -11,56 +11,6 @@ import { loadImageAndGetDataArray, rotateArray } from "./helpers";
 export const App: Component = () => {
   const [store, actions] = useStore();
   const { toast } = useToast();
-
-  // Fix iOS Safari WebSocket hanging bug using alternating RAF/setTimeout pattern
-  // Source - https://stackoverflow.com/a/42036303
-  // iOS has a bug where rapid WebSocket sends during pointer events can hang the connection
-  // Solution: alternate between requestAnimationFrame and setTimeout to break the pattern
-  let scheduledId: number | undefined;
-  let pendingLedData: { index: number; status: number } | null = null;
-  let useRaf = true;
-  let frametime = 0;
-  let lastframe = Date.now();
-
-  const deferredLedSend = (data: { index: number; status: number }) => {
-    pendingLedData = data;
-
-    if (scheduledId) return;
-
-    const sendLed = () => {
-      frametime = Date.now() - lastframe;
-      lastframe = Date.now();
-
-      if (pendingLedData) {
-        actions.send(
-          JSON.stringify({
-            event: "led",
-            ...pendingLedData,
-          }),
-        );
-        pendingLedData = null;
-      }
-
-      scheduledId = undefined;
-      useRaf = !useRaf;
-    };
-
-    if (useRaf) {
-      scheduledId = requestAnimationFrame(sendLed);
-    } else {
-      scheduledId = setTimeout(sendLed, Math.max(0, frametime)) as unknown as number;
-    }
-  };
-
-  onCleanup(() => {
-    if (scheduledId) {
-      if (useRaf) {
-        cancelAnimationFrame(scheduledId);
-      } else {
-        clearTimeout(scheduledId);
-      }
-    }
-  });
 
   const rotatedMatrix = createMemo(() => rotateArray(store.indexMatrix, store.rotation));
 
@@ -177,7 +127,7 @@ export const App: Component = () => {
             indexData={rotatedMatrix()}
             brightness={store.brightness ?? 255}
             onSetLed={(data) => {
-              deferredLedSend(data);
+              wsMessage("led", data);
             }}
             onSetMatrix={(data) => {
               actions?.setLeds([...data]);

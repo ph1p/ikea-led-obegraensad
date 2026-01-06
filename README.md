@@ -653,7 +653,27 @@ Create a second automation or condition to call `rest_command.obegraensad_bright
 
 **Structure:**
 
-- `frontend/` - Web UI code
+- `frontend/` - Web UI code built with solidjs
+- `frontend/src/` - Source files
+- `frontend/dist/` - Built files (generated)
+
+**Prerequisites:**
+
+This project uses [pnpm](https://pnpm.io/) as the package manager. pnpm is an alternative to npm.
+
+**Install pnpm:**
+
+```bash
+# Using npm
+npm install -g pnpm
+
+# Using Homebrew (macOS)
+brew install pnpm
+
+# Using Corepack (Node.js 16.13+)
+corepack enable
+corepack prepare pnpm@latest --activate
+```
 
 **Setup:**
 
@@ -664,14 +684,34 @@ pnpm install
 
 **Configuration:**
 
-- Set device IP in `.env`
+Create a `.env` file in the `frontend/` directory and set your device IP:
+
+```bash
+VITE_DEVICE_IP=192.168.178.50
+```
+
+This allows the development server to proxy API requests to your device during development.
 
 **Commands:**
 
-- `pnpm dev` - Start development server
-- `pnpm build` - Build and generate `webgui.cpp`
+- `pnpm dev` - Start development server with hot reload (usually at `http://localhost:5173`)
+- `pnpm build` - Build optimized production bundle and generate `webgui.cpp` for ESP32
+- `pnpm preview` - Preview production build locally
+- `pnpm lint` - Run linter to check code quality
+- `pnpm format` - Format code with Prettier
+
+**Development Workflow:**
+
+1. Start the development server: `pnpm dev`
+2. Make changes to files in `frontend/src/`
+3. Changes will hot-reload in your browser
+4. Test your changes against a running device
+5. When ready, run `pnpm build` to generate the embedded web UI
+6. The build process creates `src/webgui.cpp` which is compiled into the firmware
 
 **Docker Build:**
+
+If you prefer using Docker instead of installing Node.js and pnpm locally:
 
 ```bash
 docker compose run node

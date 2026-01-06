@@ -169,31 +169,34 @@ export const LedMatrix: Component<Props> = (props) => {
 
   return (
     <div
-      ref={containerRef}
-      class={`
-        p-4 bg-[#111111]
-        shadow-lg
-        relative mx-auto
-        transition-all duration-300
-        ${visible() ? "opacity-100" : "opacity-50"}
-        ${props.disabled ? "opacity-30" : ""}
-        ${isDrawing() ? "ring-2 ring-blue-500/50" : ""}
-        max-w-full max-h-full
-        aspect-9/13
-      `}
+      class="p-4 bg-[#111111] shadow-lg mx-auto"
       style={{
         width: "min(100%, 700px, (100vh - 16rem) * 9 / 13)",
-        height: "auto",
       }}
     >
-      <canvas
-        ref={canvasRef}
-        class="w-full h-full self-center"
-        style={{
-          "image-rendering": "pixelated",
-          "touch-action": "none",
-        }}
-      />
+      <div
+        ref={containerRef}
+        class={`
+          relative
+          transition-all duration-300
+          ${visible() ? "opacity-100" : "opacity-50"}
+          ${props.disabled ? "opacity-30" : ""}
+          ${isDrawing() ? "ring-2 ring-blue-500/50" : ""}
+          max-w-full max-h-full
+          aspect-9/13
+        `}
+      >
+        <canvas
+          ref={canvasRef}
+          class="w-full"
+          style={{
+            "image-rendering": "pixelated",
+            "touch-action": "none",
+            "aspect-ratio": "9 / 13",
+            height: "auto",
+          }}
+        />
+      </div>
     </div>
   );
 };
