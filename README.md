@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD024 -->
+
 # IKEA OBEGRÄNSAD Hack/Mod
 
 Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
@@ -501,6 +503,22 @@ curl http://your-server/api/clearstorage
 
 DDP enables real-time LED matrix control via UDP packets. External applications can send pixel data directly over the network.
 
+### Python project setup with Poetry
+
+Please [install Poetry](https://python-poetry.org/docs/#installation) for an easy way to setup the Python environment.
+
+To install all required dependencies and create a virtual environment run:
+
+```bash
+poetry install
+```
+
+VS Code should detect the venv automatically and prompt you to activate it. Once that's done you can use the `python` command as usual. Alternatively use the `poetry run` command to make sure the python from the virtual environment is executed, e.g.:
+
+```bash
+poetry run python ddp.py clear
+```
+
 ### Quick Start
 
 1. **Enable DDP Plugin**
@@ -510,36 +528,48 @@ DDP enables real-time LED matrix control via UDP packets. External applications 
    ```
 
 2. **Send Pixels**
+
    ```bash
    python3 ddp.py --ip 192.168.178.50 --fill 128
    ```
 
 ### Using ddp.py
 
-The included Python script (`ddp.py`) simplifies DDP packet creation.
+The included Python script (`ddp.py`) simplifies DDP packet creation. It offers a rudimentary command line interface to control display content.
 
 **Clear all pixels:**
 
 ```bash
-python3 ddp.py --ip 192.168.178.50 --clear
+python3 ddp.py clear --ip 192.168.178.50
 ```
 
 **Fill display with brightness value:**
 
 ```bash
-python3 ddp.py --ip 192.168.178.50 --fill 128
+python3 ddp.py fill 128 --ip 192.168.178.50
 ```
 
 **Set individual pixels (X, Y, brightness):**
 
 ```bash
-python3 ddp.py --ip 192.168.178.50 --pixel 0 0 255 --pixel 15 15 128
+python3 ddp.py pixels --ip 192.168.178.50 -p 0 0 255 -p 15 15 128
 ```
 
-**Options:**
+**Subcommands:**
+
+- `clear`: Clear all pixels
+- `fill BRIGHTNESS`: Fill with brightness (0-255)
+- `pixels -p X Y BRIGHTNESS`: Set pixel (-p can be used multiple times)
+
+**Options (for all subcommands):**
 
 - `--ip`: Display IP address (default: 192.168.178.50)
 - `--port`: UDP port (default: 4048)
+- `-v, --verbose`: Write more information to output
+- `-d, --debug`: Write even more information to output
+
+**Legacy options (still available for compatibility):**
+
 - `--clear`: Clear all pixels
 - `--fill BRIGHTNESS`: Fill with brightness (0-255)
 - `--pixel X Y BRIGHTNESS`: Set pixel (can be used multiple times)
@@ -555,7 +585,7 @@ python3 ddp.py --ip 192.168.178.50 --pixel 0 0 255 --pixel 15 15 128
 
 **Packet Structure:**
 
-```
+```text
 [Header: 10 bytes][RGB Data: 768 bytes for 16×16]
 ```
 
@@ -733,7 +763,7 @@ pre-commit install
 
 ### Plugin Development
 
-**1. Create Plugin Files**
+#### **1. Create Plugin Files**
 
 **plugins/MyPlugin.h:**
 
@@ -786,7 +816,7 @@ void MyPlugin::websocketHook(JsonDocument &request) {
 }
 ```
 
-**2. Register Plugin in main.cpp**
+#### **2. Register Plugin in main.cpp**
 
 ```cpp
 #include "plugins/MyPlugin.h"
