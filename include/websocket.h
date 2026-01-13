@@ -14,6 +14,7 @@ void onWsEvent(AsyncWebSocket *server,
                uint8_t *data,
                size_t len);
 void sendInfo();
+void sendWSMessage(String &message);
 void initWebsocketServer(AsyncWebServer &server);
 void cleanUpClients();
 
