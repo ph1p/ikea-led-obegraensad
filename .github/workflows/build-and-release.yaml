@@ -139,41 +139,41 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download ESP32 firmware
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: esp32dev_firmware
           path: ./builds/ # specify a target directory
 
       - name: Download ESP8266 firmware (nodemcuv2)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: nodemcuv2_firmware
           path: ./builds/ # specify a target directory
 
       - name: Download ESP8266 firmware (d1_mini_pro-ota)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: d1_mini_pro_ota_firmware
           path: ./builds/ # specify a target directory
 
       - name: Download ESP32-wemos firmware
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: ESP32-wemos_firmware
           path: ./builds/ # specify a target directory
 
       - name: Download ESP32-C3 firmware
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: esp32c3_firmware
           path: ./builds/ # specify a target directory
 
       - name: Download ESP32-S3 firmware
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: esp32s3_firmware
