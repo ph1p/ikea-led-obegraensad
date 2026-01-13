@@ -12,7 +12,7 @@ jobs:
     name: run PlatformIO Dependabot
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: run PlatformIO Dependabot
         uses: ph1p/platformio_dependabot@v1
         with:
