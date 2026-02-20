@@ -2,6 +2,11 @@
 #include "messages.h"
 #include "scheduler.h"
 #include "websocket.h"
+#ifdef ESP32
+#include <WiFi.h>
+#else
+#include <ESP8266WiFi.h>
+#endif
 
 void sendJsonSuccess(AsyncWebServerRequest *request, const char *message)
 {
@@ -114,14 +119,10 @@ void handleGetData(AsyncWebServerRequest *request)
   {
     AsyncResponseStream *response = request->beginResponseStream("application/octet-stream");
 
-    int currentpos_src = 0;
-    for (int row = 0; row < ROWS; row++)
+    uint8_t *buffer = Screen.getRenderBuffer();
+    for (int i = 0; i < TOTAL_PIXELS; i++)
     {
-      for (int col = 0; col < COLS; col++)
-      {
-        response->print(Screen.getRenderBuffer()[currentpos_src]);
-        currentpos_src += 1;
-      }
+      response->write(buffer[i]);
     }
 
     request->send(response);
@@ -142,6 +143,11 @@ void handleGetInfo(AsyncWebServerRequest *request)
   jsonDocument["rotation"] = Screen.currentRotation;
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
   jsonDocument["scheduleActive"] = Scheduler.isActive;
+  jsonDocument["rssi"] = WiFi.RSSI();
+  jsonDocument["uptime"] = millis() / 1000;
+  jsonDocument["freeHeap"] = ESP.getFreeHeap();
+  jsonDocument["ipAddress"] = WiFi.localIP().toString();
+  jsonDocument["macAddress"] = WiFi.macAddress();
 
   JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
   for (const auto &item : Scheduler.schedule)
