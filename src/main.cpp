@@ -22,17 +22,29 @@
 #include "plugins/ArtNet.h"
 #include "plugins/Blob.h"
 #include "plugins/BreakoutPlugin.h"
+#include "plugins/BubblesPlugin.h"
+#include "plugins/CheckerboardPlugin.h"
 #include "plugins/CirclePlugin.h"
+#include "plugins/CometPlugin.h"
 #include "plugins/DDPPlugin.h"
 #include "plugins/DrawPlugin.h"
+#include "plugins/FirefliesPlugin.h"
 #include "plugins/FireworkPlugin.h"
 #include "plugins/GameOfLifePlugin.h"
 #include "plugins/LinesPlugin.h"
+#include "plugins/MatrixRainPlugin.h"
+#include "plugins/MeteorShowerPlugin.h"
 #include "plugins/PongClockPlugin.h"
+#include "plugins/RadarPlugin.h"
 #include "plugins/RainPlugin.h"
+#include "plugins/ScanlinesPlugin.h"
 #include "plugins/SnakePlugin.h"
+#include "plugins/SparkleFieldPlugin.h"
+#include "plugins/SpiralPlugin.h"
 #include "plugins/StarsPlugin.h"
 #include "plugins/TickingClockPlugin.h"
+#include "plugins/WaveBarsPlugin.h"
+#include "plugins/WavePlugin.h"
 
 #ifdef ENABLE_SERVER
 #include "plugins/AnimationPlugin.h"
@@ -173,8 +185,20 @@ void baseSetup()
   pluginManager.addPlugin(new LinesPlugin());
   pluginManager.addPlugin(new CirclePlugin());
   pluginManager.addPlugin(new RainPlugin());
+  pluginManager.addPlugin(new MatrixRainPlugin());
   pluginManager.addPlugin(new FireworkPlugin());
   pluginManager.addPlugin(new BlobPlugin());
+  pluginManager.addPlugin(new SpiralPlugin());
+  pluginManager.addPlugin(new WavePlugin());
+  pluginManager.addPlugin(new CheckerboardPlugin());
+  pluginManager.addPlugin(new RadarPlugin());
+  pluginManager.addPlugin(new BubblesPlugin());
+  pluginManager.addPlugin(new CometPlugin());
+  pluginManager.addPlugin(new FirefliesPlugin());
+  pluginManager.addPlugin(new MeteorShowerPlugin());
+  pluginManager.addPlugin(new ScanlinesPlugin());
+  pluginManager.addPlugin(new SparkleFieldPlugin());
+  pluginManager.addPlugin(new WaveBarsPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
