@@ -17,6 +17,7 @@
 #endif
 
 #include "PluginManager.h"
+#include "config.h"
 #include "scheduler.h"
 
 #include "plugins/ArtNet.h"
@@ -165,12 +166,15 @@ void baseSetup()
   Screen.setup();
 #endif
 
+  // Initialize configuration system (always safe)
+  config.begin();
+
 // server
 #ifdef ENABLE_SERVER
   connectToWiFi();
 
-  // set time server
-  configTzTime(TZ_INFO, NTP_SERVER);
+  // set time server using config values
+  configTzTime(config.getTzInfo().c_str(), config.getNtpServer().c_str());
 
   initOTA(server);
   initWebsocketServer(server);

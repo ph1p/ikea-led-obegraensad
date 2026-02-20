@@ -1,4 +1,5 @@
 #include "plugins/WeatherPlugin.h"
+#include "config.h"
 
 // https://github.com/chubin/wttr.in/blob/master/share/translations/en.txt
 #ifdef ESP32
@@ -64,8 +65,12 @@ void WeatherPlugin::update()
     return;
   }
 
-  String weatherApiString = "https://wttr.in/" + String(WEATHER_LOCATION) + "?format=j2&lang=en";
-  Serial.print("Requesting weather from: ");
+  String weatherLocation = config.getWeatherLocation();
+  Serial.print("[WeatherPlugin] Fetching weather for configured city: ");
+  Serial.println(weatherLocation);
+  
+  String weatherApiString = "https://wttr.in/" + weatherLocation + "?format=j2&lang=en";
+  Serial.print("[WeatherPlugin] API request: ");
   Serial.println(weatherApiString);
 
 #ifdef ESP32

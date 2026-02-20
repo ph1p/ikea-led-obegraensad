@@ -1,4 +1,5 @@
 #include "webhandler.h"
+#include "config.h"
 #include "messages.h"
 #include "scheduler.h"
 #include "websocket.h"
@@ -236,4 +237,125 @@ void handleClearStorage(AsyncWebServerRequest *request)
 
   sendJsonSuccess(request, "Storage cleared");
 #endif
+}
+
+void handleGetConfig(AsyncWebServerRequest *request)
+{
+  Serial.println("[WebHandler] GET /api/config");
+  try {
+    String json = config.toJson();
+    Serial.println("[WebHandler] ============================================");
+    Serial.println("[WebHandler] Current Configuration:");
+    Serial.print("[WebHandler] Weather Location: ");
+    Serial.println(config.getWeatherLocation());
+    Serial.print("[WebHandler] NTP Server: ");
+    Serial.println(config.getNtpServer());
+    Serial.print("[WebHandler] Timezone: ");
+    Serial.println(config.getTzInfo());
+    Serial.print("[WebHandler] Auto-Start Schedule: ");
+    Serial.println(config.getAutoStartSchedule() ? "enabled" : "disabled");
+    Serial.println("[WebHandler] ============================================");
+    request->send(200, "application/json", json);
+  } catch (...) {
+    Serial.println("[WebHandler] ERROR: Exception in handleGetConfig");
+    sendJsonError(request, 500, "Error reading configuration");
+  }
+}
+
+void handleSetConfigBody(AsyncWebServerRequest *request,
+                         uint8_t *data,
+                         size_t len,
+                         size_t index,
+                         size_t total)
+{
+  if (index == 0)
+  {
+    request->_tempObject = new String();
+  }
+
+  String *body = static_cast<String *>(request->_tempObject);
+  if (!body)
+  {
+    sendJsonError(request, 500, "Internal buffer error");
+    return;
+  }
+
+  if (index == 0)
+  {
+    body->reserve(total);
+  }
+
+  body->concat(reinterpret_cast<char *>(data), len);
+
+  if (index + len != total)
+  {
+    return;
+  }
+
+  Serial.println("[WebHandler] POST /api/config (body)");
+  Serial.print("[WebHandler] Received JSON: ");
+  Serial.println(*body);
+
+  try
+  {
+    if (body->length() == 0)
+    {
+      Serial.println("[WebHandler] ERROR: No JSON body");
+      sendJsonError(request, 400, "No JSON body provided");
+    }
+    else if (config.fromJson(*body))
+    {
+      Serial.println("[WebHandler] JSON parsed successfully");
+      config.save();
+      Serial.println("[WebHandler] ============================================");
+      Serial.println("[WebHandler] Configuration Updated:");
+      Serial.print("[WebHandler] Weather Location: ");
+      Serial.println(config.getWeatherLocation());
+      Serial.print("[WebHandler] NTP Server: ");
+      Serial.println(config.getNtpServer());
+      Serial.print("[WebHandler] Timezone: ");
+      Serial.println(config.getTzInfo());
+      Serial.print("[WebHandler] Auto-Start Schedule: ");
+      Serial.println(config.getAutoStartSchedule() ? "enabled" : "disabled");
+      Serial.println("[WebHandler] ============================================");
+      sendJsonSuccess(request, "Configuration saved successfully");
+    }
+    else
+    {
+      Serial.println("[WebHandler] ERROR: Invalid JSON format");
+      sendJsonError(request, 400, "Invalid JSON format");
+    }
+  }
+  catch (...)
+  {
+    Serial.println("[WebHandler] ERROR: Exception in handleSetConfigBody");
+    sendJsonError(request, 500, "Error saving configuration");
+  }
+
+  delete body;
+  request->_tempObject = nullptr;
+}
+
+void handleResetConfig(AsyncWebServerRequest *request)
+{
+  Serial.println("[WebHandler] POST /api/config/reset");
+  try {
+    config.setDefaults();
+    config.save();
+    Serial.println("[WebHandler] ============================================");
+    Serial.println("[WebHandler] Configuration Reset to Defaults:");
+    Serial.print("[WebHandler] Weather Location: ");
+    Serial.println(config.getWeatherLocation());
+    Serial.print("[WebHandler] NTP Server: ");
+    Serial.println(config.getNtpServer());
+    Serial.print("[WebHandler] Timezone: ");
+    Serial.println(config.getTzInfo());
+    Serial.print("[WebHandler] Auto-Start Schedule: ");
+    Serial.println(config.getAutoStartSchedule() ? "enabled" : "disabled");
+    Serial.println("[WebHandler] ============================================");
+    sendJsonSuccess(request, "Configuration reset to defaults");
+  } catch (...) {
+    Serial.println("[WebHandler] ERROR: Exception in handleResetConfig");
+    sendJsonError(request, 500, "Error resetting configuration");
+  }
 }

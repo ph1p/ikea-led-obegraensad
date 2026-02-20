@@ -17,3 +17,10 @@ void handleClearSchedule(AsyncWebServerRequest *request);
 void handleStopSchedule(AsyncWebServerRequest *request);
 void handleStartSchedule(AsyncWebServerRequest *request);
 void handleClearStorage(AsyncWebServerRequest *request);
+void handleGetConfig(AsyncWebServerRequest *request);
+void handleSetConfigBody(AsyncWebServerRequest *request,
+						 uint8_t *data,
+						 size_t len,
+						 size_t index,
+						 size_t total);
+void handleResetConfig(AsyncWebServerRequest *request);
