@@ -18,8 +18,8 @@ importers:
         specifier: ^2.4.3
         version: 2.4.3(solid-js@1.9.11)
       '@solid-primitives/intersection-observer':
-        specifier: ^2.2.2
-        version: 2.2.2(solid-js@1.9.11)
+        specifier: ^2.2.3
+        version: 2.2.3(solid-js@1.9.11)
       '@solid-primitives/timer':
         specifier: ^1.4.3
         version: 1.4.3(solid-js@1.9.11)
@@ -566,8 +566,8 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solid-primitives/intersection-observer@2.2.2':
-    resolution: {integrity: sha512-5Vak/eRuCKAQis+YaPsP4KysPc+sQGL2ew8kvTOMxKVOTJcICkxznRrlFEBbBk0UsiUQlm9CcVQtJwocKWNXcw==}
+  '@solid-primitives/intersection-observer@2.2.3':
+    resolution: {integrity: sha512-DYQwekH8XnVsKastWPABBJ7pZ6eeePGJx+V43JbNEnR2Ai1JR3FCrvQTLw3dsWvNIclFmWUBFp9AGJ/96k6lGw==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -1454,7 +1454,7 @@ snapshots:
       '@solid-primitives/utils': 6.3.2(solid-js@1.9.11)
       solid-js: 1.9.11
 
-  '@solid-primitives/intersection-observer@2.2.2(solid-js@1.9.11)':
+  '@solid-primitives/intersection-observer@2.2.3(solid-js@1.9.11)':
     dependencies:
       '@solid-primitives/utils': 6.3.2(solid-js@1.9.11)
       solid-js: 1.9.11
