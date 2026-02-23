@@ -24,8 +24,8 @@ importers:
         specifier: ^1.4.3
         version: 1.4.3(solid-js@1.9.11)
       '@solid-primitives/websocket':
-        specifier: ^1.3.1
-        version: 1.3.1(solid-js@1.9.11)
+        specifier: ^1.3.2
+        version: 1.3.2(solid-js@1.9.11)
       '@tailwindcss/postcss':
         specifier: ^4.1.18
         version: 4.1.18
@@ -581,8 +581,8 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solid-primitives/websocket@1.3.1':
-    resolution: {integrity: sha512-F06tA2FKa5VsnS4E4WEc3jHpsJfXRlMTGOtolugTzCqV3JmJTyvk9UVg1oz6PgGHKGi1CQ91OP8iW34myyJgaQ==}
+  '@solid-primitives/websocket@1.3.2':
+    resolution: {integrity: sha512-zmS/JQeR6NVW74ttpUKdf1ehR4vg/kIIfIMzOTy7qSmUxolK5Kv2PnOZYGw7UMK8/xQCcQu10lrYWeGuNPS77Q==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -1467,7 +1467,7 @@ snapshots:
     dependencies:
       solid-js: 1.9.11
 
-  '@solid-primitives/websocket@1.3.1(solid-js@1.9.11)':
+  '@solid-primitives/websocket@1.3.2(solid-js@1.9.11)':
     dependencies:
       solid-js: 1.9.11
 
