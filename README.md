@@ -833,3 +833,11 @@ pluginManager.addPlugin(new MyPlugin());
 - Verify all soldering points, especially VCC
 - Ensure adequate power supply to the board
 - Check for loose connections
+- Try to connect the power supply directly to the microcontroller board
+
+### Microcontroller is stuck in boot loop / flickering panel / black panel
+
+- Break the 5V connection between the matrix display and the microcontroller board (cut cable between controller and VCC and insulate ends with tape)
+- Use separate USB power cables for the microcontroller and the matrix display (e.g. by using a power supply with 2x5V output of 10W each)
+- Reason: When voltage drops too low on the microcontroller board output pins might not reach 3.3V, since the matrix display is actually expecting a 0V-5V signal the resulting output voltage of the microcontroller might be lower than the threshold of the matrix display resulting in flickering / completely black matrix displays. Additionally must power supplies only deliver 10W per port which is not always sufficient to power microcontroller and matrix displays (especially at brightness 100% and more than half the pixels being lit)
+- Has the additional advantage that you can upload firmware without dissassembly of the backpanel if you cannot use OTA updates
