@@ -18,8 +18,8 @@ importers:
         specifier: ^2.4.3
         version: 2.4.3(solid-js@1.9.11)
       '@solid-primitives/intersection-observer':
-        specifier: ^2.2.3
-        version: 2.2.3(solid-js@1.9.11)
+        specifier: ^2.2.4
+        version: 2.2.4(solid-js@1.9.11)
       '@solid-primitives/timer':
         specifier: ^1.4.3
         version: 1.4.3(solid-js@1.9.11)
@@ -566,8 +566,8 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solid-primitives/intersection-observer@2.2.3':
-    resolution: {integrity: sha512-DYQwekH8XnVsKastWPABBJ7pZ6eeePGJx+V43JbNEnR2Ai1JR3FCrvQTLw3dsWvNIclFmWUBFp9AGJ/96k6lGw==}
+  '@solid-primitives/intersection-observer@2.2.4':
+    resolution: {integrity: sha512-3+QaAT/TUdEaeKkqiTf+sk8g1/vE+QM9PucG2/JI8hLI8ALpBYBnlhtvcwIdpjaKMSpPN/1L4hneLvwqnx4YRA==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -578,6 +578,11 @@ packages:
 
   '@solid-primitives/utils@6.3.2':
     resolution: {integrity: sha512-hZ/M/qr25QOCcwDPOHtGjxTD8w2mNyVAYvcfgwzBHq2RwNqHNdDNsMZYap20+ruRwW4A3Cdkczyoz0TSxLCAPQ==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
+  '@solid-primitives/utils@6.4.0':
+    resolution: {integrity: sha512-AeGTBg8Wtkh/0s+evyLtP8piQoS4wyqqQaAFs2HJcFMMjYAtUgo+ZPduRXLjPlqKVc2ejeR544oeqpbn8Egn8A==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -1616,9 +1621,9 @@ snapshots:
       '@solid-primitives/utils': 6.3.2(solid-js@1.9.11)
       solid-js: 1.9.11
 
-  '@solid-primitives/intersection-observer@2.2.3(solid-js@1.9.11)':
+  '@solid-primitives/intersection-observer@2.2.4(solid-js@1.9.11)':
     dependencies:
-      '@solid-primitives/utils': 6.3.2(solid-js@1.9.11)
+      '@solid-primitives/utils': 6.4.0(solid-js@1.9.11)
       solid-js: 1.9.11
 
   '@solid-primitives/timer@1.4.3(solid-js@1.9.11)':
@@ -1626,6 +1631,10 @@ snapshots:
       solid-js: 1.9.11
 
   '@solid-primitives/utils@6.3.2(solid-js@1.9.11)':
+    dependencies:
+      solid-js: 1.9.11
+
+  '@solid-primitives/utils@6.4.0(solid-js@1.9.11)':
     dependencies:
       solid-js: 1.9.11
 
