@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@biomejs/biome": "^2.3.13",
+    "@biomejs/biome": "^2.4.4",
     "@gfx/zopfli": "^1.0.15",
     "@types/node": "^25.3.0",
     "@types/offscreencanvas": "^2019.7.3",
