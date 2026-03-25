@@ -20,7 +20,7 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-singlefile": "^2.3.0",
-    "vite-plugin-solid": "^2.11.10"
+    "vite-plugin-solid": "^2.11.11"
   },
   "dependencies": {
     "@radix-ui/react-separator": "^1.1.8",
