@@ -17,7 +17,7 @@
     "autoprefixer": "^10.4.24",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.2.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "vite": "^7.3.1",
     "vite-plugin-singlefile": "^2.3.0",
     "vite-plugin-solid": "^2.11.10"
