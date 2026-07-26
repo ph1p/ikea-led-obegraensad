@@ -317,6 +317,14 @@ void loop()
   }
 
 #ifdef ENABLE_SERVER
+  static unsigned long lastLiveFrameMillis = 0;
+  const unsigned long currentMillis = millis();
+  if (currentMillis - lastLiveFrameMillis >= 100)
+  {
+    lastLiveFrameMillis = currentMillis;
+    sendLiveFrame();
+  }
+
   cleanUpClients();
 #endif
 #ifdef ESP32
