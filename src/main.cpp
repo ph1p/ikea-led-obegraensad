@@ -17,6 +17,7 @@
 #endif
 
 #include "PluginManager.h"
+#include "brightness_schedule.h"
 #include "config.h"
 #include "scheduler.h"
 
@@ -237,6 +238,7 @@ TaskHandle_t screenDrawingTaskHandle = NULL;
 void screenDrawingTask(void *parameter)
 {
   Screen.setup();
+  ScheduledBrightness.init();
   for (;;)
   {
     pluginManager.runActivePlugin();
@@ -260,6 +262,7 @@ void setup()
 void screenDrawingTask()
 {
   Screen.setup();
+  ScheduledBrightness.init();
   pluginManager.runActivePlugin();
   yield();
 }
@@ -288,6 +291,7 @@ void loop()
   if (currentStatus == NONE)
   {
     Scheduler.update();
+    ScheduledBrightness.update();
 
     if ((taskCounter & 0x03) == 0)
     {
