@@ -66,10 +66,12 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        environment: [nodemcuv2, d1_mini_pro-ota, ESP32-wemos, esp32c3, esp32s3]
+        environment: [nodemcuv2, d1_mini, d1_mini_pro-ota, ESP32-wemos, esp32c3, esp32s3]
         include:
           - environment: nodemcuv2
             artifact_name: nodemcuv2_firmware
+          - environment: d1_mini
+            artifact_name: d1_mini_firmware
           - environment: d1_mini_pro-ota
             artifact_name: d1_mini_pro_ota_firmware
           - environment: ESP32-wemos
@@ -149,6 +151,13 @@ jobs:
         continue-on-error: true
         with:
           name: nodemcuv2_firmware
+          path: ./builds/ # specify a target directory
+
+      - name: Download ESP8266 firmware (d1_mini)
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: d1_mini_firmware
           path: ./builds/ # specify a target directory
 
       - name: Download ESP8266 firmware (d1_mini_pro-ota)
