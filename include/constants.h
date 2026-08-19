@@ -5,7 +5,16 @@
 // disable if you do not want to have online functionality
 #define ENABLE_SERVER
 
-#ifdef ESP32
+// ESP32-C3 routes its internal SPI flash to GPIO12-17 (HD/WP/CS0/CLK/MOSI/MISO)
+// and only exposes GPIO0-21, so the generic ESP32 pins below are unusable there.
+// GPIO2/8/9 are strapping pins, 18/19 the native USB, 20/21 UART0.
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#define PIN_ENABLE 3
+#define PIN_DATA 4
+#define PIN_CLOCK 5
+#define PIN_LATCH 6
+#define PIN_BUTTON 7
+#elif defined(ESP32)
 #define PIN_ENABLE 26
 #define PIN_DATA 27
 #define PIN_CLOCK 14
