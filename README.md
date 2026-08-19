@@ -121,16 +121,16 @@ Inside you'll find 4 identical plates with 64 LEDs each (in 4 fields). Focus on 
 
 Connect the pins as shown below. Remember to configure them in `include/constants.h` according to your board.
 
-|       LCD        | ESP32  | TTGO LoRa32 | NodeMCUv2 | Lolin D32 (Pro) | Xiao ESP32S3 |
-| :--------------: | :----: | :---------: | :-------: | :-------------: | :----------: |
-|       GND        |  GND   |     GND     |    GND    |       GND       |     GND      |
-|       VCC        |   5V   |     5V      |    VIN    |       USB       |     VUSB     |
-| EN (PIN_ENABLE)  | GPIO26 |    IO22     | GPIO16 D0 |     GPIO26      |  D4 (GPIO5)  |
-|  IN (PIN_DATA)   | GPIO27 |    IO23     | GPIO13 D7 |     GPIO27      |  D10 (MOSI)  |
-| CLK (PIN_CLOCK)  | GPIO14 |    IO02     | GPIO14 D5 |     GPIO14      |   D8 (SCK)   |
-| CLA (PIN_LATCH)  | GPIO12 |    IO15     | GPIO0 D3  |     GPIO12      |  D5 (GPIO6)  |
-|  BUTTON one end  | GPIO16 |    IO21     | GPIO2 D4  |     GPIO25      |  D3 (GPIO4)  |
-| BUTTON other end |  GND   |     GND     |    GND    |       GND       |     GND      |
+|       LCD        | ESP32  | ESP32-C3 | TTGO LoRa32 | NodeMCUv2 | Lolin D32 (Pro) | Xiao ESP32S3 |
+| :--------------: | :----: | :------: | :---------: | :-------: | :-------------: | :----------: |
+|       GND        |  GND   |   GND    |     GND     |    GND    |       GND       |     GND      |
+|       VCC        |   5V   |    5V    |     5V      |    VIN    |       USB       |     VUSB     |
+| EN (PIN_ENABLE)  | GPIO26 |  GPIO3   |    IO22     | GPIO16 D0 |     GPIO26      |  D4 (GPIO5)  |
+|  IN (PIN_DATA)   | GPIO27 |  GPIO4   |    IO23     | GPIO13 D7 |     GPIO27      |  D10 (MOSI)  |
+| CLK (PIN_CLOCK)  | GPIO14 |  GPIO5   |    IO02     | GPIO14 D5 |     GPIO14      |   D8 (SCK)   |
+| CLA (PIN_LATCH)  | GPIO12 |  GPIO6   |    IO15     | GPIO0 D3  |     GPIO12      |  D5 (GPIO6)  |
+|  BUTTON one end  | GPIO16 |  GPIO7   |    IO21     | GPIO2 D4  |     GPIO25      |  D3 (GPIO4)  |
+| BUTTON other end |  GND   |   GND    |     GND     |    GND    |       GND       |     GND      |
 
 <img src="https://user-images.githubusercontent.com/86414213/205999001-6213fc4f-be2f-4305-a17a-44fdc9349069.jpg" width="60%" />
 
