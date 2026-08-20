@@ -74,6 +74,11 @@ volatile SYSTEM_STATUS currentStatus = NONE;
 #endif
 WiFiManager wifiManager;
 
+// SNTP stores the pointer it is given instead of copying the string, so these
+// have to outlive the configTzTime() call below.
+String ntpServer;
+String tzInfo;
+
 unsigned long lastConnectionAttempt = 0;
 const unsigned long connectionInterval = 10000;
 unsigned long reconnectionBackoff = 5000;            // Start with 5 seconds
