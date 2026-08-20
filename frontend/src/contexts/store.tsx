@@ -13,6 +13,9 @@ const ws = createReconnectingWS(
       : import.meta.env.VITE_WS_URL
   }ws`,
 );
+ws.addEventListener("open", (event) => {
+  (event.currentTarget as WebSocket).binaryType = "arraybuffer";
+});
 
 const wsState = createWSState(ws);
 
@@ -85,7 +88,15 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
 
   createEffect(() => {
     try {
-      const json = JSON.parse(messageEvent()?.data || "{}");
+      const data = messageEvent()?.data;
+      if (data instanceof ArrayBuffer) {
+        if (data.byteLength === 256) {
+          actions.setLeds(Array.from(new Uint8Array(data)));
+        }
+        return;
+      }
+
+      const json = JSON.parse(data || "{}");
 
       if (!json.event || typeof json.event !== "string") {
         return;

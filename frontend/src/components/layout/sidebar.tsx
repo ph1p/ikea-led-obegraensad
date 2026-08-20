@@ -148,7 +148,12 @@ export const Sidebar: Component<SidebarProps> = (props) => {
           </SidebarSection>
         </Show>
 
-        <Show when={store?.plugin === 1 && !store?.isActiveScheduler}>
+        <Show
+          when={
+            store?.plugins.find((plugin) => plugin.id === store.plugin)?.name === "Draw" &&
+            !store?.isActiveScheduler
+          }
+        >
           <div class="my-6 border-t border-gray-200 hidden lg:block" />
 
           <div class="hidden lg:block">

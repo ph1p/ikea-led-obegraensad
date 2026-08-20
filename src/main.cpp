@@ -179,8 +179,10 @@ void baseSetup()
   connectToWiFi();
 
   // set time server using config values
-  tzInfo = config.getTzInfo();
-  ntpServer = config.getNtpServer();
+  // NOTE: lwIP SNTP stores the server-name pointer without copying it, so the
+  // String must outlive this call. Keep them static so their buffers persist.
+  static String tzInfo = config.getTzInfo();
+  static String ntpServer = config.getNtpServer();
   configTzTime(tzInfo.c_str(), ntpServer.c_str());
 
   initOTA(server);
@@ -324,6 +326,14 @@ void loop()
   }
 
 #ifdef ENABLE_SERVER
+  static unsigned long lastLiveFrameMillis = 0;
+  const unsigned long currentMillis = millis();
+  if (currentMillis - lastLiveFrameMillis >= 100)
+  {
+    lastLiveFrameMillis = currentMillis;
+    sendLiveFrame();
+  }
+
   cleanUpClients();
 #endif
 #ifdef ESP32

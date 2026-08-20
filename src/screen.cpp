@@ -276,7 +276,12 @@ IRAM_ATTR void Screen_::_render()
     // Normal rendering with PWM for grayscale
     for (int idx = 0; idx < ROWS * COLS; idx++)
     {
-      uint16_t scaledValue = ((uint16_t)buf[positions[idx]] * brightness_) / MAX_BRIGHTNESS;
+      uint16_t pixelValue = buf[positions[idx]];
+      uint16_t scaledValue = ((uint16_t)pixelValue * brightness_) / MAX_BRIGHTNESS;
+      if (brightness_ > 0 && pixelValue > 0 && scaledValue == 0)
+      {
+        scaledValue = 1;
+      }
       bits[idx >> 3] |= (scaledValue > counter ? 0x80 : 0) >> (idx & 7);
     }
     counter += ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS);
