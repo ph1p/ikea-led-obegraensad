@@ -8,12 +8,9 @@ AsyncWebSocket ws("/ws");
 void sendInfo()
 {
   JsonDocument jsonDocument;
-  if (currentStatus == NONE)
+  for (int j = 0; j < ROWS * COLS; j++)
   {
-    for (int j = 0; j < ROWS * COLS; j++)
-    {
-      jsonDocument["data"][j] = Screen.getRenderBuffer()[j];
-    }
+    jsonDocument["data"][j] = Screen.getRenderBuffer()[j];
   }
 
   jsonDocument["status"] = currentStatus;
@@ -46,6 +43,18 @@ void sendInfo()
   serializeJson(jsonDocument, output);
   ws.textAll(output);
   jsonDocument.clear();
+}
+
+void sendLiveFrame()
+{
+  if (ws.count() == 0 || !ws.availableForWriteAll())
+  {
+    return;
+  }
+
+  uint8_t frame[ROWS * COLS];
+  memcpy(frame, Screen.getRenderBuffer(), sizeof(frame));
+  ws.binaryAll(frame, sizeof(frame));
 }
 
 void sendWSMessage(String &message) {
