@@ -26,10 +26,11 @@ export const LedMatrix: Component<Props> = (props) => {
   const visible = useVisibilityObserver(() => containerRef);
 
   const getLedColor = (ledBrightness: number) => {
+    if (ledBrightness <= 0) return LED_COLORS.OFF;
+
     const brightnessFactor = props.brightness / 255;
     const intensity = Math.round(Math.min(255, Math.max(0, ledBrightness * brightnessFactor)));
-    const displayIntensity = Math.round(51 + (intensity * 204) / 255);
-    return `rgb(${displayIntensity}, ${displayIntensity}, ${displayIntensity})`;
+    return `rgb(${intensity}, ${intensity}, ${intensity})`;
   };
 
   const drawMatrix = (data: number[], indexData: number[]) => {
@@ -142,20 +143,26 @@ export const LedMatrix: Component<Props> = (props) => {
     }
 
     drawMatrix(props.data, props.indexData);
+  });
+
+  createEffect(() => {
+    if (!canvasRef) return;
+    if (props.disabled) {
+      setIsDrawing(false);
+      return;
+    }
 
     canvasRef.addEventListener("pointerdown", handlePointerDown);
     canvasRef.addEventListener("pointermove", handlePointerMove);
     canvasRef.addEventListener("pointerup", handlePointerUp);
     canvasRef.addEventListener("pointerleave", handlePointerUp);
-  });
 
-  onCleanup(() => {
-    if (!canvasRef) return;
-
-    canvasRef.removeEventListener("pointerdown", handlePointerDown);
-    canvasRef.removeEventListener("pointermove", handlePointerMove);
-    canvasRef.removeEventListener("pointerup", handlePointerUp);
-    canvasRef.removeEventListener("pointerleave", handlePointerUp);
+    onCleanup(() => {
+      canvasRef?.removeEventListener("pointerdown", handlePointerDown);
+      canvasRef?.removeEventListener("pointermove", handlePointerMove);
+      canvasRef?.removeEventListener("pointerup", handlePointerUp);
+      canvasRef?.removeEventListener("pointerleave", handlePointerUp);
+    });
   });
 
   createEffect(() => {
@@ -180,7 +187,6 @@ export const LedMatrix: Component<Props> = (props) => {
           relative
           transition-all duration-300
           ${visible() ? "opacity-100" : "opacity-50"}
-          ${props.disabled ? "opacity-30" : ""}
           ${isDrawing() ? "ring-2 ring-blue-500/50" : ""}
           max-w-full max-h-full
           aspect-9/13
