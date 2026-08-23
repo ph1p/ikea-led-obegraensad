@@ -31,6 +31,7 @@
 #include "plugins/DrawPlugin.h"
 #include "plugins/FirefliesPlugin.h"
 #include "plugins/FireworkPlugin.h"
+#include "plugins/FlappyBirdPlugin.h"
 #include "plugins/GameOfLifePlugin.h"
 #include "plugins/LinesPlugin.h"
 #include "plugins/MatrixRainPlugin.h"
@@ -212,6 +213,7 @@ void baseSetup()
   pluginManager.addPlugin(new ScanlinesPlugin());
   pluginManager.addPlugin(new SparkleFieldPlugin());
   pluginManager.addPlugin(new WaveBarsPlugin());
+  pluginManager.addPlugin(new FlappyBirdPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
