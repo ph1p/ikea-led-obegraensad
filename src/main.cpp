@@ -40,6 +40,7 @@
 #include "plugins/RainPlugin.h"
 #include "plugins/ScanlinesPlugin.h"
 #include "plugins/SnakePlugin.h"
+#include "plugins/SpaceInvadersPlugin.h"
 #include "plugins/SparkleFieldPlugin.h"
 #include "plugins/SpiralPlugin.h"
 #include "plugins/StarsPlugin.h"
@@ -212,6 +213,7 @@ void baseSetup()
   pluginManager.addPlugin(new ScanlinesPlugin());
   pluginManager.addPlugin(new SparkleFieldPlugin());
   pluginManager.addPlugin(new WaveBarsPlugin());
+  pluginManager.addPlugin(new SpaceInvadersPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
