@@ -21,6 +21,7 @@
 #include "scheduler.h"
 
 #include "plugins/ArtNet.h"
+#include "plugins/BigPongPlugin.h"
 #include "plugins/Blob.h"
 #include "plugins/BreakoutPlugin.h"
 #include "plugins/BubblesPlugin.h"
@@ -212,6 +213,7 @@ void baseSetup()
   pluginManager.addPlugin(new ScanlinesPlugin());
   pluginManager.addPlugin(new SparkleFieldPlugin());
   pluginManager.addPlugin(new WaveBarsPlugin());
+  pluginManager.addPlugin(new BigPongPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
