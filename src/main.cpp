@@ -44,6 +44,7 @@
 #include "plugins/SpiralPlugin.h"
 #include "plugins/StarsPlugin.h"
 #include "plugins/TickingClockPlugin.h"
+#include "plugins/TronPlugin.h"
 #include "plugins/WaveBarsPlugin.h"
 #include "plugins/WavePlugin.h"
 
@@ -212,6 +213,7 @@ void baseSetup()
   pluginManager.addPlugin(new ScanlinesPlugin());
   pluginManager.addPlugin(new SparkleFieldPlugin());
   pluginManager.addPlugin(new WaveBarsPlugin());
+  pluginManager.addPlugin(new TronPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
