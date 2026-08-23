@@ -184,9 +184,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
                 <div class="text-xs text-red-600">{scheduleError()}</div>
               </Show>
               <div class="text-xs text-gray-600">
-                {store.brightnessSchedule.active
-                  ? `Active now · ${Math.round((store.brightness / 255) * 100)}%`
-                  : "Inactive now"}
+                {store.brightnessSchedule.active ? "Active now" : "Inactive now"}
               </div>
             </Show>
           </div>

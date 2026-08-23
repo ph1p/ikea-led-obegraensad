@@ -2,6 +2,7 @@
 
 #include "screen.h"
 #include "storage.h"
+#include "websocket.h"
 #include <time.h>
 
 BrightnessSchedule &BrightnessSchedule::getInstance()
@@ -130,11 +131,17 @@ void BrightnessSchedule::update()
                          : currentMinute >= startMinute_ || currentMinute < endMinute_;
   }
 
+  const bool wasActive = active_;
   active_ = shouldBeActive;
   const uint8_t targetBrightness = active_ ? brightness_ : Screen.getBaseBrightness();
   if (Screen.getCurrentBrightness() != targetBrightness)
   {
     Screen.setDisplayedBrightness(targetBrightness);
+  }
+
+  if (wasActive != active_)
+  {
+    sendInfo();
   }
 }
 
