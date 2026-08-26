@@ -229,6 +229,14 @@ void WeatherPlugin::drawWeather()
   }
 }
 
+// Drop the cache so the next loop() (or setup() on activation) fetches fresh
+// data - used after the configured location changes via /api/config
+void WeatherPlugin::forceRefresh()
+{
+  lastUpdate = 0;
+  hasCachedData = false;
+}
+
 const char *WeatherPlugin::getName() const
 {
   return "Weather";
