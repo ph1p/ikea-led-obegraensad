@@ -214,6 +214,14 @@ export const Sidebar: Component<SidebarProps> = (props) => {
         </a>
 
         <a
+          href="#/settings"
+          class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+        >
+          <i class="fa-solid fa-gear mr-2" />
+          Settings
+        </a>
+
+        <a
           href="/update"
           class="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
         >
