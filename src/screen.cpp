@@ -273,7 +273,10 @@ IRAM_ATTR void Screen_::_render()
   }
   else
   {
-    // Normal rendering with PWM for grayscale
+    // Normal rendering with PWM for grayscale.
+    // Each pixel gets a fixed phase offset (a multiple of the counter step, spread evenly
+    // over the cycle) so that LEDs don't all switch on at the same time. The on-time per
+    // pixel is unchanged, but the peak current drops to roughly the average current.
     for (int idx = 0; idx < ROWS * COLS; idx++)
     {
       uint16_t pixelValue = buf[positions[idx]];
@@ -282,7 +285,9 @@ IRAM_ATTR void Screen_::_render()
       {
         scaledValue = 1;
       }
-      bits[idx >> 3] |= (scaledValue > counter ? 0x80 : 0) >> (idx & 7);
+      const uint8_t phase = (uint8_t)(idx * 37 * ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS));
+      const uint8_t position = counter + phase;
+      bits[idx >> 3] |= (scaledValue > position ? 0x80 : 0) >> (idx & 7);
     }
     counter += ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS);
   }

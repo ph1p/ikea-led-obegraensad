@@ -134,6 +134,40 @@ void handleGetData(AsyncWebServerRequest *request)
   }
 }
 
+const char *getResetReason()
+{
+#ifdef ESP32
+  switch (esp_reset_reason())
+  {
+  case ESP_RST_POWERON:
+    return "poweron";
+  case ESP_RST_EXT:
+    return "external";
+  case ESP_RST_SW:
+    return "software";
+  case ESP_RST_PANIC:
+    return "panic";
+  case ESP_RST_INT_WDT:
+    return "int_wdt";
+  case ESP_RST_TASK_WDT:
+    return "task_wdt";
+  case ESP_RST_WDT:
+    return "wdt";
+  case ESP_RST_DEEPSLEEP:
+    return "deepsleep";
+  case ESP_RST_BROWNOUT:
+    return "brownout";
+  case ESP_RST_SDIO:
+    return "sdio";
+  default:
+    return "unknown";
+  }
+#else
+  static String reason = ESP.getResetReason();
+  return reason.c_str();
+#endif
+}
+
 void handleGetInfo(AsyncWebServerRequest *request)
 {
   JsonDocument jsonDocument;
@@ -149,6 +183,7 @@ void handleGetInfo(AsyncWebServerRequest *request)
   jsonDocument["freeHeap"] = ESP.getFreeHeap();
   jsonDocument["ipAddress"] = WiFi.localIP().toString();
   jsonDocument["macAddress"] = WiFi.macAddress();
+  jsonDocument["resetReason"] = getResetReason();
 
   JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
   for (const auto &item : Scheduler.schedule)
