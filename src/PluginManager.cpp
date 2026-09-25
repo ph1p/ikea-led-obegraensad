@@ -1,4 +1,5 @@
 #include "PluginManager.h"
+#include "randommode.h"
 #include "scheduler.h"
 
 Plugin::Plugin() : id(-1)
@@ -39,7 +40,7 @@ void PluginManager::init()
 
 void PluginManager::renderPluginId(int pluginId)
 {
-  if (Scheduler.isActive)
+  if (Scheduler.isActive || RandomMode.isActive)
   {
     return;
   }

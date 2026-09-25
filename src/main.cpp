@@ -18,6 +18,7 @@
 
 #include "PluginManager.h"
 #include "config.h"
+#include "randommode.h"
 #include "scheduler.h"
 
 #include "plugins/ArtNet.h"
@@ -227,6 +228,7 @@ void baseSetup()
   Screen.clear();
   pluginManager.init();
   Scheduler.init();
+  RandomMode.init();
 
   btn.onPress(pressHandler).onDoublePress(pressHandler).onPressFor(pressHandler, 1000);
 }
@@ -288,6 +290,7 @@ void loop()
   if (currentStatus == NONE)
   {
     Scheduler.update();
+    RandomMode.update();
 
     if ((taskCounter & 0x03) == 0)
     {

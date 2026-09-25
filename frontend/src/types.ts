@@ -23,6 +23,8 @@ export interface StoreActions {
   setSchedule: (items: ScheduleItem[]) => void;
   setArtnetUniverse: (artnetUniverse: number) => void;
   setGOLDelay: (GOLDelay: number) => void;
+  setRandomActive: (randomActive: boolean) => void;
+  setRandomInterval: (randomInterval: number) => void;
   send: (message: string | ArrayBuffer) => void;
 }
 
@@ -36,6 +38,8 @@ export interface Store {
   plugin: number;
   artnetUniverse: number;
   GOLDelay: number;
+  randomActive: boolean;
+  randomInterval: number;
   systemStatus: SYSTEM_STATUS;
   connectionState: () => number;
   connectionStatus?: string;

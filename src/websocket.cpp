@@ -1,4 +1,5 @@
 #include "PluginManager.h"
+#include "randommode.h"
 #include "scheduler.h"
 
 #ifdef ENABLE_SERVER
@@ -20,6 +21,8 @@ void sendInfo()
   jsonDocument["rotation"] = Screen.currentRotation;
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
   jsonDocument["scheduleActive"] = Scheduler.isActive;
+  jsonDocument["randomActive"] = RandomMode.isActive;
+  jsonDocument["randomInterval"] = RandomMode.intervalMinutes;
 
   JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
   for (const auto &item : Scheduler.schedule)
@@ -112,6 +115,18 @@ void onWsEvent(AsyncWebSocket *server,
           else if (!strcmp(event, "persist-plugin"))
           {
             pluginManager.persistActivePlugin();
+            sendInfo();
+          }
+          else if (!strcmp(event, "random"))
+          {
+            if (wsRequest["interval"].is<int>())
+            {
+              RandomMode.setInterval(wsRequest["interval"].as<int>());
+            }
+            if (wsRequest["active"].is<bool>())
+            {
+              RandomMode.setActive(wsRequest["active"].as<bool>());
+            }
             sendInfo();
           }
           else if (!strcmp(event, "rotate"))
