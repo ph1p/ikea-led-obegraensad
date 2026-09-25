@@ -32,8 +32,9 @@ export const App: Component = () => {
       | "persist-plugin"
       | "artnet"
       | "brightness"
-      | "goldelay",
-    data?: Record<string, string | number> | { data: number[] },
+      | "goldelay"
+      | "random",
+    data?: Record<string, string | number | boolean> | { data: number[] },
   ) =>
     actions.send(
       JSON.stringify({
@@ -99,6 +100,19 @@ export const App: Component = () => {
     actions?.setGOLDelay(value);
     if (shouldSend) {
       wsMessage("goldelay", { delay: value });
+    }
+  };
+
+  const handleRandomToggle = (active: boolean) => {
+    actions?.setRandomActive(active);
+    wsMessage("random", { active });
+    toast(active ? "Random animation enabled" : "Random animation disabled", 1000);
+  };
+
+  const handleRandomIntervalChange = (value: number, shouldSend = false) => {
+    actions?.setRandomInterval(value);
+    if (shouldSend) {
+      wsMessage("random", { interval: value });
     }
   };
 
@@ -232,6 +246,8 @@ export const App: Component = () => {
           onArtnetChange={handleArtnetUniverseChange}
           onGOLDelayChange={handleGOLDelayChange}
           onPersistPlugin={handlePersistPlugin}
+          onRandomToggle={handleRandomToggle}
+          onRandomIntervalChange={handleRandomIntervalChange}
         />
       }
     />

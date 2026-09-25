@@ -1,4 +1,5 @@
 #include "scheduler.h"
+#include "randommode.h"
 #include "websocket.h"
 
 PluginScheduler &PluginScheduler::getInstance()
@@ -41,6 +42,8 @@ void PluginScheduler::start()
 {
   if (!schedule.empty())
   {
+    // random mode and the scheduler are mutually exclusive
+    RandomMode.setActive(false);
     currentIndex = 0;
     lastSwitch = millis();
     isActive = true;

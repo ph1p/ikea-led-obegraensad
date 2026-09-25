@@ -29,6 +29,8 @@ const [mainStore, setStore] = createStore<Store>({
   brightness: 0,
   artnetUniverse: 1,
   GOLDelay: 150,
+  randomActive: false,
+  randomInterval: 5,
   indexMatrix: [...new Array(256)].map((_, i) => i),
   leds: [...new Array(256)].fill(0),
   systemStatus: SYSTEM_STATUS.NONE,
@@ -45,6 +47,8 @@ const actions: StoreActions = {
   setBrightness: (brightness) => setStore("brightness", brightness),
   setArtnetUniverse: (artnetUniverse) => setStore("artnetUniverse", artnetUniverse),
   setGOLDelay: (GOLDelay) => setStore("GOLDelay", GOLDelay),
+  setRandomActive: (randomActive) => setStore("randomActive", randomActive),
+  setRandomInterval: (randomInterval) => setStore("randomInterval", randomInterval),
   setIndexMatrix: (indexMatrix) => setStore("indexMatrix", indexMatrix),
   setLeds: (leds) => setStore("leds", leds),
   setSystemStatus: (systemStatus: SYSTEM_STATUS) => setStore("systemStatus", systemStatus),
@@ -123,6 +127,14 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
 
             if (isValidBoolean(json.scheduleActive)) {
               actions.setIsActiveScheduler(json.scheduleActive);
+            }
+
+            if (isValidBoolean(json.randomActive)) {
+              actions.setRandomActive(json.randomActive);
+            }
+
+            if (isValidNumber(json.randomInterval)) {
+              actions.setRandomInterval(json.randomInterval);
             }
 
             if (isValidArray(json.schedule)) {

@@ -26,6 +26,8 @@ interface SidebarProps {
   onArtnetChange: (value: number, shouldSend?: boolean) => void;
   onPersistPlugin: () => void;
   onGOLDelayChange: (value: number, shouldSend?: boolean) => void;
+  onRandomToggle: (active: boolean) => void;
+  onRandomIntervalChange: (value: number, shouldSend?: boolean) => void;
 }
 
 export const Sidebar: Component<SidebarProps> = (props) => {
@@ -45,7 +47,8 @@ export const Sidebar: Component<SidebarProps> = (props) => {
           <SidebarSection title="Display Mode">
             <div class="flex flex-col gap-2.5">
               <select
-                class="flex-1 px-2.5 py-2.5 bg-gray-50 border border-gray-200 rounded"
+                class="flex-1 px-2.5 py-2.5 bg-gray-50 border border-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={store?.randomActive}
                 onChange={(e) => props.onPluginChange(parseInt(e.currentTarget.value, 10))}
                 value={store?.plugin}
               >
@@ -56,10 +59,39 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               <button
                 type="button"
                 onClick={props.onPersistPlugin}
-                class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded"
+                disabled={store?.randomActive}
+                class="w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:opacity-50 disabled:active:translate-y-0"
               >
                 Set as Default
               </button>
+              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={store?.randomActive}
+                  onChange={(e) => props.onRandomToggle(e.currentTarget.checked)}
+                />
+                Random Animation
+              </label>
+              <Show when={store?.randomActive}>
+                <div class="space-y-2">
+                  <input
+                    type="range"
+                    min="1"
+                    max="60"
+                    value={store?.randomInterval}
+                    class="w-full"
+                    onInput={(e) =>
+                      props.onRandomIntervalChange(parseInt(e.currentTarget.value, 10))
+                    }
+                    onPointerUp={(e) =>
+                      props.onRandomIntervalChange(parseInt(e.currentTarget.value, 10), true)
+                    }
+                  />
+                  <div class="text-sm text-gray-600 text-right">
+                    Change every {store?.randomInterval} min
+                  </div>
+                </div>
+              </Show>
             </div>
           </SidebarSection>
         </Show>
