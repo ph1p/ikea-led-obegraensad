@@ -55,6 +55,7 @@ public:
   }
 
   void update();
+  void forceRefresh();
   void setup() override;
   void loop() override;
   void teardown() override;

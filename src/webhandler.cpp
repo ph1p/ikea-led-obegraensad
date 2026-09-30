@@ -4,11 +4,35 @@
 #include "messages.h"
 #include "scheduler.h"
 #include "websocket.h"
+#include "PluginManager.h"
+#include "plugins/WeatherPlugin.h"
 #ifdef ESP32
 #include <WiFi.h>
 #else
 #include <ESP8266WiFi.h>
 #endif
+
+// Make a saved configuration take effect right away instead of waiting for the
+// next reboot (time settings) or the next 30-minute cycle (weather).
+static void applyConfigChanges()
+{
+  // static storage because sntp keeps the server pointer without copying it
+  // (same reason as the static Strings in baseSetup)
+  static String ntpServer;
+  static String tzInfo;
+  ntpServer = config.getNtpServer();
+  tzInfo = config.getTzInfo();
+  configTzTime(tzInfo.c_str(), ntpServer.c_str());
+
+  for (Plugin *plugin : pluginManager.getAllPlugins())
+  {
+    if (strcmp(plugin->getName(), "Weather") == 0)
+    {
+      static_cast<WeatherPlugin *>(plugin)->forceRefresh();
+      break;
+    }
+  }
+}
 
 void sendJsonSuccess(AsyncWebServerRequest *request, const char *message)
 {
@@ -415,6 +439,7 @@ void handleSetConfigBody(AsyncWebServerRequest *request,
       Serial.print("[WebHandler] Auto-Start Schedule: ");
       Serial.println(config.getAutoStartSchedule() ? "enabled" : "disabled");
       Serial.println("[WebHandler] ============================================");
+      applyConfigChanges();
       sendJsonSuccess(request, "Configuration saved successfully");
     }
     else
@@ -447,6 +472,7 @@ void handleResetConfig(AsyncWebServerRequest *request)
     Serial.print("[WebHandler] Auto-Start Schedule: ");
     Serial.println(config.getAutoStartSchedule() ? "enabled" : "disabled");
     Serial.println("[WebHandler] ============================================");
+    applyConfigChanges();
     sendJsonSuccess(request, "Configuration reset to defaults");
   } catch (...) {
     Serial.println("[WebHandler] ERROR: Exception in handleResetConfig");
