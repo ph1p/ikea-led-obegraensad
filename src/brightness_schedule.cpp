@@ -104,16 +104,6 @@ BrightnessSchedule::ConfigureStatus BrightnessSchedule::configureFromJson(JsonVa
   return ConfigureStatus::Success;
 }
 
-bool BrightnessSchedule::getSyncedLocalTime(struct tm &timeInfo)
-{
-  const time_t now = time(nullptr);
-  localtime_r(&now, &timeInfo);
-  // Same "time is synchronized" heuristic the Arduino cores use in
-  // getLocalTime(): struct tm stores years since 1900, and an unsynced SNTP
-  // clock reports 1970. Unlike getLocalTime() this does not block.
-  return timeInfo.tm_year > (2016 - 1900);
-}
-
 void BrightnessSchedule::update()
 {
   if (!initialized_)

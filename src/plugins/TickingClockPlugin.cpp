@@ -1,4 +1,5 @@
 #include "plugins/TickingClockPlugin.h"
+#include "timing.h"
 
 void TickingClockPlugin::setup()
 {
@@ -10,7 +11,7 @@ void TickingClockPlugin::setup()
 
 void TickingClockPlugin::loop()
 {
-  if (getLocalTime(&timeinfo))
+  if (getSyncedLocalTime(timeinfo))
   {
     if (previousHour != timeinfo.tm_hour || previousMinutes != timeinfo.tm_min)
     {

@@ -1,4 +1,5 @@
 #include "messages.h"
+#include "timing.h"
 #include <SPI.h>
 
 Messages_ &Messages_::getInstance()
@@ -88,7 +89,7 @@ void Messages_::scrollMessageEveryMinute()
 {
   struct tm timeinfo;
 
-  if (getLocalTime(&timeinfo))
+  if (getSyncedLocalTime(timeinfo))
   {
     if (timeinfo.tm_min != previousMinute)
     {

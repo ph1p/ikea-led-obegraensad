@@ -1,4 +1,5 @@
 #include "plugins/BigClockPlugin.h"
+#include "timing.h"
 
 void BigClockPlugin::setup()
 {
@@ -18,7 +19,7 @@ void BigClockPlugin::setup()
 
 void BigClockPlugin::loop()
 {
-  if (getLocalTime(&timeinfo))
+  if (getSyncedLocalTime(timeinfo))
   {
     if (previousHour != timeinfo.tm_hour || previousMinutes != timeinfo.tm_min)
     {
