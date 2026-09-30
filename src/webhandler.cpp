@@ -6,6 +6,9 @@
 #include "websocket.h"
 #include "PluginManager.h"
 #include "plugins/WeatherPlugin.h"
+#include <cerrno>
+#include <climits>
+#include <cstdlib>
 #ifdef ESP32
 #include <WiFi.h>
 #else
@@ -87,6 +90,34 @@ char *accumulateRequestBody(AsyncWebServerRequest *request,
   return body;
 }
 
+// Parses a comma-separated list of integers such as "1,2,3,4". Empty entries
+// are skipped. Returns false if any entry is not a valid int.
+static bool parseGraph(const String &param, std::vector<int> &graph)
+{
+  const char *cursor = param.c_str();
+  while (*cursor != '\0')
+  {
+    if (*cursor == ',')
+    {
+      cursor++;
+      continue;
+    }
+
+    char *end;
+    errno = 0;
+    const long value = strtol(cursor, &end, 10);
+    if (end == cursor || (*end != ',' && *end != '\0') || errno == ERANGE || value < INT_MIN ||
+        value > INT_MAX)
+    {
+      return false;
+    }
+
+    graph.push_back(static_cast<int>(value));
+    cursor = end;
+  }
+  return true;
+}
+
 // http://your-server/message?text=Hello&repeat=3&id=42&graph=1,2,3,4
 void handleMessage(AsyncWebServerRequest *request)
 {
@@ -107,16 +138,18 @@ void handleMessage(AsyncWebServerRequest *request)
     maxy = 15;
   }
 
-  // Extracting the 'graph' parameter as a comma-separated list of integers
-  std::string graphParam = request->arg("graph").c_str();
-  std::vector<int> graph;
-
-  char *token = strtok(const_cast<char *>(graphParam.c_str()), ",");
-  while (token != nullptr)
+  // scrollGraph() divides by (maxy - miny + 1), which must be positive and fit an int
+  if (maxy < miny || static_cast<int64_t>(maxy) - miny + 1 > INT_MAX)
   {
-    // Convert the substring to an integer and add it to the vector
-    graph.push_back(std::stoi(token));
-    token = strtok(nullptr, ",");
+    sendJsonError(request, 422, "maxy must be >= miny and the range must fit an int");
+    return;
+  }
+
+  std::vector<int> graph;
+  if (!parseGraph(request->arg("graph"), graph))
+  {
+    sendJsonError(request, 422, "graph must be a comma-separated list of integers");
+    return;
   }
 
   // Add the message
