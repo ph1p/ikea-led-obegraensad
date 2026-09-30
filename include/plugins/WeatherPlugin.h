@@ -15,6 +15,7 @@ class WeatherPlugin : public Plugin
 {
 private:
   unsigned long lastUpdate = 0;
+  unsigned long updateInterval = 1000UL * 60 * 30;
   HTTPClient http;
 #ifdef ESP32
   WiFiClientSecure *secureClient = nullptr;
@@ -23,6 +24,11 @@ private:
   WiFiClient wiFiClient;
 #endif
 
+  // Coordinates the forecast endpoint needs, looked up once per configured city
+  String resolvedLocation;
+  float latitude = 0;
+  float longitude = 0;
+
   // Cached weather data
   bool hasCachedData = false;
   int cachedTemperature = 0;
@@ -30,17 +36,20 @@ private:
   int cachedIconY = 1;
   int cachedTempY = 10;
 
-  std::vector<int> thunderCodes = {200, 386, 389, 392, 395};
-  std::vector<int> cloudyCodes = {119, 122};
-  std::vector<int> partyCloudyCodes = {116};
-  std::vector<int> clearCodes = {113};
-  std::vector<int> fogCodes = {143, 248, 260};
-  std::vector<int> rainCodes =
-      {176, 293, 296, 299, 302, 305, 308, 311, 314, 353, 356, 359, 386, 389, 263, 266, 281, 284, 185};
-  std::vector<int> snowCodes = {179, 227, 323, 326, 329, 332, 335, 338, 368, 371, 392, 395, 230, 350};
+  // WMO weather codes as returned by Open-Meteo
+  std::vector<int> thunderCodes = {95, 96, 99};
+  std::vector<int> cloudyCodes = {3};
+  std::vector<int> partyCloudyCodes = {2};
+  std::vector<int> clearCodes = {0, 1};
+  std::vector<int> fogCodes = {45, 48};
+  std::vector<int> rainCodes = {51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82};
+  std::vector<int> snowCodes = {71, 73, 75, 77, 85, 86};
 
 private:
   void drawWeather();
+  void drawError();
+  bool resolveLocation(const String &location);
+  bool fetchJson(const String &url, JsonDocument &doc);
 
 public:
   ~WeatherPlugin()
@@ -54,7 +63,7 @@ public:
 #endif
   }
 
-  void update();
+  bool update();
   void setup() override;
   void loop() override;
   void teardown() override;
