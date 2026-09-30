@@ -33,6 +33,7 @@
 #include "plugins/CometPlugin.h"
 #include "plugins/DDPPlugin.h"
 #include "plugins/DrawPlugin.h"
+#include "plugins/FacePlugin.h"
 #include "plugins/FirefliesPlugin.h"
 #include "plugins/FireworkPlugin.h"
 #include "plugins/GameOfLifePlugin.h"
@@ -219,6 +220,7 @@ void baseSetup()
   pluginManager.addPlugin(new BigPongPlugin());
   pluginManager.addPlugin(new AutoWalkerPlugin());
   pluginManager.addPlugin(new BouncingBallPlugin());
+  pluginManager.addPlugin(new FacePlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());

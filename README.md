@@ -103,6 +103,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - BigPong
 - Auto Walker
 - Bouncing Ball
+- Face
 
 </details>
 
