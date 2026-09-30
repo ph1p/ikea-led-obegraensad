@@ -106,6 +106,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Face
 - Falling Sand
 - Flappy Bird
+- Space Invaders
 
 </details>
 
