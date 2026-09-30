@@ -72,6 +72,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Firework
 - DDP (Display Data Protocol)
 - Pong Clock
+- BigPong
 - Auto Walker
 
 </details>
