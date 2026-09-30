@@ -34,6 +34,7 @@
 #include "plugins/DDPPlugin.h"
 #include "plugins/DrawPlugin.h"
 #include "plugins/FacePlugin.h"
+#include "plugins/FallingSandPlugin.h"
 #include "plugins/FirefliesPlugin.h"
 #include "plugins/FireworkPlugin.h"
 #include "plugins/GameOfLifePlugin.h"
@@ -221,6 +222,7 @@ void baseSetup()
   pluginManager.addPlugin(new AutoWalkerPlugin());
   pluginManager.addPlugin(new BouncingBallPlugin());
   pluginManager.addPlugin(new FacePlugin());
+  pluginManager.addPlugin(new FallingSandPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());

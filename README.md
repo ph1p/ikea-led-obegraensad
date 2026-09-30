@@ -104,6 +104,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Auto Walker
 - Bouncing Ball
 - Face
+- Falling Sand
 
 </details>
 
