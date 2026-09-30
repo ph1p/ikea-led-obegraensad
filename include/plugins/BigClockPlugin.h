@@ -11,7 +11,6 @@ private:
   int previousHour;
   std::vector<int> previousHH;
   std::vector<int> previousMM;
-  bool previousLeadingZero;
 
 public:
   void setup() override;
