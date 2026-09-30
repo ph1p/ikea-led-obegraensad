@@ -1,4 +1,5 @@
 #include "PluginManager.h"
+#include "brightness_schedule.h"
 #include "scheduler.h"
 
 #ifdef ENABLE_SERVER
@@ -18,7 +19,10 @@ void sendInfo()
   jsonDocument["persist-plugin"] = pluginManager.getPersistedPluginId();
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
+  jsonDocument["baseBrightness"] = Screen.getBaseBrightness();
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
+  JsonObject brightnessSchedule = jsonDocument["brightnessSchedule"].to<JsonObject>();
+  ScheduledBrightness.writeToJson(brightnessSchedule);
   jsonDocument["scheduleActive"] = Scheduler.isActive;
 
   JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
@@ -127,7 +131,13 @@ void onWsEvent(AsyncWebSocket *server,
           else if (!strcmp(event, "brightness"))
           {
             uint8_t brightness = wsRequest["brightness"].as<uint8_t>();
-            Screen.setBrightness(brightness, true);
+            Screen.setBaseBrightness(brightness, true);
+            ScheduledBrightness.update();
+            sendInfo();
+          }
+          else if (!strcmp(event, "brightness-schedule"))
+          {
+            ScheduledBrightness.configureFromJson(wsRequest.as<JsonVariantConst>());
             sendInfo();
           }
         }
