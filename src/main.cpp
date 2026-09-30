@@ -17,10 +17,13 @@
 #endif
 
 #include "PluginManager.h"
+#include "brightness_schedule.h"
 #include "config.h"
 #include "scheduler.h"
 
 #include "plugins/ArtNet.h"
+#include "plugins/BigPongPlugin.h"
+#include "plugins/AutoWalkerPlugin.h"
 #include "plugins/Blob.h"
 #include "plugins/BouncingBallPlugin.h"
 #include "plugins/BreakoutPlugin.h"
@@ -213,6 +216,8 @@ void baseSetup()
   pluginManager.addPlugin(new ScanlinesPlugin());
   pluginManager.addPlugin(new SparkleFieldPlugin());
   pluginManager.addPlugin(new WaveBarsPlugin());
+  pluginManager.addPlugin(new BigPongPlugin());
+  pluginManager.addPlugin(new AutoWalkerPlugin());
   pluginManager.addPlugin(new BouncingBallPlugin());
 
 #ifdef ENABLE_SERVER
@@ -239,6 +244,7 @@ TaskHandle_t screenDrawingTaskHandle = NULL;
 void screenDrawingTask(void *parameter)
 {
   Screen.setup();
+  ScheduledBrightness.init();
   for (;;)
   {
     pluginManager.runActivePlugin();
@@ -262,6 +268,7 @@ void setup()
 void screenDrawingTask()
 {
   Screen.setup();
+  ScheduledBrightness.init();
   pluginManager.runActivePlugin();
   yield();
 }
@@ -290,6 +297,7 @@ void loop()
   if (currentStatus == NONE)
   {
     Scheduler.update();
+    ScheduledBrightness.update();
 
     if ((taskCounter & 0x03) == 0)
     {

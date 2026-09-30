@@ -6,6 +6,7 @@ import { LedMatrix } from "./components/led-matrix";
 import { useStore } from "./contexts/store";
 import { useToast } from "./contexts/toast";
 import { loadImageAndGetDataArray, rotateArray } from "./helpers";
+import type { BrightnessSchedule } from "./types";
 
 export const App: Component = () => {
   const [store, actions] = useStore();
@@ -32,8 +33,9 @@ export const App: Component = () => {
       | "persist-plugin"
       | "artnet"
       | "brightness"
+      | "brightness-schedule"
       | "goldelay",
-    data?: Record<string, string | number> | { data: number[] },
+    data?: Record<string, string | number | boolean> | { data: number[] },
   ) =>
     actions.send(
       JSON.stringify({
@@ -82,9 +84,16 @@ export const App: Component = () => {
   };
 
   const handleBrightnessChange = (value: number, shouldSend = false) => {
-    actions?.setBrightness(value);
+    actions?.setBaseBrightness(value);
     if (shouldSend) {
       wsMessage("brightness", { brightness: value });
+    }
+  };
+
+  const handleBrightnessScheduleChange = (schedule: BrightnessSchedule, shouldSend = true) => {
+    actions.setBrightnessSchedule(schedule);
+    if (shouldSend) {
+      wsMessage("brightness-schedule", schedule);
     }
   };
 
@@ -112,7 +121,7 @@ export const App: Component = () => {
       disabled={disabled}
       data={store.leds || []}
       indexData={rotatedMatrix()}
-      brightness={store.brightness ?? 255}
+      brightness={store.brightness ?? store.baseBrightness ?? 255}
       onSetLed={(data) => {
         wsMessage("led", data);
       }}
@@ -229,6 +238,7 @@ export const App: Component = () => {
           onLoad={handleLoad}
           onPluginChange={handlePluginChange}
           onBrightnessChange={handleBrightnessChange}
+          onBrightnessScheduleChange={handleBrightnessScheduleChange}
           onArtnetChange={handleArtnetUniverseChange}
           onGOLDelayChange={handleGOLDelayChange}
           onPersistPlugin={handlePersistPlugin}
