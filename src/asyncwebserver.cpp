@@ -29,6 +29,14 @@ void initWebServer()
 
   // Handle API request to set the brightness (0..255);
   server.on("/api/brightness", HTTP_PATCH, handleSetBrightness);
+  server.on(
+      "/api/brightness-schedule",
+      HTTP_PUT,
+      [](AsyncWebServerRequest *request) {
+        // The response is sent after the complete request body is received.
+      },
+      nullptr,
+      handleSetBrightnessScheduleBody);
   server.on("/api/data", HTTP_GET, handleGetData);
 
   // Scheduler

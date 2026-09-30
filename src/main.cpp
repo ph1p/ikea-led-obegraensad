@@ -17,11 +17,15 @@
 #endif
 
 #include "PluginManager.h"
+#include "brightness_schedule.h"
 #include "config.h"
 #include "scheduler.h"
 
 #include "plugins/ArtNet.h"
+#include "plugins/BigPongPlugin.h"
+#include "plugins/AutoWalkerPlugin.h"
 #include "plugins/Blob.h"
+#include "plugins/BouncingBallPlugin.h"
 #include "plugins/BreakoutPlugin.h"
 #include "plugins/BubblesPlugin.h"
 #include "plugins/CheckerboardPlugin.h"
@@ -29,8 +33,11 @@
 #include "plugins/CometPlugin.h"
 #include "plugins/DDPPlugin.h"
 #include "plugins/DrawPlugin.h"
+#include "plugins/FacePlugin.h"
+#include "plugins/FallingSandPlugin.h"
 #include "plugins/FirefliesPlugin.h"
 #include "plugins/FireworkPlugin.h"
+#include "plugins/FlappyBirdPlugin.h"
 #include "plugins/GameOfLifePlugin.h"
 #include "plugins/LinesPlugin.h"
 #include "plugins/MatrixRainPlugin.h"
@@ -40,6 +47,7 @@
 #include "plugins/RainPlugin.h"
 #include "plugins/ScanlinesPlugin.h"
 #include "plugins/SnakePlugin.h"
+#include "plugins/SpaceInvadersPlugin.h"
 #include "plugins/SparkleFieldPlugin.h"
 #include "plugins/SpotlightPlugin.h"
 #include "plugins/SpiralPlugin.h"
@@ -213,6 +221,13 @@ void baseSetup()
   pluginManager.addPlugin(new ScanlinesPlugin());
   pluginManager.addPlugin(new SparkleFieldPlugin());
   pluginManager.addPlugin(new WaveBarsPlugin());
+  pluginManager.addPlugin(new BigPongPlugin());
+  pluginManager.addPlugin(new AutoWalkerPlugin());
+  pluginManager.addPlugin(new BouncingBallPlugin());
+  pluginManager.addPlugin(new FacePlugin());
+  pluginManager.addPlugin(new FallingSandPlugin());
+  pluginManager.addPlugin(new FlappyBirdPlugin());
+  pluginManager.addPlugin(new SpaceInvadersPlugin());
   pluginManager.addPlugin(new SpotlightPlugin());
 
 #ifdef ENABLE_SERVER
@@ -239,6 +254,7 @@ TaskHandle_t screenDrawingTaskHandle = NULL;
 void screenDrawingTask(void *parameter)
 {
   Screen.setup();
+  ScheduledBrightness.init();
   for (;;)
   {
     pluginManager.runActivePlugin();
@@ -262,6 +278,7 @@ void setup()
 void screenDrawingTask()
 {
   Screen.setup();
+  ScheduledBrightness.init();
   pluginManager.runActivePlugin();
   yield();
 }
@@ -290,6 +307,7 @@ void loop()
   if (currentStatus == NONE)
   {
     Scheduler.update();
+    ScheduledBrightness.update();
 
     if ((taskCounter & 0x03) == 0)
     {

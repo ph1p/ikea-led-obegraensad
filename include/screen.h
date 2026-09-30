@@ -12,6 +12,7 @@ private:
   Screen_() = default;
 
   uint8_t brightness_ = MAX_BRIGHTNESS;
+  uint8_t baseBrightness_ = MAX_BRIGHTNESS;
   uint8_t renderBuffer_[ROWS * COLS];
   uint8_t rotatedRenderBuffer_[ROWS * COLS];
   uint8_t positions[ROWS * COLS] = {
@@ -47,7 +48,9 @@ public:
   void setCurrentRotation(int rotation, bool shouldPersist = false);
 
   uint8_t getCurrentBrightness() const;
-  void setBrightness(uint8_t brightness, bool shouldStore = false);
+  uint8_t getBaseBrightness() const;
+  void setBaseBrightness(uint8_t brightness, bool shouldStore = false);
+  void setDisplayedBrightness(uint8_t brightness);
 
   void setRenderBuffer(const uint8_t *renderBuffer, bool grays = false);
   uint8_t *getRenderBuffer();
