@@ -13,14 +13,14 @@ uint8_t Screen_::getCurrentBrightness() const
   return brightness_;
 }
 
-void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
+uint8_t Screen_::getBaseBrightness() const
 {
-  brightness_ = brightness;
+  return baseBrightness_;
+}
 
-#ifndef ESP8266
-  pinMode(PIN_ENABLE, OUTPUT);
-  digitalWrite(PIN_ENABLE, LOW);
-#endif
+void Screen_::setBaseBrightness(uint8_t brightness, bool shouldStore)
+{
+  baseBrightness_ = brightness;
 
 #ifdef ENABLE_STORAGE
   if (shouldStore)
@@ -29,6 +29,16 @@ void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
     storage.putUInt("brightness", brightness);
     storage.end();
   }
+#endif
+}
+
+void Screen_::setDisplayedBrightness(uint8_t brightness)
+{
+  brightness_ = brightness;
+
+#ifndef ESP8266
+  pinMode(PIN_ENABLE, OUTPUT);
+  digitalWrite(PIN_ENABLE, LOW);
 #endif
 }
 
@@ -96,7 +106,8 @@ void Screen_::loadFromStorage()
   clear();
   storage.getBytes("data", renderBuffer_, ROWS * COLS);
 
-  setBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
+  setBaseBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
+  setDisplayedBrightness(getBaseBrightness());
   setCurrentRotation(storage.getUInt("rotation", 0));
   storage.end();
 #endif
@@ -107,7 +118,7 @@ void Screen_::persist()
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall");
   storage.putBytes("data", renderBuffer_, ROWS * COLS);
-  storage.putUInt("brightness", brightness_);
+  storage.putUInt("brightness", baseBrightness_);
   storage.putUInt("rotation", currentRotation);
   storage.end();
 #endif
@@ -118,7 +129,8 @@ void Screen_::setup()
 {
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", true);
-  setBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
+  setBaseBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
+  setDisplayedBrightness(getBaseBrightness());
   Screen.setCurrentRotation(storage.getUInt("rotation", 0));
 
   storage.end();
