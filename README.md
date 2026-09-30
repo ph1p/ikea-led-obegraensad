@@ -109,6 +109,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Space Invaders
 - Spotlight
 - Tetris
+- Tron
 
 </details>
 
