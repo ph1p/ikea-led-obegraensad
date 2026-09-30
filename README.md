@@ -108,6 +108,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Flappy Bird
 - Space Invaders
 - Spotlight
+- Tetris
 
 </details>
 
