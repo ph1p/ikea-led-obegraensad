@@ -30,7 +30,7 @@ private:
 
   std::vector<int> previousDigits;
 
-  void drawCharacter(int x, int y, std::vector<int> bits, int bitCount, uint8_t brightness = 255);
+  void drawDigit(int x, int y, int digit, uint8_t brightness = 255);
   byte getScreenIndex(byte x, byte y);
   void swapXdirection();
   void swapYdirection();

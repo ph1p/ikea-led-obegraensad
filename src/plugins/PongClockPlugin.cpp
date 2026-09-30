@@ -9,22 +9,17 @@
 *************************************************/
 static const uint8_t Y_MIN = 6;
 
-void PongClockPlugin::drawCharacter(int x,
-                                    int y,
-                                    std::vector<int> bits,
-                                    int bitCount,
-                                    uint8_t brightness)
+void PongClockPlugin::drawDigit(int x, int y, int digit, uint8_t brightness)
 {
-  for (int i = 0; i < bits.size(); i += bitCount)
+  const int width = 4;
+  const size_t bitCount = sizeof(smallNumbers[0]) * 8;
+  for (size_t bit = 0; bit < bitCount; bit++)
   {
-    for (int j = 0; j < bitCount; j++)
+    int xPos = x + bit % width - 1;
+    int yPos = y + bit / width;
+    if (xPos >= 0 && xPos < X_MAX && yPos >= 0 && yPos < Y_MAX)
     {
-      int xPos = (x + j - 1);
-      int yPos = y + (i / bitCount);
-      if (xPos >= 0 && xPos < X_MAX && yPos >= 0 && yPos < Y_MAX)
-      {
-        Screen.setPixel(xPos, yPos, bits[i + j], brightness);
-      }
+      Screen.setPixel(xPos, yPos, bitmapBit(smallNumbers[digit], bit), brightness);
     }
   }
 }
@@ -57,28 +52,28 @@ void PongClockPlugin::drawDigits()
 
   if (previousDigits.empty())
   {
-    drawCharacter(0, 0, Screen.readBytes(smallNumbers[currentDigits[0]]), 4, 100);
-    drawCharacter(4, 0, Screen.readBytes(smallNumbers[currentDigits[1]]), 4, 100);
-    drawCharacter(9, 0, Screen.readBytes(smallNumbers[currentDigits[2]]), 4, 100);
-    drawCharacter(13, 0, Screen.readBytes(smallNumbers[currentDigits[3]]), 4, 100);
+    drawDigit(0, 0, currentDigits[0], 100);
+    drawDigit(4, 0, currentDigits[1], 100);
+    drawDigit(9, 0, currentDigits[2], 100);
+    drawDigit(13, 0, currentDigits[3], 100);
   }
   else
   {
     if (currentDigits[0] != previousDigits[0])
     {
-      drawCharacter(0, 0, Screen.readBytes(smallNumbers[currentDigits[0]]), 4, 100);
+      drawDigit(0, 0, currentDigits[0], 100);
     }
     if (currentDigits[1] != previousDigits[1])
     {
-      drawCharacter(4, 0, Screen.readBytes(smallNumbers[currentDigits[1]]), 4, 100);
+      drawDigit(4, 0, currentDigits[1], 100);
     }
     if (currentDigits[2] != previousDigits[2])
     {
-      drawCharacter(9, 0, Screen.readBytes(smallNumbers[currentDigits[2]]), 4, 100);
+      drawDigit(9, 0, currentDigits[2], 100);
     }
     if (currentDigits[3] != previousDigits[3])
     {
-      drawCharacter(13, 0, Screen.readBytes(smallNumbers[currentDigits[3]]), 4, 100);
+      drawDigit(13, 0, currentDigits[3], 100);
     }
   }
 
