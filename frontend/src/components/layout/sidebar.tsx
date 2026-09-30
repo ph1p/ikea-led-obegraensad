@@ -1,7 +1,8 @@
-import { type Component, For, type JSX, Show } from "solid-js";
+import { type Component, createSignal, For, type JSX, Show } from "solid-js";
 
 import { useStore } from "../../contexts/store";
 import { ToggleScheduleButton } from "../../scheduler";
+import type { BrightnessSchedule } from "../../types";
 
 interface SidebarSectionProps {
   title: string;
@@ -23,6 +24,7 @@ interface SidebarProps {
   onLoad: () => void;
   onPluginChange: (pluginId: number) => void;
   onBrightnessChange: (value: number, shouldSend?: boolean) => void;
+  onBrightnessScheduleChange: (schedule: BrightnessSchedule, shouldSend?: boolean) => void;
   onArtnetChange: (value: number, shouldSend?: boolean) => void;
   onPersistPlugin: () => void;
   onGOLDelayChange: (value: number, shouldSend?: boolean) => void;
@@ -30,6 +32,20 @@ interface SidebarProps {
 
 export const Sidebar: Component<SidebarProps> = (props) => {
   const [store] = useStore();
+  const [scheduleError, setScheduleError] = createSignal<string>();
+  const updateBrightnessSchedule = (changes: Partial<BrightnessSchedule>, shouldSend = true) => {
+    const next = { ...store.brightnessSchedule, ...changes };
+    if (!next.startTime || !next.endTime) {
+      setScheduleError("Start and end times are required.");
+      return;
+    }
+    if (next.startTime === next.endTime) {
+      setScheduleError("Start and end times must differ.");
+      return;
+    }
+    setScheduleError();
+    props.onBrightnessScheduleChange(next, shouldSend);
+  };
 
   return (
     <>
@@ -89,13 +105,13 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
         <div class="my-6 border-t border-gray-200" />
 
-        <SidebarSection title="Brightness">
+        <SidebarSection title="Base Brightness">
           <div class="space-y-2">
             <input
               type="range"
               min="0"
               max="255"
-              value={store?.brightness}
+              value={store?.baseBrightness}
               class="w-full"
               onInput={(e) => props.onBrightnessChange(parseInt(e.currentTarget.value, 10))}
               onPointerUp={(e) =>
@@ -103,8 +119,74 @@ export const Sidebar: Component<SidebarProps> = (props) => {
               }
             />
             <div class="text-sm text-gray-600 text-right">
-              {Math.round(((store?.brightness ?? 255) / 255) * 100)}%
+              {Math.round(((store?.baseBrightness ?? 255) / 255) * 100)}%
             </div>
+          </div>
+        </SidebarSection>
+
+        <div class="my-6 border-t border-gray-200" />
+
+        <SidebarSection title="Scheduled Brightness">
+          <div class="space-y-3">
+            <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.brightnessSchedule.enabled}
+                onChange={(e) => updateBrightnessSchedule({ enabled: e.currentTarget.checked })}
+              />
+              Enable scheduled brightness
+            </label>
+
+            <Show when={store.brightnessSchedule.enabled}>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="text-xs text-gray-600">
+                  Start
+                  <input
+                    type="time"
+                    value={store.brightnessSchedule.startTime}
+                    class="mt-1 w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm"
+                    onChange={(e) => updateBrightnessSchedule({ startTime: e.currentTarget.value })}
+                  />
+                </label>
+                <label class="text-xs text-gray-600">
+                  End
+                  <input
+                    type="time"
+                    value={store.brightnessSchedule.endTime}
+                    class="mt-1 w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm"
+                    onChange={(e) => updateBrightnessSchedule({ endTime: e.currentTarget.value })}
+                  />
+                </label>
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs text-gray-600" for="scheduled-brightness">
+                  Scheduled brightness
+                </label>
+                <input
+                  id="scheduled-brightness"
+                  type="range"
+                  min="0"
+                  max="255"
+                  value={store.brightnessSchedule.brightness}
+                  class="w-full"
+                  onInput={(e) =>
+                    updateBrightnessSchedule({ brightness: parseInt(e.currentTarget.value, 10) }, false)
+                  }
+                  onPointerUp={(e) =>
+                    updateBrightnessSchedule({ brightness: parseInt(e.currentTarget.value, 10) })
+                  }
+                />
+                <div class="text-sm text-gray-600 text-right">
+                  {Math.round((store.brightnessSchedule.brightness / 255) * 100)}%
+                </div>
+              </div>
+              <Show when={scheduleError()}>
+                <div class="text-xs text-red-600">{scheduleError()}</div>
+              </Show>
+              <div class="text-xs text-gray-600">
+                {store.brightnessSchedule.active ? "Active now" : "Inactive now"}
+              </div>
+            </Show>
           </div>
         </SidebarSection>
 
