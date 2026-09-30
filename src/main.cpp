@@ -178,6 +178,20 @@ void baseSetup()
   pinMode(PIN_DATA, OUTPUT);
   pinMode(PIN_ENABLE, OUTPUT);
 
+#ifndef ESP8266
+  // Keep the matrix dark until Screen.setup(): the shift registers hold random data
+  // after power-on, which would light LEDs at full current during WiFi start-up.
+  digitalWrite(PIN_ENABLE, HIGH);
+#endif
+  digitalWrite(PIN_LATCH, LOW);
+  for (int i = 0; i < ROWS * COLS; i++)
+  {
+    digitalWrite(PIN_DATA, LOW);
+    digitalWrite(PIN_CLOCK, HIGH);
+    digitalWrite(PIN_CLOCK, LOW);
+  }
+  digitalWrite(PIN_LATCH, HIGH);
+
 #if !defined(ESP32) && !defined(ESP8266)
   Screen.setup();
 #endif
