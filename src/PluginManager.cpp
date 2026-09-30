@@ -32,8 +32,6 @@ PluginManager::PluginManager() : nextPluginId(1)
 void PluginManager::init()
 {
   Screen.clear();
-  std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
-
   activatePersistedPlugin();
 }
 
@@ -81,26 +79,28 @@ void PluginManager::renderPluginId(int pluginId)
 
 void PluginManager::activatePersistedPlugin()
 {
-  std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
+  const int firstPluginId = plugins.at(0)->getId();
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", true);
-  persistedPluginId = storage.getInt("current-plugin", allPlugins.at(0)->getId());
-  pluginManager.setActivePluginById(persistedPluginId);
+  persistedPluginId = storage.getInt("current-plugin", firstPluginId);
   storage.end();
-#endif
-  if (!activePlugin)
+
+  if (setActivePluginById(persistedPluginId))
   {
-    pluginManager.setActivePluginById(allPlugins.at(0)->getId());
+    return;
   }
+#endif
+  setActivePluginById(firstPluginId);
 }
 
 void PluginManager::persistActivePlugin()
 {
 #ifdef ENABLE_STORAGE
+  Plugin *plugin = activePlugin;
   storage.begin("led-wall", false);
-  if (activePlugin)
+  if (plugin)
   {
-    persistedPluginId = activePlugin->getId();
+    persistedPluginId = plugin->getId();
     storage.putInt("current-plugin", persistedPluginId);
   }
   storage.end();
@@ -109,10 +109,9 @@ void PluginManager::persistActivePlugin()
 
 int PluginManager::getPersistedPluginId()
 {
-  std::vector<Plugin *> &allPlugins = pluginManager.getAllPlugins();
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", true);
-  persistedPluginId = storage.getInt("current-plugin", allPlugins.at(0)->getId());
+  persistedPluginId = storage.getInt("current-plugin", plugins.at(0)->getId());
   storage.end();
   return persistedPluginId;
 #else
@@ -128,54 +127,144 @@ int PluginManager::addPlugin(Plugin *plugin)
   return plugin->getId();
 }
 
-void PluginManager::setActivePlugin(const char *pluginName)
-{
-  if (activePlugin)
-  {
-    activePlugin->teardown();
-    activePlugin = nullptr;
-  }
-
-  for (Plugin *plugin : plugins)
-  {
-    if (strcmp(plugin->getName(), pluginName) == 0)
-    {
-      currentStatus = LOADING; // Prevent plugin loop from drawing during ID display
-      activePlugin = plugin;
-      renderPluginId(activePlugin->getId());
-      currentStatus = NONE; // Allow plugin to start drawing
-      activePlugin->setup();
-      break;
-    }
-  }
-}
-
-void PluginManager::setActivePluginById(int pluginId)
+Plugin *PluginManager::findPlugin(int pluginId) const
 {
   for (Plugin *plugin : plugins)
   {
     if (plugin->getId() == pluginId)
     {
-      setActivePlugin(plugin->getName());
+      return plugin;
+    }
+  }
+  return nullptr;
+}
+
+bool PluginManager::mustDefer() const
+{
+#ifdef ESP32
+  return deferToRenderTask && xTaskGetCurrentTaskHandle() != renderTask;
+#else
+  return false;
+#endif
+}
+
+void PluginManager::activatePlugin(Plugin *plugin)
+{
+  currentStatus = LOADING; // Prevent plugin loop from drawing during ID display
+  Plugin *previous = activePlugin;
+  if (previous)
+  {
+    previous->teardown();
+  }
+  activePlugin = plugin;
+  renderPluginId(plugin->getId());
+  plugin->setup();
+  currentStatus = NONE; // Allow plugin to start drawing
+
+#ifdef ENABLE_SERVER
+  sendInfo();
+#endif
+}
+
+bool PluginManager::setActivePluginById(int pluginId)
+{
+  Plugin *plugin = findPlugin(pluginId);
+  if (!plugin)
+  {
+    return false;
+  }
+
+#ifdef ESP32
+  if (mustDefer())
+  {
+    requestedPluginId = pluginId;
+    return true;
+  }
+#endif
+
+  activatePlugin(plugin);
+  return true;
+}
+
+void PluginManager::dispatchWebsocketHook(JsonDocument &request)
+{
+#ifdef ESP32
+  if (mustDefer())
+  {
+    std::lock_guard<std::mutex> lock(pendingHooksMutex);
+    if (pendingHooks.size() >= MAX_PENDING_HOOKS)
+    {
+      Serial.println(F("PluginManager: websocket hook queue full, message dropped"));
+      return;
+    }
+    pendingHooks.emplace_back(request);
+    return;
+  }
+#endif
+
+  Plugin *plugin = activePlugin;
+  if (plugin)
+  {
+    plugin->websocketHook(request);
+  }
+}
+
+void PluginManager::enableRenderTask()
+{
+#ifdef ESP32
+  deferToRenderTask = true;
+#endif
+}
+
+#ifdef ESP32
+void PluginManager::processPendingRequests()
+{
+  std::deque<JsonDocument> hooks;
+  {
+    std::lock_guard<std::mutex> lock(pendingHooksMutex);
+    hooks.swap(pendingHooks);
+  }
+
+  // Hooks were queued before any switch that is still pending, so they belong
+  // to the plugin that is active now.
+  for (JsonDocument &request : hooks)
+  {
+    Plugin *plugin = activePlugin;
+    if (plugin)
+    {
+      plugin->websocketHook(request);
+    }
+  }
+
+  const int pluginId = requestedPluginId.exchange(-1);
+  if (pluginId >= 0)
+  {
+    Plugin *plugin = findPlugin(pluginId);
+    if (plugin)
+    {
+      activatePlugin(plugin);
     }
   }
 }
-
-void PluginManager::setupActivePlugin()
-{
-  if (activePlugin)
-  {
-    renderPluginId(activePlugin->getId());
-    activePlugin->setup();
-  }
-}
+#endif
 
 void PluginManager::runActivePlugin()
 {
-  if (activePlugin && currentStatus != UPDATE && currentStatus != LOADING &&
-      currentStatus != WSBINARY)
+#ifdef ESP32
+  if (deferToRenderTask)
   {
-    activePlugin->loop();
+    if (renderTask == nullptr)
+    {
+      renderTask = xTaskGetCurrentTaskHandle();
+    }
+    processPendingRequests();
+  }
+#endif
+
+  Plugin *plugin = activePlugin;
+  if (plugin && currentStatus != UPDATE && currentStatus != LOADING && currentStatus != WSBINARY)
+  {
+    plugin->loop();
   }
 }
 
@@ -196,22 +285,23 @@ size_t PluginManager::getNumPlugins()
 
 void PluginManager::activateNextPlugin()
 {
-  if (activePlugin)
+  // Step from a switch that is still queued so repeated presses keep advancing
+  int currentId = -1;
+#ifdef ESP32
+  currentId = requestedPluginId;
+#endif
+  if (currentId < 0)
   {
-    if (activePlugin->getId() <= getNumPlugins() - 1)
-    {
-      setActivePluginById(activePlugin->getId() + 1);
-    }
-    else
-    {
-      setActivePluginById(1);
-    }
+    Plugin *plugin = activePlugin;
+    currentId = plugin ? plugin->getId() : 0;
+  }
+
+  if (currentId >= 1 && currentId < (int)getNumPlugins())
+  {
+    setActivePluginById(currentId + 1);
   }
   else
   {
     setActivePluginById(1);
   }
-#ifdef ENABLE_SERVER
-  sendInfo();
-#endif
 }

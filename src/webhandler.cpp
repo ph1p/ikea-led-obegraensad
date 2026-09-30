@@ -137,9 +137,7 @@ void handleMessageRemove(AsyncWebServerRequest *request)
 void handleSetPlugin(AsyncWebServerRequest *request)
 {
   int id = request->arg("id").toInt();
-  pluginManager.setActivePluginById(id);
-
-  if (pluginManager.getActivePlugin() && pluginManager.getActivePlugin()->getId() == id)
+  if (pluginManager.setActivePluginById(id))
   {
     sendJsonSuccess(request, "Plugin set successfully");
   }
@@ -275,7 +273,8 @@ void handleGetInfo(AsyncWebServerRequest *request)
   jsonDocument["rows"] = ROWS;
   jsonDocument["cols"] = COLS;
   jsonDocument["status"] = currentStatus;
-  jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
+  Plugin *activePlugin = pluginManager.getActivePlugin();
+  jsonDocument["plugin"] = activePlugin ? activePlugin->getId() : -1;
   jsonDocument["rotation"] = Screen.currentRotation;
   jsonDocument["baseBrightness"] = Screen.getBaseBrightness();
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
@@ -289,7 +288,7 @@ void handleGetInfo(AsyncWebServerRequest *request)
   jsonDocument["resetReason"] = getResetReason();
 
   JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
-  for (const auto &item : Scheduler.schedule)
+  for (const auto &item : Scheduler.getSchedule())
   {
     JsonObject scheduleItem = scheduleArray.add<JsonObject>();
     scheduleItem["pluginId"] = item.pluginId;
@@ -340,7 +339,7 @@ void handleClearSchedule(AsyncWebServerRequest *request)
 
 void handleStopSchedule(AsyncWebServerRequest *request)
 {
-  if (!Scheduler.schedule.empty())
+  if (Scheduler.hasSchedule())
   {
     Scheduler.stop();
     sendInfo();
@@ -354,7 +353,7 @@ void handleStopSchedule(AsyncWebServerRequest *request)
 
 void handleStartSchedule(AsyncWebServerRequest *request)
 {
-  if (!Scheduler.schedule.empty())
+  if (Scheduler.hasSchedule())
   {
     Scheduler.start();
     sendInfo();

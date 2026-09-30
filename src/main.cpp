@@ -283,6 +283,8 @@ void screenDrawingTask(void *parameter)
 void setup()
 {
   baseSetup();
+  // From here on plugin switches and websocket hooks are handed to the drawing task
+  pluginManager.enableRenderTask();
   xTaskCreatePinnedToCore(screenDrawingTask,
                           "screenDrawingTask",
                           10000,

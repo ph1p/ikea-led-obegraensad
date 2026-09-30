@@ -4,6 +4,10 @@
 #include <Arduino.h>
 #include <vector>
 
+#ifdef ESP32
+#include <mutex>
+#endif
+
 struct ScheduleItem
 {
   int pluginId;
@@ -21,6 +25,12 @@ private:
   unsigned long lastPersistRequest = 0;
   static constexpr unsigned long PERSIST_DELAY_MS = 2000;
 
+  // Written by the web server task, read by the Arduino loop task and sendInfo()
+  std::vector<ScheduleItem> schedule;
+#ifdef ESP32
+  mutable std::recursive_mutex scheduleMutex;
+#endif
+
 public:
   static PluginScheduler &getInstance();
 
@@ -28,7 +38,9 @@ public:
   PluginScheduler &operator=(const PluginScheduler &) = delete;
 
   bool isActive = false;
-  std::vector<ScheduleItem> schedule;
+
+  std::vector<ScheduleItem> getSchedule() const;
+  bool hasSchedule() const;
 
   void addItem(int pluginId, unsigned long durationSeconds);
   void clearSchedule(bool emptyStorage = false);
