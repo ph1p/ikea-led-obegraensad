@@ -11,12 +11,22 @@ export interface ScheduleItem {
   duration: number;
 }
 
+export type BrightnessSchedule = {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+  brightness: number;
+  active: boolean;
+}
+
 export interface StoreActions {
   setIsActiveScheduler: (isActive: boolean) => void;
   setRotation: (rotation: number) => void;
   setPlugins: (plugins: []) => void;
   setPlugin: (plugin: number) => void;
+  setBaseBrightness: (brightness: number) => void;
   setBrightness: (brightness: number) => void;
+  setBrightnessSchedule: (schedule: BrightnessSchedule) => void;
   setIndexMatrix: (indexMatrix: number[]) => void;
   setLeds: (leds: number[]) => void;
   setSystemStatus: (systemStatus: SYSTEM_STATUS) => void;
@@ -29,7 +39,9 @@ export interface StoreActions {
 export interface Store {
   isActiveScheduler: boolean;
   rotation: number;
+  baseBrightness: number;
   brightness: number;
+  brightnessSchedule: BrightnessSchedule;
   indexMatrix: number[];
   leds: number[];
   plugins: { id: number; name: string }[];

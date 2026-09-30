@@ -17,11 +17,15 @@
 #endif
 
 #include "PluginManager.h"
+#include "brightness_schedule.h"
 #include "config.h"
 #include "scheduler.h"
 
 #include "plugins/ArtNet.h"
+#include "plugins/BigPongPlugin.h"
+#include "plugins/AutoWalkerPlugin.h"
 #include "plugins/Blob.h"
+#include "plugins/BouncingBallPlugin.h"
 #include "plugins/BreakoutPlugin.h"
 #include "plugins/BubblesPlugin.h"
 #include "plugins/CheckerboardPlugin.h"
@@ -29,8 +33,11 @@
 #include "plugins/CometPlugin.h"
 #include "plugins/DDPPlugin.h"
 #include "plugins/DrawPlugin.h"
+#include "plugins/FacePlugin.h"
+#include "plugins/FallingSandPlugin.h"
 #include "plugins/FirefliesPlugin.h"
 #include "plugins/FireworkPlugin.h"
+#include "plugins/FlappyBirdPlugin.h"
 #include "plugins/GameOfLifePlugin.h"
 #include "plugins/LinesPlugin.h"
 #include "plugins/MatrixRainPlugin.h"
@@ -40,10 +47,14 @@
 #include "plugins/RainPlugin.h"
 #include "plugins/ScanlinesPlugin.h"
 #include "plugins/SnakePlugin.h"
+#include "plugins/SpaceInvadersPlugin.h"
 #include "plugins/SparkleFieldPlugin.h"
+#include "plugins/SpotlightPlugin.h"
 #include "plugins/SpiralPlugin.h"
 #include "plugins/StarsPlugin.h"
+#include "plugins/TetrisPlugin.h"
 #include "plugins/TickingClockPlugin.h"
+#include "plugins/TronPlugin.h"
 #include "plugins/WaveBarsPlugin.h"
 #include "plugins/WavePlugin.h"
 
@@ -167,6 +178,20 @@ void baseSetup()
   pinMode(PIN_DATA, OUTPUT);
   pinMode(PIN_ENABLE, OUTPUT);
 
+#ifndef ESP8266
+  // Keep the matrix dark until Screen.setup(): the shift registers hold random data
+  // after power-on, which would light LEDs at full current during WiFi start-up.
+  digitalWrite(PIN_ENABLE, HIGH);
+#endif
+  digitalWrite(PIN_LATCH, LOW);
+  for (int i = 0; i < ROWS * COLS; i++)
+  {
+    digitalWrite(PIN_DATA, LOW);
+    digitalWrite(PIN_CLOCK, HIGH);
+    digitalWrite(PIN_CLOCK, LOW);
+  }
+  digitalWrite(PIN_LATCH, HIGH);
+
 #if !defined(ESP32) && !defined(ESP8266)
   Screen.setup();
 #endif
@@ -212,6 +237,16 @@ void baseSetup()
   pluginManager.addPlugin(new ScanlinesPlugin());
   pluginManager.addPlugin(new SparkleFieldPlugin());
   pluginManager.addPlugin(new WaveBarsPlugin());
+  pluginManager.addPlugin(new BigPongPlugin());
+  pluginManager.addPlugin(new AutoWalkerPlugin());
+  pluginManager.addPlugin(new BouncingBallPlugin());
+  pluginManager.addPlugin(new FacePlugin());
+  pluginManager.addPlugin(new FallingSandPlugin());
+  pluginManager.addPlugin(new FlappyBirdPlugin());
+  pluginManager.addPlugin(new SpaceInvadersPlugin());
+  pluginManager.addPlugin(new SpotlightPlugin());
+  pluginManager.addPlugin(new TetrisPlugin());
+  pluginManager.addPlugin(new TronPlugin());
 
 #ifdef ENABLE_SERVER
   pluginManager.addPlugin(new BigClockPlugin());
@@ -237,6 +272,7 @@ TaskHandle_t screenDrawingTaskHandle = NULL;
 void screenDrawingTask(void *parameter)
 {
   Screen.setup();
+  ScheduledBrightness.init();
   for (;;)
   {
     pluginManager.runActivePlugin();
@@ -260,6 +296,7 @@ void setup()
 void screenDrawingTask()
 {
   Screen.setup();
+  ScheduledBrightness.init();
   pluginManager.runActivePlugin();
   yield();
 }
@@ -288,6 +325,7 @@ void loop()
   if (currentStatus == NONE)
   {
     Scheduler.update();
+    ScheduledBrightness.update();
 
     if ((taskCounter & 0x03) == 0)
     {

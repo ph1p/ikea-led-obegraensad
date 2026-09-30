@@ -1,4 +1,5 @@
 #include "webhandler.h"
+#include "brightness_schedule.h"
 #include "config.h"
 #include "messages.h"
 #include "scheduler.h"
@@ -53,6 +54,37 @@ void sendJsonError(AsyncWebServerRequest *request, int statusCode, const char *e
   String output;
   serializeJson(jsonResponse, output);
   request->send(statusCode, "application/json", output);
+}
+
+// Accumulates chunked request bodies into a buffer owned by the request. The
+// AsyncWebServer frees the buffer together with the request, so callers must
+// not free it themselves. Returns nullptr while more chunks are pending, or
+// after buffering failed (a 500 response has been sent in that case).
+char *accumulateRequestBody(AsyncWebServerRequest *request,
+                            uint8_t *data,
+                            size_t len,
+                            size_t index,
+                            size_t total)
+{
+  if (index == 0)
+  {
+    request->_tempObject = malloc(total + 1);
+  }
+
+  char *body = static_cast<char *>(request->_tempObject);
+  if (!body)
+  {
+    sendJsonError(request, 500, "Internal buffer error");
+    return nullptr;
+  }
+
+  memcpy(body + index, data, len);
+  if (index + len != total)
+  {
+    return nullptr;
+  }
+  body[total] = '\0';
+  return body;
 }
 
 // http://your-server/message?text=Hello&repeat=3&id=42&graph=1,2,3,4
@@ -134,8 +166,53 @@ void handleSetBrightness(AsyncWebServerRequest *request)
     return;
   }
 
-  Screen.setBrightness(value, true);
+  Screen.setBaseBrightness(value, true);
+  ScheduledBrightness.update();
   sendJsonSuccess(request, "Brightness set successfully");
+}
+
+void handleSetBrightnessScheduleBody(AsyncWebServerRequest *request,
+                                     uint8_t *data,
+                                     size_t len,
+                                     size_t index,
+                                     size_t total)
+{
+  const char *body = accumulateRequestBody(request, data, len, index, total);
+  if (!body)
+  {
+    return;
+  }
+
+  JsonDocument document;
+  const DeserializationError error = deserializeJson(document, body);
+  if (error)
+  {
+    sendJsonError(request, 400, "Invalid JSON payload");
+    return;
+  }
+
+  switch (ScheduledBrightness.configureFromJson(document.as<JsonVariantConst>()))
+  {
+  case BrightnessSchedule::ConfigureStatus::Success: {
+    JsonDocument response;
+    response["baseBrightness"] = Screen.getBaseBrightness();
+    response["brightness"] = Screen.getCurrentBrightness();
+    JsonObject brightnessSchedule = response["brightnessSchedule"].to<JsonObject>();
+    ScheduledBrightness.writeToJson(brightnessSchedule);
+
+    String output;
+    serializeJson(response, output);
+    request->send(200, "application/json", output);
+    sendInfo();
+    break;
+  }
+  case BrightnessSchedule::ConfigureStatus::InvalidConfiguration:
+    sendJsonError(request, 422, "Invalid scheduled brightness configuration");
+    break;
+  case BrightnessSchedule::ConfigureStatus::IdenticalTimes:
+    sendJsonError(request, 422, "Start and end times must differ");
+    break;
+  }
 }
 
 void handleGetData(AsyncWebServerRequest *request)
@@ -158,6 +235,40 @@ void handleGetData(AsyncWebServerRequest *request)
   }
 }
 
+const char *getResetReason()
+{
+#ifdef ESP32
+  switch (esp_reset_reason())
+  {
+  case ESP_RST_POWERON:
+    return "poweron";
+  case ESP_RST_EXT:
+    return "external";
+  case ESP_RST_SW:
+    return "software";
+  case ESP_RST_PANIC:
+    return "panic";
+  case ESP_RST_INT_WDT:
+    return "int_wdt";
+  case ESP_RST_TASK_WDT:
+    return "task_wdt";
+  case ESP_RST_WDT:
+    return "wdt";
+  case ESP_RST_DEEPSLEEP:
+    return "deepsleep";
+  case ESP_RST_BROWNOUT:
+    return "brownout";
+  case ESP_RST_SDIO:
+    return "sdio";
+  default:
+    return "unknown";
+  }
+#else
+  static String reason = ESP.getResetReason();
+  return reason.c_str();
+#endif
+}
+
 void handleGetInfo(AsyncWebServerRequest *request)
 {
   JsonDocument jsonDocument;
@@ -166,13 +277,16 @@ void handleGetInfo(AsyncWebServerRequest *request)
   jsonDocument["status"] = currentStatus;
   jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
   jsonDocument["rotation"] = Screen.currentRotation;
+  jsonDocument["baseBrightness"] = Screen.getBaseBrightness();
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
+  ScheduledBrightness.writeToJson(jsonDocument["brightnessSchedule"].to<JsonObject>());
   jsonDocument["scheduleActive"] = Scheduler.isActive;
   jsonDocument["rssi"] = WiFi.RSSI();
   jsonDocument["uptime"] = millis() / 1000;
   jsonDocument["freeHeap"] = ESP.getFreeHeap();
   jsonDocument["ipAddress"] = WiFi.localIP().toString();
   jsonDocument["macAddress"] = WiFi.macAddress();
+  jsonDocument["resetReason"] = getResetReason();
 
   JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
   for (const auto &item : Scheduler.schedule)
@@ -292,42 +406,25 @@ void handleSetConfigBody(AsyncWebServerRequest *request,
                          size_t index,
                          size_t total)
 {
-  if (index == 0)
-  {
-    request->_tempObject = new String();
-  }
-
-  String *body = static_cast<String *>(request->_tempObject);
+  const char *body = accumulateRequestBody(request, data, len, index, total);
+  
   if (!body)
-  {
-    sendJsonError(request, 500, "Internal buffer error");
-    return;
-  }
-
-  if (index == 0)
-  {
-    body->reserve(total);
-  }
-
-  body->concat(reinterpret_cast<char *>(data), len);
-
-  if (index + len != total)
   {
     return;
   }
 
   Serial.println("[WebHandler] POST /api/config (body)");
   Serial.print("[WebHandler] Received JSON: ");
-  Serial.println(*body);
+  Serial.println(body);
 
   try
   {
-    if (body->length() == 0)
+    if (strlen(body) == 0)
     {
       Serial.println("[WebHandler] ERROR: No JSON body");
       sendJsonError(request, 400, "No JSON body provided");
     }
-    else if (config.fromJson(*body))
+    else if (config.fromJson(String(body)))
     {
       Serial.println("[WebHandler] JSON parsed successfully");
       config.save();
@@ -356,9 +453,6 @@ void handleSetConfigBody(AsyncWebServerRequest *request,
     Serial.println("[WebHandler] ERROR: Exception in handleSetConfigBody");
     sendJsonError(request, 500, "Error saving configuration");
   }
-
-  delete body;
-  request->_tempObject = nullptr;
 }
 
 void handleResetConfig(AsyncWebServerRequest *request)

@@ -13,14 +13,14 @@ uint8_t Screen_::getCurrentBrightness() const
   return brightness_;
 }
 
-void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
+uint8_t Screen_::getBaseBrightness() const
 {
-  brightness_ = brightness;
+  return baseBrightness_;
+}
 
-#ifndef ESP8266
-  pinMode(PIN_ENABLE, OUTPUT);
-  digitalWrite(PIN_ENABLE, LOW);
-#endif
+void Screen_::setBaseBrightness(uint8_t brightness, bool shouldStore)
+{
+  baseBrightness_ = brightness;
 
 #ifdef ENABLE_STORAGE
   if (shouldStore)
@@ -29,6 +29,16 @@ void Screen_::setBrightness(uint8_t brightness, bool shouldStore)
     storage.putUInt("brightness", brightness);
     storage.end();
   }
+#endif
+}
+
+void Screen_::setDisplayedBrightness(uint8_t brightness)
+{
+  brightness_ = brightness;
+
+#ifndef ESP8266
+  pinMode(PIN_ENABLE, OUTPUT);
+  digitalWrite(PIN_ENABLE, LOW);
 #endif
 }
 
@@ -96,7 +106,8 @@ void Screen_::loadFromStorage()
   clear();
   storage.getBytes("data", renderBuffer_, ROWS * COLS);
 
-  setBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
+  setBaseBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
+  setDisplayedBrightness(getBaseBrightness());
   setCurrentRotation(storage.getUInt("rotation", 0));
   storage.end();
 #endif
@@ -107,7 +118,7 @@ void Screen_::persist()
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall");
   storage.putBytes("data", renderBuffer_, ROWS * COLS);
-  storage.putUInt("brightness", brightness_);
+  storage.putUInt("brightness", baseBrightness_);
   storage.putUInt("rotation", currentRotation);
   storage.end();
 #endif
@@ -118,7 +129,8 @@ void Screen_::setup()
 {
 #ifdef ENABLE_STORAGE
   storage.begin("led-wall", true);
-  setBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
+  setBaseBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
+  setDisplayedBrightness(getBaseBrightness());
   Screen.setCurrentRotation(storage.getUInt("rotation", 0));
 
   storage.end();
@@ -273,7 +285,10 @@ IRAM_ATTR void Screen_::_render()
   }
   else
   {
-    // Normal rendering with PWM for grayscale
+    // Normal rendering with PWM for grayscale.
+    // Each pixel gets a fixed phase offset (a multiple of the counter step, spread evenly
+    // over the cycle) so that LEDs don't all switch on at the same time. The on-time per
+    // pixel is unchanged, but the peak current drops to roughly the average current.
     for (int idx = 0; idx < ROWS * COLS; idx++)
     {
       uint16_t pixelValue = buf[positions[idx]];
@@ -282,7 +297,9 @@ IRAM_ATTR void Screen_::_render()
       {
         scaledValue = 1;
       }
-      bits[idx >> 3] |= (scaledValue > counter ? 0x80 : 0) >> (idx & 7);
+      const uint8_t phase = (uint8_t)(idx * 37 * ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS));
+      const uint8_t position = counter + phase;
+      bits[idx >> 3] |= (scaledValue > position ? 0x80 : 0) >> (idx & 7);
     }
     counter += ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS);
   }
