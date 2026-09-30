@@ -105,6 +105,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Bouncing Ball
 - Face
 - Falling Sand
+- Flappy Bird
 
 </details>
 
