@@ -13,12 +13,7 @@ void onOTAStart()
   currentStatus = UPDATE;
 
   Screen.clear();
-  std::vector<int> bits = Screen.readBytes(letterU);
-
-  for (int i = 0; i < bits.size(); i++)
-  {
-    Screen.setPixelAtIndex(i, bits[i], MAX_BRIGHTNESS);
-  }
+  Screen.drawBitmap(0, 0, letterU, sizeof(letterU), COLS, MAX_BRIGHTNESS);
 }
 
 void onOTAProgress(size_t current, size_t final)
@@ -43,12 +38,7 @@ void onOTAEnd(bool success)
     Serial.println("There was an error during OTA update!");
   }
 
-  std::vector<int> bits = Screen.readBytes(letterR);
-
-  for (int i = 0; i < bits.size(); i++)
-  {
-    Screen.setPixelAtIndex(i, bits[i]);
-  }
+  Screen.drawBitmap(0, 0, letterR, sizeof(letterR), COLS);
 
 #ifdef ESP32
   vTaskDelay(pdMS_TO_TICKS(1000));

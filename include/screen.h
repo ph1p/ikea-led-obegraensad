@@ -103,6 +103,13 @@ public:
                      const std::vector<int> &bits,
                      int bitCount,
                      uint8_t brightness = MAX_BRIGHTNESS);
+  // Draws a bitmap from flash, see signs.h for the format
+  void drawBitmap(int x,
+                  int y,
+                  const uint8_t *bytes,
+                  size_t length,
+                  int width,
+                  uint8_t brightness = MAX_BRIGHTNESS);
   void drawNumbers(int x,
                    int y,
                    const std::vector<int> &numbers,

@@ -485,11 +485,25 @@ std::vector<int> Screen_::readBytes(const std::vector<int> &bytes)
   return bits;
 }
 
+void Screen_::drawBitmap(int x,
+                         int y,
+                         const uint8_t *bytes,
+                         size_t length,
+                         int width,
+                         uint8_t brightness)
+{
+  const size_t bitCount = length * 8;
+  for (size_t bit = 0; bit < bitCount; bit++)
+  {
+    setPixel(x + bit % width, y + bit / width, bitmapBit(bytes, bit), brightness);
+  }
+}
+
 void Screen_::drawNumbers(int x, int y, const std::vector<int> &numbers, uint8_t brightness)
 {
   for (int i = 0; i < numbers.size(); i++)
   {
-    drawCharacter(x + (i * 5), y, readBytes(smallNumbers[numbers.at(i)]), 4, brightness);
+    drawBitmap(x + (i * 5), y, smallNumbers[numbers.at(i)], sizeof(smallNumbers[0]), 4, brightness);
   }
 }
 
@@ -497,19 +511,23 @@ void Screen_::drawBigNumbers(int x, int y, const std::vector<int> &numbers, uint
 {
   for (int i = 0; i < numbers.size(); i++)
   {
-    drawCharacter(x + (i * 8), y, readBytes(bigNumbers[numbers.at(i)]), 8, brightness);
+    drawBitmap(x + (i * 8), y, bigNumbers[numbers.at(i)], sizeof(bigNumbers[0]), 8, brightness);
   }
 }
 
 void Screen_::drawWeather(int x, int y, int weather, uint8_t brightness)
 {
-  drawCharacter(x, y, readBytes(weatherIcons[weather]), 16, brightness);
+  if (weather < 0 || weather >= WEATHER_ICON_COUNT)
+  {
+    return;
+  }
+  drawBitmap(x, y, weatherIcons[weather].data, weatherIcons[weather].length, 16, brightness);
 }
 
 void Screen_::scrollText(const std::string &text, int delayTime, uint8_t brightness, uint8_t fontid)
 {
   // lets determine the current font
-  font currentFont = (fontid < fonts.size()) ? fonts[fontid] : fonts[0];
+  const font &currentFont = (fontid < FONT_COUNT) ? fonts[fontid] : fonts[0];
 
   int textWidth = text.length() * (currentFont.sizeX + 1); // charsize + space
 
@@ -534,15 +552,17 @@ void Screen_::scrollText(const std::string &text, int delayTime, uint8_t brightn
         if (xPos > -6 && xPos < ROWS)
         { // so are we somewhere on screen with the char?
           // ensure that we have a defined char, lets take the first
-          uint8_t currentChar = (((text[strPos] - currentFont.offset) < currentFont.data.size()) &&
-                                 (text[strPos] >= currentFont.offset))
-                                    ? text[strPos]
-                                    : currentFont.offset;
+          const uint8_t c = text[strPos];
+          uint8_t currentChar =
+              (c >= currentFont.offset && c - currentFont.offset < currentFont.charCount)
+                  ? c
+                  : currentFont.offset;
 
-          Screen.drawCharacter(xPos,
-                               4,
-                               Screen.readBytes(currentFont.data[currentChar - currentFont.offset]),
-                               8);
+          drawBitmap(xPos,
+                     4,
+                     fontGlyph(currentFont, currentChar - currentFont.offset),
+                     currentFont.sizeY,
+                     8);
         }
       }
     }
