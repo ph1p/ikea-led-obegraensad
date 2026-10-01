@@ -1,6 +1,23 @@
 #pragma once
 
 #include <Arduino.h>
+#include <time.h>
+
+/**
+ * Non-blocking replacement for getLocalTime()
+ *
+ * The Arduino cores' getLocalTime() waits up to 5 seconds for SNTP to set the
+ * clock, which stalls the caller whenever no time is available (no internet,
+ * NTP blocked, right after boot). This uses the same "is the clock set"
+ * heuristic (struct tm counts years from 1900, an unsynced clock is in 1970)
+ * but returns immediately.
+ */
+inline bool getSyncedLocalTime(struct tm &timeInfo)
+{
+  const time_t now = time(nullptr);
+  localtime_r(&now, &timeInfo);
+  return timeInfo.tm_year > (2016 - 1900);
+}
 
 /**
  * Non-blocking delay helper class

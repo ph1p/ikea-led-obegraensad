@@ -1,4 +1,5 @@
 #include "plugins/ClockPlugin.h"
+#include "timing.h"
 
 void ClockPlugin::setup()
 {
@@ -18,7 +19,7 @@ void ClockPlugin::setup()
 
 void ClockPlugin::loop()
 {
-  if (getLocalTime(&timeinfo))
+  if (getSyncedLocalTime(timeinfo))
   {
     if (previousHour != timeinfo.tm_hour || previousMinutes != timeinfo.tm_min)
     {

@@ -4,6 +4,8 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
+#include "timing.h"
+
 class BrightnessSchedule
 {
 private:
@@ -21,7 +23,6 @@ private:
   bool initialized_ = false;
 
   void persist();
-  static bool getSyncedLocalTime(struct tm &timeInfo);
   static bool parseTime(const String &value, uint16_t &minutes);
   static String formatTime(uint16_t minutes);
 
