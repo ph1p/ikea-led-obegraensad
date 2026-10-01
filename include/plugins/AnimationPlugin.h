@@ -5,7 +5,10 @@
 class AnimationPlugin : public Plugin
 {
 private:
-  uint8_t step = 0;
+  // Each frame costs ~150 bytes of heap; cap it so a client cannot exhaust memory.
+  static constexpr size_t MAX_FRAMES = 128;
+
+  size_t step = 0;
   std::vector<std::vector<int>> customAnimationFrames;
   int frameDelay = 400;
 

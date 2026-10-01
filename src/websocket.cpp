@@ -159,16 +159,14 @@ void onWsEvent(AsyncWebSocket *server,
     AwsFrameInfo *info = (AwsFrameInfo *)arg;
     if (info->final && info->index == 0 && info->len == len)
     {
-      if (info->opcode == WS_BINARY && currentStatus == WSBINARY && info->len == 256)
+      if (info->opcode == WS_BINARY && currentStatus == WSBINARY && info->len == TOTAL_PIXELS)
       {
         Screen.setRenderBuffer(data, true);
       }
       else if (info->opcode == WS_TEXT)
       {
-        data[len] = 0;
-
         JsonDocument wsRequest;
-        DeserializationError error = deserializeJson(wsRequest, data);
+        DeserializationError error = deserializeJson(wsRequest, data, len);
 
         if (error)
         {
@@ -178,7 +176,19 @@ void onWsEvent(AsyncWebSocket *server,
         }
         else
         {
-          pluginManager.getActivePlugin()->websocketHook(wsRequest);
+          // Every handler below and the plugin hooks dispatch on "event", so
+          // drop anything without it instead of passing nullptr to strcmp().
+          if (!wsRequest["event"].is<const char *>())
+          {
+            Serial.println(F("websocket message without \"event\" ignored"));
+            return;
+          }
+
+          Plugin *activePlugin = pluginManager.getActivePlugin();
+          if (activePlugin)
+          {
+            activePlugin->websocketHook(wsRequest);
+          }
 
           const char *event = wsRequest["event"];
 
@@ -197,7 +207,7 @@ void onWsEvent(AsyncWebSocket *server,
           }
           else if (!strcmp(event, "rotate"))
           {
-            bool isRight = (bool)!strcmp(wsRequest["direction"], "right");
+            bool isRight = !strcmp(wsRequest["direction"] | "", "right");
             Screen.setCurrentRotation((Screen.currentRotation + (isRight ? 1 : 3)) % 4, true);
             sendInfo();
           }

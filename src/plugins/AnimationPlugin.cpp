@@ -26,10 +26,16 @@ void AnimationPlugin::setup()
 
 void AnimationPlugin::loop()
 {
-  int size = customAnimationFrames.size();
+  size_t size = customAnimationFrames.size();
 
   if (size > 0)
   {
+    // The frame list can shrink under us (resetFrames, a shorter upload)
+    if (this->step >= size)
+    {
+      this->step = 0;
+    }
+
     std::vector<int> bits = Screen.readBytes(customAnimationFrames[this->step]);
 
     for (int i = 0; i < bits.size(); i++)
@@ -64,6 +70,12 @@ void AnimationPlugin::websocketHook(JsonDocument &request)
   if (!strcmp(event, "resetFrames")) {
     customAnimationFrames.resize(0);
   } else if (!strcmp(event, "addFrame")) {
+    if (customAnimationFrames.size() >= MAX_FRAMES)
+    {
+      Serial.println(F("Animation: frame limit reached, frame ignored"));
+      return;
+    }
+
     int currentSize = customAnimationFrames.size();
     int targetSize = currentSize + 1;
     customAnimationFrames.resize(targetSize);
@@ -78,7 +90,12 @@ void AnimationPlugin::websocketHook(JsonDocument &request)
     }
     
   } else if (!strcmp(event, "upload")) {
-    int size = (int)request["screens"];
+    int size = request["screens"] | -1;
+    if (size < 0 || size > (int)MAX_FRAMES)
+    {
+      Serial.println(F("Animation: invalid frame count, upload ignored"));
+      return;
+    }
 
     customAnimationFrames.resize(size);
     for (int i = 0; i < size; i++)
