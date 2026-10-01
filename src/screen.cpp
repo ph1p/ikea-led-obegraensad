@@ -33,10 +33,18 @@ struct PwmThresholds
 static const PwmThresholds pwmThresholds;
 
 #ifdef ESP32
+#include <mutex>
+
 static portMUX_TYPE frameMux = portMUX_INITIALIZER_UNLOCKED;
 #define SCREEN_LOCK() portENTER_CRITICAL(&frameMux)
 #define SCREEN_UNLOCK() portEXIT_CRITICAL(&frameMux)
+
+// present() also runs outside the screen task (plugin id on a web or button
+// switch), two callers writing the back planes at once leave a torn frame
+static std::mutex presentLock;
+#define PRESENT_GUARD std::lock_guard<std::mutex> guard(presentLock)
 #else
+#define PRESENT_GUARD
 #define SCREEN_LOCK() noInterrupts()
 #define SCREEN_UNLOCK() interrupts()
 #endif
@@ -171,6 +179,12 @@ void Screen_::setup()
   Screen.setCurrentRotation(0);
 #endif
 
+  // the plugin id is presented before setup(), with the default full brightness;
+  // drop that frame so the timer starts dark and the next present() uses the
+  // stored brightness instead of flashing the old frame at full brightness
+  planesReady_ = false;
+  presentedKey_ = -1;
+
   // TODO find proper unused pins for MISO and SS
 #ifdef ESP8266
   // Initialize control pins
@@ -269,6 +283,7 @@ void Screen_::buildPixelMap(uint8_t rotation)
 
 void Screen_::present()
 {
+  PRESENT_GUARD;
   const bool updating = currentStatus == UPDATE;
   // the update screen is drawn unrotated and without grays
   const uint8_t rotation = updating ? 0 : currentRotation;

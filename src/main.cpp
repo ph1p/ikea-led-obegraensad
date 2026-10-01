@@ -353,12 +353,6 @@ void screenDrawingTask(void *parameter)
   {
     runScreenJobs();
     pluginManager.runActivePlugin();
-    // while LOADING someone else (plugin id, scrolling message) owns the
-    // buffer and presents its own finished frames
-    if (currentStatus != LOADING)
-    {
-      Screen.present();
-    }
     vTaskDelay(1);
   }
 }
@@ -425,10 +419,6 @@ void loop()
 #ifndef ESP32
   runScreenJobs();
   pluginManager.runActivePlugin();
-  if (currentStatus != LOADING)
-  {
-    Screen.present();
-  }
 #endif
 
   // Check WiFi less frequently with exponential backoff

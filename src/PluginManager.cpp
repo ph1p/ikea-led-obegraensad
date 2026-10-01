@@ -181,6 +181,14 @@ void PluginManager::runActivePlugin()
   {
     activePlugin->loop();
   }
+  // present under the lock: a plugin switch from another task clears and
+  // redraws the buffer, presenting in between flashes a torn frame.
+  // while LOADING someone else (plugin id, scrolling message) owns the buffer
+  // and presents its own finished frames
+  if (currentStatus != LOADING)
+  {
+    Screen.present();
+  }
 }
 
 Plugin *PluginManager::getActivePlugin() const
