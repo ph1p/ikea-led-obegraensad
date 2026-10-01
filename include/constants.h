@@ -65,7 +65,7 @@ constexpr uint8_t MIN_EDGE_BRIGHTNESS = 16;
 constexpr uint16_t TOTAL_PIXELS = ROWS * COLS;
 
 // set your city or coords (https://github.com/chubin/wttr.in)
-#define WEATHER_LOCATION "Monheim%20am%20Rhein"
+#define WEATHER_LOCATION "Hamburg"
 
 // name of WiFi created by the device if no known WiFi is available
 #define WIFI_MANAGER_SSID "IKEA"
