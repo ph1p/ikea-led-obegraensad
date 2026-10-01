@@ -48,6 +48,13 @@ void BubblesPlugin::loop()
         if (delta < 0.6f)
         {
           uint8_t brightness = static_cast<uint8_t>(bubble.brightness * (1.0f - delta / 0.6f));
+          // near-black ring edges only shimmer as the radius grows
+          if (brightness < MIN_EDGE_BRIGHTNESS)
+          {
+            continue;
+          }
+          // keep the brighter ring where two bubbles cross
+          brightness = max(brightness, Screen.getBufferIndex(y * COLS + x));
           Screen.setPixel(x, y, 1, brightness);
         }
       }

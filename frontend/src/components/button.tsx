@@ -5,10 +5,9 @@ export const Button: Component<
 > = (props) => {
   return (
     <button
+      type="button"
       {...props}
-      class={`${props.widthAuto ? "w-auto" : "w-full"} bg-gray-600 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded disabled:opacity-40 hover:disabled:bg-gray-600 ${
-        props.class || ""
-      }`}
+      class={`btn ${props.widthAuto ? "" : "w-full"} ${props.class || ""}`}
     >
       {props.children}
     </button>

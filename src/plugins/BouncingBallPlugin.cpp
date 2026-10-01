@@ -143,8 +143,10 @@ void BouncingBallPlugin::render()
 
   if (gameState == GameState::Run)
   {
-    int ballX = static_cast<int>(posX + 0.5f);
-    int ballY = static_cast<int>(posY + 0.5f);
+    // the physics treats cell n as the area [n, n+1), rounding instead would
+    // make a ball resting on a segment alternate between it and the row above
+    int ballX = static_cast<int>(floorf(posX));
+    int ballY = static_cast<int>(floorf(posY));
     if (ballX >= 0 && ballX < GRID_WIDTH && ballY >= 0 && ballY < GRID_HEIGHT)
     {
       Screen.setPixel(static_cast<uint8_t>(ballX), static_cast<uint8_t>(ballY), 1, FULL_BRIGHTNESS);

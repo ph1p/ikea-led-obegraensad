@@ -59,7 +59,8 @@ void SpotlightPlugin::render()
       }
       float falloff = 1.0f - d / RADIUS;
       int b = (int)(255.0f * falloff * falloff + 0.5f);
-      if (b <= 0)
+      // the moving center makes near-black edge pixels blink on and off
+      if (b < MIN_EDGE_BRIGHTNESS)
       {
         continue;
       }

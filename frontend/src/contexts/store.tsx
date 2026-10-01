@@ -1,6 +1,6 @@
 import { createEventSignal } from "@solid-primitives/event-listener";
 import { createReconnectingWS, createWSState } from "@solid-primitives/websocket";
-import { batch, createContext, createEffect, type JSX, useContext } from "solid-js";
+import { batch, createContext, createEffect, type JSX, untrack, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import {
@@ -19,8 +19,25 @@ const ws = createReconnectingWS(
       : import.meta.env.VITE_WS_URL
   }ws`,
 );
+const LIVE_PREVIEW_STORAGE_KEY = "livePreview";
+
+const readLivePreview = () => {
+  try {
+    return localStorage.getItem(LIVE_PREVIEW_STORAGE_KEY) !== "false";
+  } catch {
+    return true;
+  }
+};
+
+const sendLivePreview = (enabled: boolean) =>
+  ws.send(JSON.stringify({ event: "live-preview", enabled }));
+
 ws.addEventListener("open", (event) => {
   (event.currentTarget as WebSocket).binaryType = "arraybuffer";
+  // the device subscribes every new connection, so only opting out is needed
+  if (!mainStore.livePreview) {
+    sendLivePreview(false);
+  }
 });
 
 const wsState = createWSState(ws);
@@ -49,6 +66,7 @@ const [mainStore, setStore] = createStore<Store>({
   connectionState: wsState,
   connectionStatus: connectionStatus[0],
   schedule: [],
+  livePreview: readLivePreview(),
 });
 
 const actions: StoreActions = {
@@ -65,6 +83,15 @@ const actions: StoreActions = {
   setLeds: (leds) => setStore("leds", leds),
   setSystemStatus: (systemStatus: SYSTEM_STATUS) => setStore("systemStatus", systemStatus),
   setSchedule: (items: ScheduleItem[]) => setStore("schedule", items),
+  setLivePreview: (enabled) => {
+    setStore("livePreview", enabled);
+    try {
+      localStorage.setItem(LIVE_PREVIEW_STORAGE_KEY, String(enabled));
+    } catch {
+      // preference is only kept for this session
+    }
+    sendLivePreview(enabled);
+  },
   send: ws.send,
 };
 
@@ -119,7 +146,12 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
       const data = messageEvent()?.data;
       if (data instanceof ArrayBuffer) {
         if (data.byteLength === 256) {
-          actions.setLeds(Array.from(new Uint8Array(data)));
+          const frame = new Uint8Array(data);
+          // the device can resend an identical frame, skip it so nothing redraws
+          const leds = untrack(() => mainStore.leds);
+          if (!frame.every((value, i) => value === leds[i])) {
+            actions.setLeds(Array.from(frame));
+          }
         }
         return;
       }

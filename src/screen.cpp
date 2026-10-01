@@ -2,11 +2,44 @@
 #include "constants.h"
 #include <SPI.h>
 #include <algorithm>
+#ifdef ESP32
+#include "hal/gpio_ll.h"
+#endif
 
 #define TIMER_INTERVAL_US 200
-#define GRAY_LEVELS 64 // must be a power of two
 
 using namespace std;
+
+static constexpr uint8_t reverseBits(uint8_t value, uint8_t bits)
+{
+  return bits == 0 ? 0 : (uint8_t)(((value & 1) << (bits - 1)) | reverseBits(value >> 1, bits - 1));
+}
+
+static constexpr uint8_t GRAY_LEVEL_BITS = __builtin_ctz(GRAY_LEVELS);
+static constexpr uint8_t GRAY_LEVEL_STEP = (MAX_BRIGHTNESS + 1) / GRAY_LEVELS;
+
+struct PwmThresholds
+{
+  uint8_t values[GRAY_LEVELS];
+  constexpr PwmThresholds() : values()
+  {
+    for (uint8_t i = 0; i < GRAY_LEVELS; i++)
+    {
+      values[i] = reverseBits(i, GRAY_LEVEL_BITS) * GRAY_LEVEL_STEP;
+    }
+  }
+};
+
+static const PwmThresholds pwmThresholds;
+
+#ifdef ESP32
+static portMUX_TYPE frameMux = portMUX_INITIALIZER_UNLOCKED;
+#define SCREEN_LOCK() portENTER_CRITICAL(&frameMux)
+#define SCREEN_UNLOCK() portEXIT_CRITICAL(&frameMux)
+#else
+#define SCREEN_LOCK() noInterrupts()
+#define SCREEN_UNLOCK() interrupts()
+#endif
 
 uint8_t Screen_::getCurrentBrightness() const
 {
@@ -199,61 +232,123 @@ void Screen_::setCurrentRotation(int rotation, bool shouldPersist)
 #endif
 }
 
-IRAM_ATTR uint8_t *Screen_::getRotatedRenderBuffer()
+void Screen_::buildPixelMap(uint8_t rotation)
 {
-  // No rotation needed - return original buffer directly
-  if (currentRotation == 0)
+  // source pixel for every rotated position
+  uint8_t source[TOTAL_PIXELS];
+  for (int row = 0; row < ROWS; row++)
   {
-    return renderBuffer_;
+    for (int col = 0; col < COLS; col++)
+    {
+      int target;
+      switch (rotation)
+      {
+      case 1: // 90° clockwise
+        target = col * COLS + (ROWS - 1 - row);
+        break;
+      case 2: // 180°
+        target = TOTAL_PIXELS - 1 - (row * COLS + col);
+        break;
+      case 3: // 270° clockwise (or 90° counter-clockwise)
+        target = (COLS - 1 - col) * COLS + row;
+        break;
+      default:
+        target = row * COLS + col;
+        break;
+      }
+      source[target] = row * COLS + col;
+    }
   }
 
-  // Copy buffer for rotation
-  for (int i = 0; i < ROWS * COLS; i++)
+  for (int idx = 0; idx < TOTAL_PIXELS; idx++)
   {
-    rotatedRenderBuffer_[i] = renderBuffer_[i];
+    pixelMap_[idx] = source[positions[idx]];
   }
-
-  rotate();
-
-  return rotatedRenderBuffer_;
+  pixelMapRotation_ = rotation;
 }
 
-IRAM_ATTR void Screen_::rotate()
+void Screen_::present()
 {
-  if (currentRotation == 1)
+  const bool updating = currentStatus == UPDATE;
+  // the update screen is drawn unrotated and without grays
+  const uint8_t rotation = updating ? 0 : currentRotation;
+  const uint8_t brightness = brightness_;
+  const int16_t key = (updating << 10) | (rotation << 8) | brightness;
+
+  if (key == presentedKey_ && memcmp(renderBuffer_, presentedBuffer_, TOTAL_PIXELS) == 0)
   {
-    // 90° clockwise
-    uint8_t temp[TOTAL_PIXELS];
-    for (int row = 0; row < ROWS; row++)
+    return;
+  }
+
+  if (rotation != pixelMapRotation_)
+  {
+    buildPixelMap(rotation);
+  }
+
+  uint8_t frame[TOTAL_PIXELS];
+  for (int idx = 0; idx < TOTAL_PIXELS; idx++)
+  {
+    const uint8_t pixelValue = renderBuffer_[pixelMap_[idx]];
+    if (updating)
     {
-      for (int col = 0; col < COLS; col++)
+      frame[idx] = pixelValue > 0 ? MAX_BRIGHTNESS : 0;
+      continue;
+    }
+    uint8_t scaledValue = ((uint16_t)pixelValue * brightness) / MAX_BRIGHTNESS;
+    frame[idx] = (brightness > 0 && pixelValue > 0 && scaledValue == 0) ? 1 : scaledValue;
+  }
+
+  // withdraw a pending frame, so the timer cannot swap to the back planes
+  // while they are rewritten
+  SCREEN_LOCK();
+  planesReady_ = false;
+  SCREEN_UNLOCK();
+
+  for (int tick = 0; tick < GRAY_LEVELS; tick++)
+  {
+    const uint8_t counter = pwmThresholds.values[tick];
+    uint8_t *bits = (uint8_t *)planes_[frontPlanes_ ^ 1][tick];
+    for (int i = 0; i < TOTAL_PIXELS / 8; i++)
+    {
+      uint8_t byte = 0;
+      for (int bit = 0; bit < 8; bit++)
       {
-        temp[col * COLS + (ROWS - 1 - row)] = rotatedRenderBuffer_[row * COLS + col];
+        // each pixel gets a fixed phase offset (a multiple of the threshold step,
+        // spread over the cycle) so LEDs don't all switch on at the same time;
+        // the on-time per pixel is unchanged, but the current peaks drop
+        const int idx = i * 8 + bit;
+        const uint8_t position = counter + (uint8_t)(idx * 37 * GRAY_LEVEL_STEP);
+        byte = (byte << 1) | (frame[idx] > position);
       }
-    }
-    memcpy(rotatedRenderBuffer_, temp, TOTAL_PIXELS);
-  }
-  else if (currentRotation == 2)
-  {
-    // 180°
-    for (int i = 0; i < TOTAL_PIXELS / 2; i++)
-    {
-      swap(rotatedRenderBuffer_[i], rotatedRenderBuffer_[TOTAL_PIXELS - 1 - i]);
+      bits[i] = byte;
     }
   }
-  else if (currentRotation == 3)
-  {
-    // 270° clockwise (or 90° counter-clockwise)
-    uint8_t temp[TOTAL_PIXELS];
-    for (int row = 0; row < ROWS; row++)
-    {
-      for (int col = 0; col < COLS; col++)
-      {
-        temp[(COLS - 1 - col) * COLS + row] = rotatedRenderBuffer_[row * COLS + col];
-      }
-    }
-    memcpy(rotatedRenderBuffer_, temp, TOTAL_PIXELS);
-  }
+
+  SCREEN_LOCK();
+  planesReady_ = true;
+  memcpy(presentedBuffer_, renderBuffer_, TOTAL_PIXELS);
+  frameCounter_++;
+  SCREEN_UNLOCK();
+  presentedKey_ = key;
+}
+
+void Screen_::presentAndWait(uint32_t ms)
+{
+  present();
+#ifdef ESP32
+  vTaskDelay(pdMS_TO_TICKS(ms));
+#else
+  delay(ms);
+#endif
+}
+
+uint32_t Screen_::copyPresentedFrame(uint8_t *dst)
+{
+  SCREEN_LOCK();
+  memcpy(dst, presentedBuffer_, TOTAL_PIXELS);
+  const uint32_t counter = frameCounter_;
+  SCREEN_UNLOCK();
+  return counter;
 }
 
 IRAM_ATTR void Screen_::onScreenTimer()
@@ -263,50 +358,42 @@ IRAM_ATTR void Screen_::onScreenTimer()
 
 IRAM_ATTR void Screen_::_render()
 {
-  const auto buf = (currentStatus == UPDATE) ? renderBuffer_ : getRotatedRenderBuffer();
+  // the bit planes visit the PWM thresholds in bit-reversed order: a pixel
+  // still gets the same number of on-ticks per cycle, but they are spread out
+  // instead of bunched at the start, so dim pixels pulse several times per cycle
+  static uint8_t tick = 0;
 
-  // SPI data needs to be 32-bit aligned, round up before divide
-  static unsigned long
-      spi_bits[(ROWS * COLS + 8 * sizeof(unsigned long) - 1) / 8 / sizeof(unsigned long)] = {0};
-  unsigned char *bits = (unsigned char *)spi_bits;
-  memset(bits, 0, ROWS * COLS / 8);
-
-  static unsigned char counter = 0;
-
-  if (currentStatus == UPDATE)
+  // only swap frames between PWM cycles, a frame changing mid cycle shows up
+  // as a short brightness glitch on the changed pixels
+  if (tick == 0 && planesReady_)
   {
-    for (int idx = 0; idx < ROWS * COLS; idx++)
+#ifdef ESP32
+    portENTER_CRITICAL_ISR(&frameMux);
+#endif
+    if (planesReady_)
     {
-      if (buf[positions[idx]] > 0)
-      {
-        bits[idx >> 3] |= (0x80 >> (idx & 7));
-      }
+      frontPlanes_ ^= 1;
+      planesReady_ = false;
     }
-  }
-  else
-  {
-    // Normal rendering with PWM for grayscale.
-    // Each pixel gets a fixed phase offset (a multiple of the counter step, spread evenly
-    // over the cycle) so that LEDs don't all switch on at the same time. The on-time per
-    // pixel is unchanged, but the peak current drops to roughly the average current.
-    for (int idx = 0; idx < ROWS * COLS; idx++)
-    {
-      uint16_t pixelValue = buf[positions[idx]];
-      uint16_t scaledValue = ((uint16_t)pixelValue * brightness_) / MAX_BRIGHTNESS;
-      if (brightness_ > 0 && pixelValue > 0 && scaledValue == 0)
-      {
-        scaledValue = 1;
-      }
-      const uint8_t phase = (uint8_t)(idx * 37 * ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS));
-      const uint8_t position = counter + phase;
-      bits[idx >> 3] |= (scaledValue > position ? 0x80 : 0) >> (idx & 7);
-    }
-    counter += ((MAX_BRIGHTNESS + 1) / GRAY_LEVELS);
+#ifdef ESP32
+    portEXIT_CRITICAL_ISR(&frameMux);
+#endif
   }
 
+  const uint8_t *bits = (const uint8_t *)planes_[frontPlanes_][tick];
+  tick = (tick + 1) & (GRAY_LEVELS - 1);
+
+#ifdef ESP32
+  // digitalWrite() looks the pin up on every call, the register write keeps
+  // the interrupt short and its timing steady
+  gpio_ll_set_level(&GPIO, PIN_LATCH, 0);
+  SPI.writeBytes(bits, TOTAL_PIXELS / 8);
+  gpio_ll_set_level(&GPIO, PIN_LATCH, 1);
+#else
   digitalWrite(PIN_LATCH, LOW);
-  SPI.writeBytes(bits, sizeof(spi_bits));
+  SPI.writeBytes(bits, TOTAL_PIXELS / 8);
   digitalWrite(PIN_LATCH, HIGH);
+#endif
 #ifdef ESP8266
   timer1_write(100);
 #endif
@@ -460,11 +547,7 @@ void Screen_::scrollText(const std::string &text, int delayTime, uint8_t brightn
       }
     }
 
-#ifdef ESP32
-    vTaskDelay(pdMS_TO_TICKS(delayTime));
-#else
-    delay(delayTime);
-#endif
+    presentAndWait(delayTime);
   }
 }
 
@@ -505,11 +588,7 @@ void Screen_::scrollGraph(const std::vector<int> &graph,
         y1 = y2; // this value is next values previous value
       }
     }
-#ifdef ESP32
-    vTaskDelay(pdMS_TO_TICKS(delayTime));
-#else
-    delay(delayTime);
-#endif
+    presentAndWait(delayTime);
   }
 }
 

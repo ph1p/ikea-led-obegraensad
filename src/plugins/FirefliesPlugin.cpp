@@ -26,8 +26,12 @@ void FirefliesPlugin::loop()
   for (uint8_t i = 0; i < kFireflyCount; i++)
   {
     Firefly &firefly = fireflies[i];
-    firefly.x += firefly.vx + (static_cast<float>(random(-2, 3)) / 40.0f);
-    firefly.y += firefly.vy + (static_cast<float>(random(-2, 3)) / 40.0f);
+    // wander by nudging the velocity, random steps on the position itself
+    // make a firefly near a cell border jump between two pixels every frame
+    firefly.vx = constrain(firefly.vx + static_cast<float>(random(-2, 3)) / 200.0f, -0.25f, 0.25f);
+    firefly.vy = constrain(firefly.vy + static_cast<float>(random(-2, 3)) / 200.0f, -0.25f, 0.25f);
+    firefly.x += firefly.vx;
+    firefly.y += firefly.vy;
 
     if (firefly.x < 0.0f || firefly.x > 15.0f)
     {

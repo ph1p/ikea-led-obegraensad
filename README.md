@@ -23,6 +23,8 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
   - [Software Setup](#software-setup)
     - [ESP32 Setup with VS Code and PlatformIO](#esp32-setup-with-vs-code-and-platformio)
     - [WiFi Configuration](#wifi-configuration)
+      - [Resetting WiFi](#resetting-wifi)
+      - [DNS Servers](#dns-servers)
   - [OTA Updates](#ota-updates)
     - [Configuration](#configuration)
     - [Upload Methods](#upload-methods)
@@ -224,12 +226,27 @@ You can use the original button wiring without adding external connections. See 
 This project uses [tzapu's WiFiManager](https://github.com/tzapu/WiFiManager). After booting:
 
 1. Device attempts to connect to known access points
-2. If none available, creates network named `Ikea Display Setup WiFi`
+2. If none available, creates network named `IKEA`
 3. Connect to this network on any device
 4. Captive portal guides you through WiFi configuration
 5. Device reboots and connects to your network
 
 \*_Network name can be changed via `WIFI_MANAGER_SSID` in `include/constants.h`._
+
+#### Resetting WiFi
+
+To switch to another network, clear the stored WiFi credentials:
+
+1. Unplug the device
+2. Press and hold the button while plugging it back in
+3. Keep holding for 5 seconds, then release
+4. The device starts the `IKEA` setup network, continue with step 3 above
+
+Releasing the button earlier cancels the reset. Only the WiFi credentials are cleared, all other settings (plugins, schedule, weather location, ...) are kept. The hold time can be changed via `WIFI_RESET_HOLD_MS` in `include/constants.h`.
+
+#### DNS Servers
+
+By default the device replaces the DNS servers handed out by your router with `8.8.8.8` and `8.8.4.4` (ESP32 only), the IP address itself still comes from DHCP. Change or comment out `DNS_OVERRIDE_1` / `DNS_OVERRIDE_2` in `include/constants.h` to use other servers or the ones from your router.
 
 **ESP8266 (Manual Configuration):**
 

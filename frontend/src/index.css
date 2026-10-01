@@ -1,11 +1,40 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-@layer base {
-  :root {
-    --multiplier: 1.5;
-  }
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
+  --color-canvas: #0b0b0d;
+  --color-surface: #141417;
+  --color-raised: #1d1d22;
+  --color-hover: #26262c;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-fg: #ededf0;
+  --color-muted: #8e8e98;
+  --color-accent: #ffb547;
+  --color-accent-fg: #1a1205;
+  --color-danger: #fca5a5;
+  --color-success: #6ee7b7;
+}
+
+/* tokens above are the dark theme; light theme follows the OS setting */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-canvas: #f3f3f5;
+    --color-surface: #ffffff;
+    --color-raised: #ececef;
+    --color-hover: #e2e2e7;
+    --color-line: rgb(0 0 0 / 0.09);
+    --color-fg: #18181b;
+    --color-muted: #6b6b76;
+    --color-accent: #f5a524;
+    --color-danger: #dc2626;
+    --color-success: #047857;
+  }
+}
+
+@layer base {
   * {
     box-sizing: border-box;
   }
@@ -14,12 +43,10 @@
   body,
   #app {
     @apply h-full w-full m-0 p-0;
-    /* iOS safe area support */
     height: 100vh;
-    height: 100dvh; /* Use dynamic viewport height for better mobile support */
+    height: 100dvh;
   }
 
-  /* Handle safe area insets on iOS */
   @supports (padding: max(0px)) {
     body {
       padding-left: env(safe-area-inset-left);
@@ -28,79 +55,159 @@
   }
 
   body {
-    @apply font-sans text-base font-normal bg-[#9b8d82];
+    @apply font-sans text-base font-normal text-fg bg-canvas antialiased;
+    background-image:
+      radial-gradient(60rem 40rem at 70% -10%, rgb(255 181 71 / 0.07), transparent 60%),
+      radial-gradient(40rem 30rem at -10% 110%, rgb(120 120 255 / 0.05), transparent 60%);
+    background-attachment: fixed;
+    color-scheme: light dark;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
   }
 
-  select {
-    @apply px-2.5 py-2.5 text-base;
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
-  /* Slider styles */
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e98' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    padding-right: 2.25rem !important;
+  }
+
+  option {
+    background: var(--color-raised);
+  }
+
   input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
-    height: 8px;
-    background: #d1d5db;
+    height: 6px;
+    background: var(--color-raised);
     border-radius: 9999px;
-    outline: none;
+    outline-offset: 6px;
     cursor: pointer;
-  }
-
-  /* Webkit browsers (Chrome, Safari, Edge) */
-  input[type="range"]::-webkit-slider-track {
-    width: 100%;
-    height: 8px;
-    background: #d1d5db;
-    border-radius: 9999px;
   }
 
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #374151;
+    width: 18px;
+    height: 18px;
+    background: var(--color-fg);
     border-radius: 50%;
-    cursor: pointer;
+    box-shadow: 0 0 0 4px rgb(255 181 71 / 0.25);
+    transition: box-shadow 0.15s;
   }
 
-  input[type="range"]::-webkit-slider-thumb:hover {
-    background: #4b5563;
+  input[type="range"]:active::-webkit-slider-thumb {
+    box-shadow: 0 0 0 6px rgb(255 181 71 / 0.35);
   }
 
-  /* Firefox */
   input[type="range"]::-moz-range-track {
-    width: 100%;
-    height: 8px;
-    background: #d1d5db;
+    height: 6px;
+    background: var(--color-raised);
     border-radius: 9999px;
   }
 
   input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: #374151;
-    border-radius: 50%;
-    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    background: var(--color-fg);
     border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgb(255 181 71 / 0.25);
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface/90 border border-line rounded-2xl shadow-xl shadow-black/30 backdrop-blur;
   }
 
-  input[type="range"]::-moz-range-thumb:hover {
-    background: #4b5563;
+  @media (prefers-color-scheme: light) {
+    .card {
+      @apply shadow-black/5;
+    }
+  }
+
+  .section-title {
+    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-muted;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-raised px-3.5 py-2.5 text-sm font-medium text-fg cursor-pointer select-none transition hover:bg-hover active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply bg-fg text-canvas border-transparent hover:bg-fg/85;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-accent-fg border-transparent hover:bg-accent/90;
+  }
+
+  .btn-danger {
+    @apply hover:bg-danger/15 hover:text-danger hover:border-danger/30;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent border-transparent text-muted hover:text-fg hover:bg-raised;
+  }
+
+  .btn-icon {
+    @apply size-10 p-0 shrink-0;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-raised px-3 py-2.5 text-sm text-fg outline-none transition focus:border-accent/60 focus:ring-2 focus:ring-accent/20;
+  }
+
+  .segmented {
+    @apply inline-flex rounded-xl border border-line bg-surface p-1 text-sm;
+  }
+
+  .segmented > button {
+    @apply rounded-lg px-3 py-1.5 font-medium text-muted transition hover:text-fg cursor-pointer;
+  }
+
+  .segmented > button[aria-pressed="true"] {
+    @apply bg-raised text-fg shadow;
+  }
+
+  .switch {
+    @apply relative h-5 w-9 shrink-0 cursor-pointer appearance-none rounded-full bg-raised border border-line transition;
+  }
+
+  .switch::before {
+    @apply absolute top-0.5 left-0.5 size-3.5 rounded-full bg-muted transition content-[''];
+  }
+
+  .switch:checked {
+    @apply bg-accent border-transparent;
+  }
+
+  .switch:checked::before {
+    @apply translate-x-4 bg-accent-fg;
+  }
+
+  .kbd {
+    @apply rounded-md border border-line bg-raised px-1.5 py-0.5 font-mono text-[11px] text-fg;
   }
 }
 
 @keyframes toastSlideUp {
   0% {
     opacity: 0;
-    transform: translateY(1rem);
+    transform: translate(-50%, 1rem);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
 }
 

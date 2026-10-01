@@ -18,46 +18,78 @@ export const LedMatrix: Component<Props> = (props) => {
 
   const MATRIX_SIZE = 16;
   const LED_COLORS = {
-    OFF: "#000000",
-    BACKGROUND: "#111111",
+    OFF: "#17171b",
+    BACKGROUND: "#050506",
   };
 
   const useVisibilityObserver = createVisibilityObserver({ threshold: 0.9 });
   const visible = useVisibilityObserver(() => containerRef);
 
-  const getLedColor = (ledBrightness: number) => {
-    if (ledBrightness <= 0) return LED_COLORS.OFF;
+  const LOGICAL_SIZE = 400;
+  const CELL_SIZE = LOGICAL_SIZE / MATRIX_SIZE;
+  const PADDING = 4;
+  const LED_SIZE = CELL_SIZE - PADDING * 2;
+  const GLOW = 10;
 
-    const brightnessFactor = props.brightness / 255;
-    const intensity = Math.round(Math.min(255, Math.max(0, ledBrightness * brightnessFactor)));
-    return `rgb(${intensity}, ${intensity}, ${intensity})`;
+  let ctx: CanvasRenderingContext2D | null = null;
+  let dpr = 1;
+  // a blurred shadow per LED is the expensive part of a frame, so each
+  // intensity is rendered once into a sprite and stamped with drawImage
+  const glowSprites = new Map<number, HTMLCanvasElement>();
+
+  const glowSprite = (intensity: number) => {
+    let sprite = glowSprites.get(intensity);
+    if (sprite) return sprite;
+
+    sprite = document.createElement("canvas");
+    const size = LED_SIZE + GLOW * 4;
+    sprite.width = sprite.height = Math.ceil(size * dpr);
+    const spriteCtx = sprite.getContext("2d");
+    if (spriteCtx) {
+      spriteCtx.scale(dpr, dpr);
+      spriteCtx.shadowBlur = GLOW * dpr;
+      spriteCtx.shadowColor = `rgb(255 255 255 / ${(intensity / 255) * 0.55})`;
+      spriteCtx.fillStyle = `rgb(${intensity}, ${intensity}, ${intensity})`;
+      spriteCtx.fillRect(GLOW * 2, GLOW * 2, LED_SIZE, LED_SIZE);
+    }
+    glowSprites.set(intensity, sprite);
+    return sprite;
   };
 
-  const drawMatrix = (data: number[], indexData: number[]) => {
-    if (!canvasRef) return;
+  let frame = new Uint8ClampedArray(MATRIX_SIZE * MATRIX_SIZE);
+  let drawnFrame: Uint8ClampedArray | null = null;
+  let pendingDraw = 0;
 
-    const ctx = canvasRef.getContext("2d");
-    const logicalSize = 400;
-    const cellSize = logicalSize / MATRIX_SIZE;
-    const padding = 4;
-
+  const drawMatrix = () => {
+    pendingDraw = 0;
     if (!ctx) return;
+    if (drawnFrame && drawnFrame.every((value, i) => value === frame[i])) return;
+    drawnFrame = frame;
 
     ctx.fillStyle = LED_COLORS.BACKGROUND;
-    ctx.fillRect(0, 0, logicalSize, logicalSize);
+    ctx.fillRect(0, 0, LOGICAL_SIZE, LOGICAL_SIZE);
 
-    for (let y = 0; y < MATRIX_SIZE; y++) {
-      for (let x = 0; x < MATRIX_SIZE; x++) {
-        const index = y * MATRIX_SIZE + x;
-        const mappedIndex = indexData[index];
-        const brightness = data[mappedIndex];
+    ctx.fillStyle = LED_COLORS.OFF;
+    for (let i = 0; i < frame.length; i++) {
+      if (frame[i] === 0) {
+        const x = i % MATRIX_SIZE;
+        const y = (i - x) / MATRIX_SIZE;
+        ctx.fillRect(x * CELL_SIZE + PADDING, y * CELL_SIZE + PADDING, LED_SIZE, LED_SIZE);
+      }
+    }
 
-        ctx.fillStyle = getLedColor(brightness);
-        ctx.fillRect(
-          x * cellSize + padding,
-          y * cellSize + padding,
-          cellSize - padding * 2,
-          cellSize - padding * 2,
+    // second pass so the glow of lit LEDs sits on top of their dark neighbours
+    const spriteSize = LED_SIZE + GLOW * 4;
+    for (let i = 0; i < frame.length; i++) {
+      if (frame[i] > 0) {
+        const x = i % MATRIX_SIZE;
+        const y = (i - x) / MATRIX_SIZE;
+        ctx.drawImage(
+          glowSprite(frame[i]),
+          x * CELL_SIZE + PADDING - GLOW * 2,
+          y * CELL_SIZE + PADDING - GLOW * 2,
+          spriteSize,
+          spriteSize,
         );
       }
     }
@@ -67,12 +99,11 @@ export const LedMatrix: Component<Props> = (props) => {
     if (!canvasRef || props.disabled) return null;
 
     const rect = canvasRef.getBoundingClientRect();
-    const logicalSize = 400;
-    const scaleX = logicalSize / rect.width;
-    const scaleY = logicalSize / rect.height;
+    const scaleX = LOGICAL_SIZE / rect.width;
+    const scaleY = LOGICAL_SIZE / rect.height;
 
-    const x = Math.floor(((e.clientX - rect.left) * scaleX) / (logicalSize / MATRIX_SIZE));
-    const y = Math.floor(((e.clientY - rect.top) * scaleY) / (logicalSize / MATRIX_SIZE));
+    const x = Math.floor(((e.clientX - rect.left) * scaleX) / CELL_SIZE);
+    const y = Math.floor(((e.clientY - rect.top) * scaleY) / CELL_SIZE);
 
     if (x >= 0 && x < MATRIX_SIZE && y >= 0 && y < MATRIX_SIZE) {
       const index = y * MATRIX_SIZE + x;
@@ -132,18 +163,16 @@ export const LedMatrix: Component<Props> = (props) => {
   onMount(() => {
     if (!canvasRef) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const size = 400;
-    canvasRef.width = size * dpr;
-    canvasRef.height = size * dpr;
+    dpr = window.devicePixelRatio || 1;
+    canvasRef.width = LOGICAL_SIZE * dpr;
+    canvasRef.height = LOGICAL_SIZE * dpr;
 
-    const ctx = canvasRef.getContext("2d");
-    if (ctx) {
-      ctx.scale(dpr, dpr);
-    }
-
-    drawMatrix(props.data, props.indexData);
+    ctx = canvasRef.getContext("2d");
+    ctx?.scale(dpr, dpr);
+    drawMatrix();
   });
+
+  onCleanup(() => cancelAnimationFrame(pendingDraw));
 
   createEffect(() => {
     if (!canvasRef) return;
@@ -165,29 +194,35 @@ export const LedMatrix: Component<Props> = (props) => {
     });
   });
 
+  // the live preview can push frames faster than the display refreshes, so
+  // the effect only snapshots the intensities and one draw runs per frame
   createEffect(() => {
     const data = props.data;
     const indexData = props.indexData;
+    if (!data.length || !indexData.length) return;
 
-    if (canvasRef && data.length && indexData.length) {
-      drawMatrix(data, indexData);
+    const scale = props.brightness / 255;
+    // clamped array rounds and clamps on write
+    const next = new Uint8ClampedArray(MATRIX_SIZE * MATRIX_SIZE);
+    for (let i = 0; i < next.length; i++) {
+      next[i] = data[indexData[i]] * scale;
+    }
+    frame = next;
+
+    if (!pendingDraw) {
+      pendingDraw = requestAnimationFrame(drawMatrix);
     }
   });
 
   return (
-    <div
-      class="p-4 bg-[#111111] shadow-lg mx-auto"
-      style={{
-        width: "min(100%, 700px, (100vh - 16rem) * 9 / 13)",
-      }}
-    >
+    <div class="mx-auto w-[min(100%,700px,(100dvh-16rem)*9/13)] rounded-3xl bg-[#050506] p-3 shadow-2xl shadow-black/40 ring-1 ring-line max-lg:w-[min(100%,55dvh*9/13)] sm:p-4">
       <div
         ref={containerRef}
         class={`
           relative
           transition-all duration-300
           ${visible() ? "opacity-100" : "opacity-50"}
-          ${isDrawing() ? "ring-2 ring-blue-500/50" : ""}
+          ${isDrawing() ? "ring-2 ring-accent/40 rounded-lg" : ""}
           max-w-full max-h-full
           aspect-9/13
         `}
@@ -196,7 +231,6 @@ export const LedMatrix: Component<Props> = (props) => {
           ref={canvasRef}
           class="w-full"
           style={{
-            "image-rendering": "pixelated",
             "touch-action": "none",
             "aspect-ratio": "9 / 13",
             height: "auto",

@@ -1,7 +1,32 @@
-import { type Component, createSignal, type JSX, Show } from "solid-js";
+import { type Component, createSignal, For, type JSX, onCleanup, onMount, Show } from "solid-js";
 
 import { useStore } from "../../contexts/store";
 import { ScreenInfo } from "../screen-info";
+
+interface NavItem {
+  href: string;
+  label: string;
+  icon: string;
+  visible?: () => boolean;
+}
+
+const Brand: Component = () => {
+  const [store] = useStore();
+
+  return (
+    <div class="flex items-center">
+      <div class="leading-tight">
+        <div class="text-sm font-semibold tracking-wide">OBEGRÄNSAD</div>
+        <div class="flex items-center gap-1.5 text-xs text-muted">
+          <span
+            class={`size-1.5 rounded-full ${store.connectionState() === 1 ? "bg-emerald-400" : "bg-amber-400"}`}
+          />
+          {store.connectionState() === 1 ? "Connected" : store.connectionStatus}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const Layout: Component<{
   content: JSX.Element;
@@ -9,9 +34,27 @@ export const Layout: Component<{
   ref?: HTMLElement;
 }> = (props) => {
   const [store] = useStore();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = createSignal(false);
+  const [hash, setHash] = createSignal(window.location.hash || "#/");
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const onHashChange = () => setHash(window.location.hash || "#/");
+  onMount(() => window.addEventListener("hashchange", onHashChange));
+  onCleanup(() => window.removeEventListener("hashchange", onHashChange));
+
+  const navItems: NavItem[] = [
+    { href: "#/", label: "Display", icon: "fa-table-cells" },
+    {
+      href: "#/creator",
+      label: "Animation Creator",
+      icon: "fa-pencil",
+      visible: () => store.plugins.some((p) => p.name.includes("Animation")),
+    },
+    { href: "#/scheduler", label: "Scheduler", icon: "fa-clock" },
+    { href: "#/settings", label: "Settings", icon: "fa-gear" },
+    { href: "/update", label: "Firmware Update", icon: "fa-download" },
+  ];
+
+  const visibleNavItems = () => navItems.filter((item) => item.visible?.() ?? true);
+  const isActive = (item: NavItem) => item.href === hash();
 
   return (
     <div class="h-full flex flex-col">
@@ -20,10 +63,14 @@ export const Layout: Component<{
         fallback={
           <main class="h-full overflow-auto">
             <ScreenInfo>
-              <h2 class="text-4xl mb-4">{store.connectionStatus}...</h2>
+              <div class="mb-6 flex justify-center">
+                <Brand />
+              </div>
+              <div class="mx-auto mb-4 size-8 animate-spin rounded-full border-2 border-line border-t-accent" />
+              <h2 class="mb-2 text-xl font-semibold">{store.connectionStatus}…</h2>
               <Show when={store.connectionState() === 0}>
-                <p class="text-white text-sm max-w-md mx-auto">
-                  Make sure your device is powered on and connected to the same network. Check
+                <p class="mx-auto max-w-sm text-sm text-muted">
+                  Make sure your device is powered on and connected to the same network. Check the
                   browser console for connection errors.
                 </p>
               </Show>
@@ -31,64 +78,56 @@ export const Layout: Component<{
           </main>
         }
       >
-        <div class="flex-1 lg:grid lg:grid-cols-[320px_1fr] lg:gap-6 lg:p-6 relative overflow-hidden">
-          <Show when={isMobileMenuOpen()}>
-            <button
-              type="button"
-              class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 border-0 p-0 cursor-default"
-              onClick={closeMobileMenu}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
-                  closeMobileMenu();
-                }
-              }}
-            />
-          </Show>
+        <div class="flex-1 min-h-0 flex flex-col overflow-y-auto lg:overflow-hidden lg:grid lg:grid-cols-[300px_1fr] lg:gap-4 lg:p-4">
+          <header class="lg:hidden sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-line bg-canvas/80 px-4 py-3 backdrop-blur-lg">
+            <Brand />
+            <nav class="flex gap-1">
+              <For each={visibleNavItems()}>
+                {(item) => (
+                  <a
+                    href={item.href}
+                    aria-label={item.label}
+                    title={item.label}
+                    aria-current={isActive(item) ? "page" : undefined}
+                    class={`btn btn-icon ${isActive(item) ? "" : "btn-ghost"}`}
+                  >
+                    <i class={`fa-solid ${item.icon}`} />
+                  </a>
+                )}
+              </For>
+            </nav>
+          </header>
 
-          <aside
-            class={`bg-white p-6 shadow-lg flex flex-col
-              lg:relative lg:h-full lg:rounded-2xl
-              fixed top-0 left-0 h-full w-full z-50
-              transition-transform duration-300 ease-in-out
-              ${isMobileMenuOpen() ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
-            onClick={(e) => {
-              const target = e.target as HTMLElement;
-              if (target.tagName === "A" || target.closest("a")) {
-                closeMobileMenu();
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                const target = e.target as HTMLElement;
-                if (target.tagName === "A" || target.closest("a")) {
-                  closeMobileMenu();
-                }
-              }
-            }}
-          >
-            {props.sidebar}
-            <button
-              type="button"
-              onClick={closeMobileMenu}
-              class="lg:hidden mt-4 w-full bg-gray-700 text-white border-0 px-3 py-2 text-sm cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded"
-            >
-              <i class="fa-solid fa-times mr-2" />
-              Close Menu
-            </button>
+          <aside class="card order-2 mx-4 mb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col p-5 lg:order-0 lg:m-0 lg:min-h-0">
+            <div class="hidden lg:block">
+              <Brand />
+              <nav class="mt-6 flex flex-col gap-1">
+                <For each={visibleNavItems()}>
+                  {(item) => (
+                    <a
+                      href={item.href}
+                      aria-current={isActive(item) ? "page" : undefined}
+                      class={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${
+                        isActive(item)
+                          ? "bg-raised text-fg"
+                          : "text-muted hover:bg-raised/60 hover:text-fg"
+                      }`}
+                    >
+                      <i class={`fa-solid ${item.icon} w-4 text-center`} />
+                      {item.label}
+                    </a>
+                  )}
+                </For>
+              </nav>
+              <div class="my-5 border-t border-line" />
+            </div>
+            <div class="flex-1 min-h-0 lg:overflow-y-auto lg:-mr-2 lg:pr-2">{props.sidebar}</div>
           </aside>
 
-          <main class="h-full overflow-auto" ref={props.ref}>
+          <main class="shrink-0 lg:h-full lg:min-h-0 lg:overflow-auto" ref={props.ref}>
             {props.content}
           </main>
         </div>
-
-        <button
-          type="button"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen())}
-          class="lg:hidden fixed bottom-6 right-6 z-30 bg-gray-700 text-white border-0 py-3 px-4 rounded-full shadow-lg cursor-pointer font-bold hover:opacity-80 active:-translate-y-px transition-all"
-        >
-          <i class="fa-solid fa-bars text-xl" />
-        </button>
       </Show>
     </div>
   );

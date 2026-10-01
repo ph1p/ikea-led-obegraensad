@@ -1,5 +1,12 @@
 #include "plugins/DDPPlugin.h"
 
+#ifdef ASYNC_UDP_ENABLED
+// packets arrive on the network task, so they are collected here and copied
+// into the screen from loop() instead of drawing into a frame mid-present
+static uint8_t ddpFrame[ROWS * COLS];
+static volatile bool ddpFrameReady = false;
+#endif
+
 void DDPPlugin::setup()
 {
 #ifdef ASYNC_UDP_ENABLED
@@ -20,7 +27,7 @@ void DDPPlugin::setup()
           uint8_t brightness = (data[0] + data[1] + data[2]) / 3;
           for (int i = 0; i < ROWS * COLS; i++)
           {
-            Screen.setPixelAtIndex(i, brightness > 4, brightness);
+            ddpFrame[i] = brightness > 4 ? brightness : 0;
           }
         }
         else
@@ -28,9 +35,10 @@ void DDPPlugin::setup()
           for (int i = 0; i < count; i++)
           {
             uint8_t brightness = (data[i * 3] + data[i * 3 + 1] + data[i * 3 + 2]) / 3;
-            Screen.setPixelAtIndex(i, brightness > 4, brightness);
+            ddpFrame[i] = brightness > 4 ? brightness : 0;
           }
         }
+        ddpFrameReady = true;
       }
     });
   }
@@ -50,6 +58,13 @@ void DDPPlugin::teardown()
 
 void DDPPlugin::loop()
 {
+#ifdef ASYNC_UDP_ENABLED
+  if (ddpFrameReady)
+  {
+    ddpFrameReady = false;
+    Screen.setRenderBuffer(ddpFrame, true);
+  }
+#endif
 #ifdef ESP32
   vTaskDelay(1);
 #else

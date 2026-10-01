@@ -43,7 +43,9 @@ void MeteorShowerPlugin::loop()
       int ty = static_cast<int>(meteor.y - meteor.vy * t + 0.5f);
       if (tx >= 0 && tx < 16 && ty >= 0 && ty < 16)
       {
+        // a dimmer tail point can round onto a brighter pixel, keep the brighter one
         uint8_t brightness = static_cast<uint8_t>(230 - t * 50);
+        brightness = max(brightness, Screen.getBufferIndex(ty * COLS + tx));
         Screen.setPixel(static_cast<uint8_t>(tx), static_cast<uint8_t>(ty), 1, brightness);
       }
     }

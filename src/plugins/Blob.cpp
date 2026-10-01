@@ -14,6 +14,8 @@ BlobPlugin::BlobPlugin()
 void BlobPlugin::setup()
 {
   Screen.clear();
+  // the screen was cleared, so the diff against the last frame is stale
+  memset(previousBrightness, 0, sizeof(previousBrightness));
 
   // Initialize balls with random positions and velocities
   for (auto &b : balls)

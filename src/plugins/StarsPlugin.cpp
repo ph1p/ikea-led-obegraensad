@@ -30,8 +30,22 @@ void StarsPlugin::loop()
       }
       else
       {
-        stars[i].x = random(0, 16);
-        stars[i].y = random(0, 16);
+        // two stars on one pixel overwrite each other every frame and flicker
+        bool taken;
+        do
+        {
+          stars[i].x = random(0, 16);
+          stars[i].y = random(0, 16);
+          taken = false;
+          for (int j = 0; j < numStars; j++)
+          {
+            if (j != i && stars[j].x == stars[i].x && stars[j].y == stars[i].y)
+            {
+              taken = true;
+              break;
+            }
+          }
+        } while (taken);
         stars[i].brightness = random(8, 255);
 
         for (int brightness = 0; brightness <= stars[i].brightness; brightness += 5)

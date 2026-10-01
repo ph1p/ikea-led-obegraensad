@@ -21,30 +21,26 @@ void BreakoutPlugin::initBricks()
     Screen.setPixelAtIndex(this->bricks[i].y * this->X_MAX + this->bricks[i].x,
                            this->LED_TYPE_ON,
                            50);
-
-#ifdef ESP32
-    vTaskDelay(pdMS_TO_TICKS(25));
-#else
-    delay(25);
-#endif
+    Screen.presentAndWait(25);
   }
 }
 
 void BreakoutPlugin::newLevel()
 {
+  // the old paddle and ball are still in the buffer otherwise
+  Screen.clear();
   this->initBricks();
   for (byte i = 0; i < this->PADDLE_WIDTH; i++)
   {
     this->paddle[i].x = (this->X_MAX / 2) - (this->PADDLE_WIDTH / 2) + i;
     this->paddle[i].y = this->Y_MAX - 1;
     Screen.setPixelAtIndex(this->paddle[i].y * this->X_MAX + this->paddle[i].x,
-                           this->LED_TYPE_ON,
-                           50);
+                           this->LED_TYPE_ON);
   }
   this->ball.x = this->paddle[1].x;
   this->ball.y = this->paddle[1].y - 1;
 
-  Screen.setPixelAtIndex(ball.y * this->X_MAX + ball.x, this->LED_TYPE_ON, 128);
+  Screen.setPixelAtIndex(ball.y * this->X_MAX + ball.x, this->LED_TYPE_ON, 100);
   this->ballMovement[0] = 1;
   this->ballMovement[1] = -1;
   this->lastBallUpdate = 0;
@@ -106,6 +102,7 @@ void BreakoutPlugin::updateBall()
 
 void BreakoutPlugin::hitBrick(byte i)
 {
+  Screen.setPixelAtIndex(this->bricks[i].y * this->X_MAX + this->bricks[i].x, this->LED_TYPE_OFF);
   this->bricks[i].x = -1;
   this->bricks[i].y = -1;
   // ballMovement[1] *= -1;
@@ -115,7 +112,6 @@ void BreakoutPlugin::hitBrick(byte i)
   {
     this->ballDelay -= this->BALL_DELAY_STEP;
   }
-  Screen.setPixelAtIndex(this->bricks[i].y * this->X_MAX + this->bricks[i].x, this->LED_TYPE_OFF);
 }
 
 void BreakoutPlugin::checkPaddleCollision()
@@ -209,11 +205,7 @@ void BreakoutPlugin::loop()
   case this->GAME_STATE_RUNNING:
     this->updateBall();
     this->updatePaddle();
-#ifdef ESP32
-    vTaskDelay(pdMS_TO_TICKS(random(100, 200)));
-#else
-    delay(random(100, 200));
-#endif
+    Screen.presentAndWait(random(100, 200));
     break;
   case this->GAME_STATE_END:
     this->initGame();

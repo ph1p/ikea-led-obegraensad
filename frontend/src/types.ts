@@ -17,7 +17,7 @@ export type BrightnessSchedule = {
   endTime: string;
   brightness: number;
   active: boolean;
-}
+};
 
 export interface StoreActions {
   setIsActiveScheduler: (isActive: boolean) => void;
@@ -33,6 +33,7 @@ export interface StoreActions {
   setSchedule: (items: ScheduleItem[]) => void;
   setArtnetUniverse: (artnetUniverse: number) => void;
   setGOLDelay: (GOLDelay: number) => void;
+  setLivePreview: (enabled: boolean) => void;
   send: (message: string | ArrayBuffer) => void;
 }
 
@@ -52,6 +53,7 @@ export interface Store {
   connectionState: () => number;
   connectionStatus?: string;
   schedule: ScheduleItem[];
+  livePreview: boolean;
 }
 
 export interface IToastContext {

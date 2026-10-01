@@ -1,7 +1,7 @@
-import { gzip } from '@gfx/zopfli';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { gzip } from "@gfx/zopfli";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,17 +22,17 @@ const chunkArray = (input, size) =>
 const addLineBreaks = (buffer) => {
   const chunks = chunkArray(buffer, 30);
   return chunks.reduce((data, chunk, index) => {
-    data += chunk.join(',');
+    data += chunk.join(",");
     if (index + 1 !== chunks.length) {
-      data += ',\n';
+      data += ",\n";
     }
     return data;
-  }, '');
+  }, "");
 };
 
 gzip(
-  fs.readFileSync('./dist/index.html', {
-    encoding: 'utf-8',
+  fs.readFileSync("./dist/index.html", {
+    encoding: "utf-8",
   }),
   { numiterations: 30 },
   (err, output) => {
@@ -59,6 +59,6 @@ void startGui(AsyncWebServerRequest *request)
 #endif
 `;
 
-    fs.writeFileSync(path.resolve(__dirname, '../src/webgui.cpp'), FILE);
-  }
+    fs.writeFileSync(path.resolve(__dirname, "../src/webgui.cpp"), FILE);
+  },
 );

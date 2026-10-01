@@ -1,4 +1,4 @@
-import { type Component, createEffect, createMemo, createSignal, Show } from "solid-js";
+import { type Component, createEffect, createMemo, createSignal, For, Show } from "solid-js";
 
 import { Layout } from "./components/layout/layout";
 import Sidebar from "./components/layout/sidebar";
@@ -131,111 +131,114 @@ export const App: Component = () => {
     />
   );
 
+  const drawActions = [
+    { label: "Import", icon: "fa-file-import", onClick: () => handleLoadImage() },
+    { label: "Clear", icon: "fa-trash", onClick: () => handleClear(), danger: true },
+    { label: "Save", icon: "fa-floppy-disk", onClick: () => handlePersist() },
+    { label: "Load", icon: "fa-rotate", onClick: () => handleLoad() },
+  ];
+
   const renderDrawControls = () => (
-    <div class="lg:hidden w-full max-w-100 sm:max-w-125">
-      <div class="grid grid-cols-4 gap-2">
-        <button
-          type="button"
-          onClick={handleLoadImage}
-          class="flex flex-col items-center justify-center gap-1 bg-gray-700 text-white border-0 p-2 cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded text-xs"
-        >
-          <i class="fa-solid fa-file-import text-base" />
-          <span>Import</span>
-        </button>
-        <button
-          type="button"
-          onClick={handleClear}
-          class="flex flex-col items-center justify-center gap-1 bg-gray-700 text-white border-0 p-2 cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded hover:bg-red-600 text-xs"
-        >
-          <i class="fa-solid fa-trash text-base" />
-          <span>Clear</span>
-        </button>
-        <button
-          type="button"
-          onClick={handlePersist}
-          class="flex flex-col items-center justify-center gap-1 bg-gray-700 text-white border-0 p-2 cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded text-xs"
-        >
-          <i class="fa-solid fa-floppy-disk text-base" />
-          <span>Save</span>
-        </button>
-        <button
-          type="button"
-          onClick={handleLoad}
-          class="flex flex-col items-center justify-center gap-1 bg-gray-700 text-white border-0 p-2 cursor-pointer font-semibold hover:opacity-80 active:-translate-y-px transition-all rounded text-xs"
-        >
-          <i class="fa-solid fa-refresh text-base" />
-          <span>Load</span>
-        </button>
-      </div>
+    <div class="grid w-full grid-cols-4 gap-2">
+      <For each={drawActions}>
+        {(action) => (
+          <button
+            type="button"
+            onClick={action.onClick}
+            class={`btn flex-col gap-1 py-3 text-xs ${action.danger ? "btn-danger" : ""}`}
+          >
+            <i class={`fa-solid ${action.icon} text-base`} />
+            {action.label}
+          </button>
+        )}
+      </For>
     </div>
   );
 
-  const renderTabNavigation = () => (
-    <div class="flex rounded bg-gray-800 p-1 text-sm">
+  const renderHeader = () => (
+    <div class="flex w-full flex-wrap items-center justify-between gap-3">
+      <div class="flex min-w-0 items-center gap-2.5 rounded-full border border-line bg-surface/80 py-1.5 pr-4 pl-3 text-sm font-medium backdrop-blur">
+        <span class="relative flex size-2 shrink-0">
+          <span class="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span class="relative inline-flex size-2 rounded-full bg-emerald-400" />
+        </span>
+        <span class="truncate">
+          {store.isActiveScheduler ? "Scheduler running" : (activePlugin()?.name ?? "—")}
+        </span>
+      </div>
       <Show when={canConfigure()}>
-        <button
-          type="button"
-          class={`rounded px-3 py-1.5 ${
-            activeTab() === "configuration"
-              ? "bg-gray-600 text-white"
-              : "text-gray-300 hover:text-white"
-          }`}
-          onClick={() => setActiveTab("configuration")}
-        >
-          Configuration
-        </button>
+        <div class="segmented" role="group" aria-label="View">
+          <button
+            type="button"
+            aria-pressed={activeTab() === "configuration"}
+            onClick={() => setActiveTab("configuration")}
+          >
+            <i class="fa-solid fa-pen mr-1.5 text-xs" />
+            Draw
+          </button>
+          <button
+            type="button"
+            aria-pressed={activeTab() === "preview"}
+            onClick={() => setActiveTab("preview")}
+          >
+            <i class="fa-solid fa-eye mr-1.5 text-xs" />
+            Live
+          </button>
+        </div>
       </Show>
+    </div>
+  );
+
+  const renderLivePreview = () => (
+    <>
+      <div class="relative">
+        {renderMatrix(true)}
+        <Show when={!store.livePreview}>
+          <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-3xl bg-black/70 text-sm font-medium text-white/70 backdrop-blur-sm">
+            <i class="fa-solid fa-eye-slash text-xl" />
+            Live preview paused
+          </div>
+        </Show>
+      </div>
       <button
         type="button"
-        class={`rounded px-3 py-1.5 ${
-          activeTab() === "preview"
-            ? "bg-gray-600 text-white"
-            : "text-gray-300 hover:text-white"
-        }`}
-        onClick={() => setActiveTab("preview")}
+        aria-pressed={store.livePreview}
+        onClick={() => actions.setLivePreview(!store.livePreview)}
+        class="btn"
       >
-        Live preview
+        <i class={`fa-solid ${store.livePreview ? "fa-pause" : "fa-play"}`} />
+        {store.livePreview ? "Pause live preview" : "Resume live preview"}
       </button>
-    </div>
+    </>
   );
-
-  const renderLivePreview = () => <div class="flex flex-col items-center">{renderMatrix(true)}</div>;
 
   const renderDrawConfiguration = () => (
-    <div class="flex flex-col items-center gap-6">
+    <>
       {renderMatrix(false)}
       {renderDrawControls()}
-    </div>
+    </>
   );
 
-  const renderTabContent = () => (
-    <Show
-      when={canConfigure() && activeTab() === "configuration"}
-      fallback={renderLivePreview()}
-    >
-      {renderDrawConfiguration()}
-    </Show>
-  );
-
-  const renderContentTabs = () => (
-    <div class="grid p-8 h-full justify-center items-center sm:p-4 sm:m-0">
-      <div class="w-full flex flex-col items-center gap-4">
-        {renderTabNavigation()}
-        {renderTabContent()}
+  const renderContent = () => (
+    <div class="flex min-h-full items-center justify-center p-4 lg:p-8">
+      <div class="flex w-[min(100%,700px,(100dvh-16rem)*9/13)] flex-col items-center gap-5 max-lg:w-[min(100%,55dvh*9/13)]">
+        {renderHeader()}
+        <Show
+          when={canConfigure() && activeTab() === "configuration"}
+          fallback={renderLivePreview()}
+        >
+          {renderDrawConfiguration()}
+        </Show>
       </div>
     </div>
   );
 
   return (
     <Layout
-      content={renderContentTabs()}
+      content={renderContent()}
       sidebar={
         <Sidebar
           onRotate={handleRotate}
-          onLoadImage={handleLoadImage}
-          onClear={handleClear}
-          onPersist={handlePersist}
-          onLoad={handleLoad}
           onPluginChange={handlePluginChange}
           onBrightnessChange={handleBrightnessChange}
           onBrightnessScheduleChange={handleBrightnessScheduleChange}

@@ -126,23 +126,28 @@ void BigPongPlugin::tickGame()
 int8_t BigPongPlugin::predictLanding(bool top) const
 {
   float targetY = top ? (float)PADDLE_TOP_Y : (float)PADDLE_BOTTOM_Y;
+  // step exactly like tickGame() does, so the prediction stays the same for
+  // the whole flight and the paddle does not jitter between two targets
   float px = bx;
   float py = by;
+  float pvx = vx;
   for (uint16_t i = 0; i < PREDICT_MAX_STEPS; i++)
   {
     if (top ? (py <= targetY) : (py >= targetY))
     {
       break;
     }
-    px += vx;
+    px += pvx;
     py += vy;
     if (px < 0.0f)
     {
-      px = -px;
+      px = 0.0f;
+      pvx = -pvx;
     }
     else if (px > (float)(X_MAX - 1))
     {
-      px = 2.0f * (float)(X_MAX - 1) - px;
+      px = (float)(X_MAX - 1);
+      pvx = -pvx;
     }
   }
   return clampPaddle((int8_t)(px + 0.5f));

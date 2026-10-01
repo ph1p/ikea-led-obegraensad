@@ -1,5 +1,15 @@
 #include "PluginManager.h"
 #include "scheduler.h"
+#ifdef ESP32
+#include <mutex>
+
+// plugins are switched from the web, button and scheduler tasks while the
+// screen task runs loop(), so never tear down a plugin in the middle of it
+static std::recursive_mutex pluginLock;
+#define PLUGIN_GUARD std::lock_guard<std::recursive_mutex> guard(pluginLock)
+#else
+#define PLUGIN_GUARD
+#endif
 
 Plugin::Plugin() : id(-1)
 {
@@ -67,16 +77,7 @@ void PluginManager::renderPluginId(int pluginId)
     Screen.drawNumbers(6, 6, digits, MAX_BRIGHTNESS);
   }
 
-  unsigned long startTime = millis();
-  while (millis() - startTime < 800)
-  {
-    yield();
-#ifdef ESP32
-    vTaskDelay(pdMS_TO_TICKS(10));
-#else
-    delay(10);
-#endif
-  }
+  Screen.presentAndWait(800);
 }
 
 void PluginManager::activatePersistedPlugin()
@@ -130,6 +131,7 @@ int PluginManager::addPlugin(Plugin *plugin)
 
 void PluginManager::setActivePlugin(const char *pluginName)
 {
+  PLUGIN_GUARD;
   if (activePlugin)
   {
     activePlugin->teardown();
@@ -143,8 +145,8 @@ void PluginManager::setActivePlugin(const char *pluginName)
       currentStatus = LOADING; // Prevent plugin loop from drawing during ID display
       activePlugin = plugin;
       renderPluginId(activePlugin->getId());
-      currentStatus = NONE; // Allow plugin to start drawing
       activePlugin->setup();
+      currentStatus = NONE; // Allow plugin to start drawing
       break;
     }
   }
@@ -163,6 +165,7 @@ void PluginManager::setActivePluginById(int pluginId)
 
 void PluginManager::setupActivePlugin()
 {
+  PLUGIN_GUARD;
   if (activePlugin)
   {
     renderPluginId(activePlugin->getId());
@@ -172,6 +175,7 @@ void PluginManager::setupActivePlugin()
 
 void PluginManager::runActivePlugin()
 {
+  PLUGIN_GUARD;
   if (activePlugin && currentStatus != UPDATE && currentStatus != LOADING &&
       currentStatus != WSBINARY)
   {
