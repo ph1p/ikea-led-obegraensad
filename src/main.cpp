@@ -63,6 +63,7 @@
 #include "plugins/AnimationPlugin.h"
 #include "plugins/BigClockPlugin.h"
 #include "plugins/ClockPlugin.h"
+#include "plugins/SmokeClockPlugin.h"
 #include "plugins/WeatherPlugin.h"
 #endif
 
@@ -316,6 +317,7 @@ void baseSetup()
   pluginManager.addPlugin(new AnimationPlugin());
   pluginManager.addPlugin(new DDPPlugin());
   pluginManager.addPlugin(new ArtNetPlugin());
+  pluginManager.addPlugin(new SmokeClockPlugin());
 #endif
 
   Screen.clear();
