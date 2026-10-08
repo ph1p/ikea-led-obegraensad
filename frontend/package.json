@@ -30,7 +30,7 @@
     "@types/node": "^26.6.3",
     "@types/offscreencanvas": "^2019.7.3",
     "autoprefixer": "^10.6.1",
-    "oxfmt": "^0.71.0",
+    "oxfmt": "^0.72.0",
     "oxlint": "^1.86.0",
     "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
