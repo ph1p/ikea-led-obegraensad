@@ -25,7 +25,6 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
     - [WiFi Configuration](#wifi-configuration)
       - [Resetting WiFi](#resetting-wifi)
       - [DNS Servers](#dns-servers)
-    - [Power Limit](#power-limit)
   - [OTA Updates](#ota-updates)
     - [Configuration](#configuration)
     - [Upload Methods](#upload-methods)
@@ -85,7 +84,6 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Switch plugin by pressing the button
 - Schedule Plugins to switch after "n" seconds
 - Schedule different brightness for time frame
-- Adaptive power limit for weak power supplies
 
 **Available Plugins:**
 
@@ -253,14 +251,6 @@ By default the device replaces the DNS servers handed out by your router with `8
 **ESP8266 (Manual Configuration):**
 
 For ESP8266, WiFi Manager is not available. Set `WIFI_SSID` and `WIFI_PASSWORD` in `include/secrets.h`.
-
-### Power Limit
-
-Many lit pixels at high brightness can draw more than a small USB power supply delivers and cause brownouts. The power limit estimates the power of every frame and dims the whole frame evenly when it would exceed the budget. Frames with only a few lit pixels keep full brightness.
-
-Set the rating of your power supply in mW under **Settings → Power** in the web GUI (1000–10000 mW), or switch the limit off. The default of 5000 mW comes from `POWER_LIMIT_MW` in `include/constants.h` and is also used on boards without storage (ESP8266), `0` disables it there.
-
-The estimate assumes ~0.6 W for the board and WiFi (`POWER_BASE_MW`), 30 mW per fully lit pixel (`POWER_PER_PIXEL_MW`) and keeps 10% of the supply in reserve (`POWER_HEADROOM_PERCENT`). With 5000 mW a fully lit screen runs at about 51% brightness.
 
 ---
 
@@ -941,7 +931,6 @@ pluginManager.addPlugin(new MyPlugin());
 ### Microcontroller is stuck in boot loop / flickering panel / black panel
 
 - Break the 5V connection between the matrix display and the microcontroller board (cut cable between controller and VCC and insulate ends with tape)
-- Lower the [power limit](#power-limit) to match your power supply
 - Use separate USB power cables for the microcontroller and the matrix display (e.g. by using a power supply with 2x5V output of 10W each)
 - Reason: When voltage drops too low on the microcontroller board output pins might not reach 3.3V, since the matrix display is actually expecting a 0V-5V signal the resulting output voltage of the microcontroller might be lower than the threshold of the matrix display resulting in flickering / completely black matrix displays. Additionally must power supplies only deliver 10W per port which is not always sufficient to power microcontroller and matrix displays (especially at brightness 100% and more than half the pixels being lit)
 - Has the additional advantage that you can upload firmware without dissassembly of the backpanel if you cannot use OTA updates

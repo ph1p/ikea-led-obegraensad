@@ -54,8 +54,6 @@ void Config::begin()
   Serial.println(tzInfo);
   Serial.print("[Config] Auto-Start Schedule: ");
   Serial.println(autoStartSchedule ? "enabled" : "disabled");
-  Serial.print("[Config] Power Limit: ");
-  Serial.println(powerLimitMw > 0 ? String(powerLimitMw) + " mW" : String("disabled"));
   Serial.println("[Config] ============================================");
 }
 
@@ -66,7 +64,6 @@ void Config::setDefaults()
   ntpServer = String(NTP_SERVER);
   tzInfo = String(TZ_INFO);
   autoStartSchedule = false;
-  powerLimitMw = POWER_LIMIT_MW;
 }
 
 void Config::load()
@@ -83,7 +80,6 @@ void Config::load()
     ntpServer = preferences.getString("ntpServer", String(NTP_SERVER));
     tzInfo = preferences.getString("tzInfo", String(TZ_INFO));
     autoStartSchedule = preferences.getBool("autoSchedule", false);
-    setPowerLimitMw(preferences.getUShort("powerLimit", POWER_LIMIT_MW));
     
     Serial.println("[Config] Configuration loaded from storage");
   } catch (...) {
@@ -106,7 +102,6 @@ void Config::save()
     preferences.putString("ntpServer", ntpServer);
     preferences.putString("tzInfo", tzInfo);
     preferences.putBool("autoSchedule", autoStartSchedule);
-    preferences.putUShort("powerLimit", powerLimitMw);
     
     Serial.println("[Config] Configuration saved");
   } catch (...) {
@@ -138,11 +133,6 @@ bool Config::getAutoStartSchedule() const
   return autoStartSchedule;
 }
 
-uint16_t Config::getPowerLimitMw() const
-{
-  return powerLimitMw;
-}
-
 void Config::setWeatherLocation(const String& location)
 {
   if (location.length() > 0 && location.length() < 100) {
@@ -170,13 +160,6 @@ void Config::setAutoStartSchedule(bool autoStart)
   autoStartSchedule = autoStart;
 }
 
-void Config::setPowerLimitMw(uint16_t milliwatts)
-{
-  if (milliwatts == 0 || (milliwatts >= POWER_LIMIT_MIN_MW && milliwatts <= POWER_LIMIT_MAX_MW)) {
-    powerLimitMw = milliwatts;
-  }
-}
-
 
 String Config::toJson() const
 {
@@ -185,7 +168,6 @@ String Config::toJson() const
   doc["ntpServer"] = ntpServer;
   doc["tzInfo"] = tzInfo;
   doc["autoStartSchedule"] = autoStartSchedule;
-  doc["powerLimitMw"] = powerLimitMw;
   
   String output;
   serializeJson(doc, output);
@@ -233,13 +215,6 @@ bool Config::fromJson(const String& json)
   
   if (doc["autoStartSchedule"].is<bool>()) {
     autoStartSchedule = doc["autoStartSchedule"].as<bool>();
-  }
-
-  if (doc["powerLimitMw"].is<uint32_t>()) {
-    const uint32_t milliwatts = doc["powerLimitMw"].as<uint32_t>();
-    if (milliwatts <= POWER_LIMIT_MAX_MW) {
-      setPowerLimitMw(milliwatts);
-    }
   }
   
   return true;

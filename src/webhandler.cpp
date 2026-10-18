@@ -27,8 +27,6 @@ static void applyConfigChanges()
   tzInfo = config.getTzInfo();
   configTzTime(tzInfo.c_str(), ntpServer.c_str());
 
-  Screen.setPowerLimit(config.getPowerLimitMw());
-
   for (Plugin *plugin : pluginManager.getAllPlugins())
   {
     if (strcmp(plugin->getName(), "Weather") == 0)
