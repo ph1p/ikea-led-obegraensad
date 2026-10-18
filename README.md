@@ -114,6 +114,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Spotlight
 - Tetris
 - Tron
+- Smoke Clock (fluid simulation below the time)
 
 </details>
 
