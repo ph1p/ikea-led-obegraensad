@@ -32,7 +32,7 @@
     "autoprefixer": "^10.6.1",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.86.0",
-    "postcss": "^8.5.28",
+    "postcss": "^8.5.29",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.2",
