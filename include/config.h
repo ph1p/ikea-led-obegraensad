@@ -21,7 +21,6 @@ private:
   String ntpServer;
   String tzInfo;
   bool autoStartSchedule;
-  uint16_t powerLimitMw;
   bool initialized;
 
 public:
@@ -44,7 +43,6 @@ public:
   String getNtpServer() const;
   String getTzInfo() const;
   bool getAutoStartSchedule() const;
-  uint16_t getPowerLimitMw() const;
   bool isInitialized() const { return initialized; }
   
   // Setters with validation
@@ -52,8 +50,6 @@ public:
   void setNtpServer(const String& server);
   void setTzInfo(const String& tz);
   void setAutoStartSchedule(bool autoStart);
-  // 0 disables the limit, otherwise POWER_LIMIT_MIN_MW..POWER_LIMIT_MAX_MW
-  void setPowerLimitMw(uint16_t milliwatts);
   
   // Export to JSON
   String toJson() const;
