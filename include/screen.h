@@ -27,6 +27,9 @@ private:
   // what was presented last, to skip unchanged frames and for the live preview
   uint8_t presentedBuffer_[ROWS * COLS] = {0};
   int16_t presentedKey_ = -1;
+  // sum of the pixel values (after brightness) a frame may reach, 0 = no limit
+  volatile uint32_t powerBudget_ = powerBudgetFor(POWER_LIMIT_MW);
+  uint32_t presentedPowerBudget_ = 0;
   volatile uint32_t frameCounter_ = 0;
   // positions[] combined with the rotation, rebuilt when the rotation changes
   uint8_t pixelMap_[ROWS * COLS];
@@ -49,6 +52,21 @@ private:
       0xe7, 0xe6, 0xe5, 0xe4, 0xe3, 0xe2, 0xe1, 0xe0, 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
       0xef, 0xee, 0xed, 0xec, 0xeb, 0xea, 0xe9, 0xe8, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
+  static constexpr uint32_t powerBudgetFor(uint16_t milliwatts)
+  {
+    if (milliwatts == 0)
+    {
+      return 0;
+    }
+    const uint32_t usable = (uint32_t)milliwatts * (100 - POWER_HEADROOM_PERCENT) / 100;
+    // keep at least one fully lit pixel, even for a supply below the base load
+    if (usable < POWER_BASE_MW + POWER_PER_PIXEL_MW)
+    {
+      return MAX_BRIGHTNESS;
+    }
+    return (usable - POWER_BASE_MW) * MAX_BRIGHTNESS / POWER_PER_PIXEL_MW;
+  }
+
   static void onScreenTimer();
   void _render();
   void buildPixelMap(uint8_t rotation);
@@ -66,6 +84,9 @@ public:
   uint8_t getBaseBrightness() const;
   void setBaseBrightness(uint8_t brightness, bool shouldStore = false);
   void setDisplayedBrightness(uint8_t brightness);
+
+  // power supply rating in mW, frames estimated above it are dimmed, 0 = no limit
+  void setPowerLimit(uint16_t milliwatts);
 
   void setRenderBuffer(const uint8_t *renderBuffer, bool grays = false);
   uint8_t *getRenderBuffer();

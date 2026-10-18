@@ -256,6 +256,7 @@ void baseSetup()
 
   // Initialize configuration system (always safe)
   config.begin();
+  Screen.setPowerLimit(config.getPowerLimitMw());
 
 // server
 #ifdef ENABLE_SERVER

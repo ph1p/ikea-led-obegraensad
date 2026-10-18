@@ -25,11 +25,28 @@ const TIMEZONE_PRESETS = [
 
 const CUSTOM_TIMEZONE = "custom";
 
+// mirrors the power constants in include/constants.h
+const POWER_LIMIT_DEFAULT_MW = 5000;
+const POWER_LIMIT_MIN_MW = 1000;
+const POWER_LIMIT_MAX_MW = 10000;
+const POWER_BASE_MW = 600;
+const POWER_PER_PIXEL_MW = 30;
+const POWER_HEADROOM_PERCENT = 10;
+const TOTAL_PIXELS = 256;
+
+// brightness all pixels can share before the limit dims them, in percent
+const fullScreenBrightness = (milliwatts: number) => {
+  const usable = (milliwatts * (100 - POWER_HEADROOM_PERCENT)) / 100 - POWER_BASE_MW;
+  const pixels = Math.max(usable / POWER_PER_PIXEL_MW, 1);
+  return Math.min(100, Math.round((pixels / TOTAL_PIXELS) * 100));
+};
+
 interface Config {
   weatherLocation: string;
   ntpServer: string;
   tzInfo: string;
   autoStartSchedule: boolean;
+  powerLimitMw: number;
 }
 
 interface DeviceInfo {
@@ -46,6 +63,7 @@ const EMPTY_CONFIG: Config = {
   ntpServer: "",
   tzInfo: "",
   autoStartSchedule: false,
+  powerLimitMw: 0,
 };
 
 const formatUptime = (seconds: number) => {
@@ -100,6 +118,13 @@ const Settings: Component = () => {
   const isDirty = () => JSON.stringify(config()) !== JSON.stringify(savedConfig());
   const ntpMissing = () => config().ntpServer.trim() === "";
   const tzMissing = () => config().tzInfo.trim() === "";
+  // 0 means disabled, only the switch sets it; while editing the field can be out of range
+  const powerLimitEnabled = () => config().powerLimitMw !== 0;
+  const powerLimitInvalid = () =>
+    powerLimitEnabled() &&
+    (config().powerLimitMw < POWER_LIMIT_MIN_MW || config().powerLimitMw > POWER_LIMIT_MAX_MW);
+  // the last enabled value, restored when the limit is switched back on
+  const [lastPowerLimitMw, setLastPowerLimitMw] = createSignal(POWER_LIMIT_DEFAULT_MW);
   const timezoneSelection = () =>
     customTimezone() || !TIMEZONE_PRESETS.some((preset) => preset.value === config().tzInfo)
       ? CUSTOM_TIMEZONE
@@ -129,7 +154,11 @@ const Settings: Component = () => {
         ntpServer: data.ntpServer ?? "",
         tzInfo: data.tzInfo ?? "",
         autoStartSchedule: data.autoStartSchedule ?? false,
+        powerLimitMw: data.powerLimitMw ?? 0,
       };
+      if (loaded.powerLimitMw > 0) {
+        setLastPowerLimitMw(loaded.powerLimitMw);
+      }
       setConfig(loaded);
       setSavedConfig(loaded);
       setCustomTimezone(false);
@@ -151,7 +180,7 @@ const Settings: Component = () => {
 
   const handleSave = async (event: SubmitEvent) => {
     event.preventDefault();
-    if (!isDirty() || ntpMissing() || tzMissing()) {
+    if (!isDirty() || ntpMissing() || tzMissing() || powerLimitInvalid()) {
       return;
     }
 
@@ -160,6 +189,7 @@ const Settings: Component = () => {
       ntpServer: config().ntpServer.trim(),
       tzInfo: config().tzInfo.trim(),
       autoStartSchedule: config().autoStartSchedule,
+      powerLimitMw: Math.round(config().powerLimitMw),
     };
 
     setIsSaving(true);
@@ -343,6 +373,55 @@ const Settings: Component = () => {
                 </label>
               </Section>
 
+              <Section title="Power" icon="fa-bolt">
+                <label
+                  class="flex cursor-pointer items-center justify-between gap-4"
+                  for="power-limit-enabled"
+                >
+                  <span class="text-sm font-medium">Limit power draw</span>
+                  <input
+                    id="power-limit-enabled"
+                    type="checkbox"
+                    checked={powerLimitEnabled()}
+                    onChange={(e) =>
+                      update("powerLimitMw", e.currentTarget.checked ? lastPowerLimitMw() : 0)
+                    }
+                    class="switch"
+                  />
+                </label>
+
+                <Show when={powerLimitEnabled()}>
+                  <Field
+                    label="Power supply (mW)"
+                    for="power-limit"
+                    hint={
+                      powerLimitInvalid()
+                        ? `Between ${POWER_LIMIT_MIN_MW} and ${POWER_LIMIT_MAX_MW} mW.`
+                        : `Bright frames are dimmed to stay within this budget. A fully lit screen gets up to ~${fullScreenBrightness(config().powerLimitMw)}% brightness, a few pixels stay at full brightness.`
+                    }
+                  >
+                    <input
+                      id="power-limit"
+                      type="number"
+                      min={POWER_LIMIT_MIN_MW}
+                      max={POWER_LIMIT_MAX_MW}
+                      step="100"
+                      value={config().powerLimitMw > 0 ? config().powerLimitMw : ""}
+                      onInput={(e) => {
+                        const milliwatts = e.currentTarget.valueAsNumber;
+                        // empty or 0 keeps the limit enabled but invalid instead of switching it off
+                        update("powerLimitMw", milliwatts > 0 ? milliwatts : -1);
+                        if (milliwatts >= POWER_LIMIT_MIN_MW && milliwatts <= POWER_LIMIT_MAX_MW) {
+                          setLastPowerLimitMw(milliwatts);
+                        }
+                      }}
+                      aria-invalid={powerLimitInvalid()}
+                      class={`input ${powerLimitInvalid() ? "border-danger/60" : ""}`}
+                    />
+                  </Field>
+                </Show>
+              </Section>
+
               <div class="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
@@ -358,7 +437,9 @@ const Settings: Component = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={!isDirty() || isSaving() || ntpMissing() || tzMissing()}
+                  disabled={
+                    !isDirty() || isSaving() || ntpMissing() || tzMissing() || powerLimitInvalid()
+                  }
                   class="btn btn-accent flex-1"
                 >
                   <i class="fa-solid fa-floppy-disk" />
