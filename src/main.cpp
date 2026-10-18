@@ -386,6 +386,8 @@ void setup()
   // the timer interrupt is bound to the core it is created on, keep it on
   // core 1 so WiFi interrupts on core 0 do not delay it and jitter the PWM
   Screen.setup();
+  // from here on plugin switches and websocket hooks are handed to the screen task
+  pluginManager.enableScreenTask();
   xTaskCreatePinnedToCore(screenDrawingTask,
                           "screenDrawingTask",
                           10000,
