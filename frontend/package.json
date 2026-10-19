@@ -21,7 +21,7 @@
     "@solid-primitives/websocket": "^1.4.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
-    "solid-js": "^1.9.15",
+    "solid-js": "^1.9.17",
     "tailwind-merge": "^3.7.0",
     "tailwindcss-animate": "^1.0.7"
   },
