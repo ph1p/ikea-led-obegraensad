@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@radix-ui/react-separator": "^1.1.16",
-    "@radix-ui/react-slot": "^1.3.3",
+    "@radix-ui/react-slot": "^1.5.0",
     "@solid-primitives/event-listener": "^2.4.6",
     "@solid-primitives/intersection-observer": "^2.2.5",
     "@solid-primitives/timer": "^1.4.4",
