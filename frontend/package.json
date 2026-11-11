@@ -19,7 +19,7 @@
     "@solid-primitives/intersection-observer": "^2.2.5",
     "@solid-primitives/timer": "^1.4.4",
     "@solid-primitives/websocket": "^1.4.0",
-    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/vite": "^4.3.3",
     "solid-js": "^1.9.17",
     "tailwind-merge": "^3.7.0",
