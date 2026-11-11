@@ -113,6 +113,7 @@ Turn your OBEGRÄNSAD LED Wall Lamp into a live drawing canvas
 - Tetris
 - Tron
 - Smoke Clock (fluid simulation below the time)
+- Fractal Clock (endless Mandelbrot zoom below the time)
 
 </details>
 
