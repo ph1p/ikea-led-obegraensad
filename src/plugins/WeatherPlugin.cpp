@@ -1,5 +1,6 @@
 #include "plugins/WeatherPlugin.h"
 #include "config.h"
+#include "plugins/weather_ca.h"
 
 // https://github.com/chubin/wttr.in/blob/master/share/translations/en.txt
 #ifdef ESP32
@@ -18,7 +19,7 @@ void WeatherPlugin::setup()
   if (secureClient == nullptr)
   {
     secureClient = new WiFiClientSecure();
-    secureClient->setInsecure();
+    secureClient->setCACert(WTTR_ROOT_CA);
   }
 #endif
 
@@ -89,6 +90,8 @@ void WeatherPlugin::update()
 #endif
 
   http.setTimeout(20000);
+  // no chunked encoding, so the body can be parsed from the stream
+  http.useHTTP10(true);
 
   Serial.println("Sending HTTP GET request...");
   int code = http.GET();
@@ -97,12 +100,17 @@ void WeatherPlugin::update()
 
   if (code == HTTP_CODE_OK)
   {
-    String payload = http.getString();
-    Serial.print("Response size: ");
-    Serial.println(payload.length());
+    // wttr.in serves current_condition at top level or under "data"
+    JsonDocument conditionFilter;
+    conditionFilter[0]["temp_C"] = true;
+    conditionFilter[0]["weatherCode"] = true;
+    JsonDocument filter;
+    filter["current_condition"] = conditionFilter;
+    filter["data"]["current_condition"] = conditionFilter;
 
     JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, payload);
+    DeserializationError error =
+        deserializeJson(doc, http.getStream(), DeserializationOption::Filter(filter));
 
     if (error)
     {
@@ -112,8 +120,21 @@ void WeatherPlugin::update()
       return;
     }
 
-    int temperature = round(doc["current_condition"][0]["temp_C"].as<float>());
-    int weatherCode = doc["current_condition"][0]["weatherCode"].as<int>();
+    JsonVariantConst current = doc["data"]["current_condition"][0];
+    if (current.isNull())
+    {
+      current = doc["current_condition"][0];
+    }
+
+    if (current["temp_C"].isNull() || current["weatherCode"].isNull())
+    {
+      Serial.println("Weather response is missing current_condition");
+      http.end();
+      return;
+    }
+
+    int temperature = round(current["temp_C"].as<float>());
+    int weatherCode = current["weatherCode"].as<int>();
     int weatherIcon = 0;
     int iconY = 1;
     int tempY = 10;
