@@ -52,11 +52,21 @@ private:
   // plugins) plus the plugin id display, stalling the web server meanwhile.
   static constexpr size_t MAX_PENDING_HOOKS = 32;
 
+  // One queue for both, so a hook sent after a switch reaches the new plugin.
+  // pluginId >= 0 marks a switch, otherwise the entry is a websocket hook.
+  struct PendingRequest
+  {
+    int pluginId;
+    JsonDocument request;
+  };
+
   std::atomic<bool> deferToScreenTask{false};
   std::atomic<TaskHandle_t> screenTask{nullptr};
+  // latest queued switch, -1 if none; lets activateNextPlugin() keep advancing
   std::atomic<int> requestedPluginId{-1};
-  std::mutex pendingHooksMutex;
-  std::deque<JsonDocument> pendingHooks;
+  std::mutex pendingMutex;
+  std::deque<PendingRequest> pendingRequests;
+  size_t pendingHookCount = 0;
 
   void processPendingRequests();
 #endif

@@ -195,7 +195,17 @@ bool PluginManager::setActivePluginById(int pluginId)
 #ifdef ESP32
   if (mustDefer())
   {
+    std::lock_guard<std::mutex> lock(pendingMutex);
     requestedPluginId = pluginId;
+    // back-to-back switches collapse into one, the latest request wins
+    if (!pendingRequests.empty() && pendingRequests.back().pluginId >= 0)
+    {
+      pendingRequests.back().pluginId = pluginId;
+    }
+    else
+    {
+      pendingRequests.push_back({pluginId, JsonDocument()});
+    }
     return true;
   }
 #endif
@@ -209,13 +219,14 @@ void PluginManager::dispatchWebsocketHook(JsonDocument &request)
 #ifdef ESP32
   if (mustDefer())
   {
-    std::lock_guard<std::mutex> lock(pendingHooksMutex);
-    if (pendingHooks.size() >= MAX_PENDING_HOOKS)
+    std::lock_guard<std::mutex> lock(pendingMutex);
+    if (pendingHookCount >= MAX_PENDING_HOOKS)
     {
       Serial.println(F("PluginManager: websocket hook queue full, message dropped"));
       return;
     }
-    pendingHooks.emplace_back(request);
+    pendingRequests.push_back({-1, request});
+    pendingHookCount++;
     return;
   }
 #endif
@@ -238,30 +249,42 @@ void PluginManager::enableScreenTask()
 #ifdef ESP32
 void PluginManager::processPendingRequests()
 {
-  std::deque<JsonDocument> hooks;
+  std::deque<PendingRequest> requests;
   {
-    std::lock_guard<std::mutex> lock(pendingHooksMutex);
-    hooks.swap(pendingHooks);
+    std::lock_guard<std::mutex> lock(pendingMutex);
+    requests.swap(pendingRequests);
+    pendingHookCount = 0;
+    requestedPluginId = -1;
   }
 
-  // hooks queued before a still pending switch belong to the current plugin
-  for (JsonDocument &request : hooks)
+  // apply in arrival order: hooks go to the plugin active when they were sent.
+  // A switch is applied lazily, so one with no hooks after it costs nothing
+  // until the end of the batch.
+  int pendingSwitch = -1;
+  for (PendingRequest &entry : requests)
   {
+    if (entry.pluginId >= 0)
+    {
+      pendingSwitch = entry.pluginId;
+      continue;
+    }
+
+    if (pendingSwitch >= 0)
+    {
+      activatePlugin(findPlugin(pendingSwitch));
+      pendingSwitch = -1;
+    }
+
     Plugin *plugin = activePlugin;
     if (plugin)
     {
-      plugin->websocketHook(request);
+      plugin->websocketHook(entry.request);
     }
   }
 
-  const int pluginId = requestedPluginId.exchange(-1);
-  if (pluginId >= 0)
+  if (pendingSwitch >= 0)
   {
-    Plugin *plugin = findPlugin(pluginId);
-    if (plugin)
-    {
-      activatePlugin(plugin);
-    }
+    activatePlugin(findPlugin(pendingSwitch));
   }
 }
 #endif

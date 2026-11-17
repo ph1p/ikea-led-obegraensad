@@ -194,8 +194,9 @@ void onWsEvent(AsyncWebSocket *server,
             int pluginId = wsRequest["plugin"];
 
             Scheduler.clearSchedule();
+            // no sendInfo() here: on ESP32 the switch is only queued, so it
+            // would broadcast the old plugin; the switch itself sends info
             pluginManager.setActivePluginById(pluginId);
-            sendInfo();
           }
           else if (!strcmp(event, "persist-plugin"))
           {
