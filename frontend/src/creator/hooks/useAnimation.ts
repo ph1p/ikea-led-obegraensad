@@ -1,52 +1,36 @@
-import { createEffect, createSignal, onCleanup, untrack } from "solid-js";
+import { createEffect, createSignal, untrack } from "solid-js";
 
 import type { FrameSignals } from "../types";
 
 export function useAnimation(screenSignals: () => FrameSignals, animationDelayMs: () => number) {
   const [isPlaying, setIsPlaying] = createSignal(false);
   const [currentFrame, setCurrentFrame] = createSignal<number[]>([]);
-  const [intervalId, setIntervalId] = createSignal(0);
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying());
   };
 
-  createEffect(() => {
-    const existingId = untrack(intervalId);
-    if (existingId) {
-      clearInterval(existingId);
-      setIntervalId(0);
-    }
+  createEffect(
+    () => [isPlaying(), animationDelayMs()] as const,
+    ([playing, delay]) => {
+      if (!playing) return;
 
-    if (!isPlaying()) {
-      return;
-    }
+      let i = 0;
+      const run = () => {
+        const signals = untrack(screenSignals);
+        if (signals.length === 0) return;
+        if (i >= signals.length) i = 0;
 
-    let i = 0;
-    const run = () => {
-      const signals = screenSignals();
-      if (signals.length === 0) return;
+        const [screen] = signals[i];
+        setCurrentFrame([...untrack(screen)]);
+        i++;
+      };
+      run();
+      const id = setInterval(run, delay);
 
-      const [screen] = signals[i];
-      setCurrentFrame([...screen()]);
-      i++;
-      if (i >= signals.length) {
-        i = 0;
-      }
-    };
-    run();
-    const newIntervalId = setInterval(run, animationDelayMs()) as unknown as number;
-    setIntervalId(newIntervalId);
-
-    return () => {
-      clearInterval(newIntervalId);
-      setIntervalId(0);
-    };
-  });
-
-  onCleanup(() => {
-    clearInterval(intervalId());
-  });
+      return () => clearInterval(id);
+    },
+  );
 
   return {
     isPlaying,

@@ -1,4 +1,4 @@
-import { type Component, For, Index, Show } from "solid-js";
+import { type Component, For, Show } from "solid-js";
 
 import { Layout } from "./components/layout/layout";
 import { useStore } from "./contexts/store";
@@ -195,7 +195,7 @@ const Scheduler: Component = () => {
             }
           >
             <ol class="space-y-2">
-              <Index each={store.schedule}>
+              <For each={store.schedule} keyed={false}>
                 {(item, index) => {
                   const isCurrent = () =>
                     store.isActiveScheduler && store.plugin === item().pluginId;
@@ -273,7 +273,7 @@ const Scheduler: Component = () => {
                     </li>
                   );
                 }}
-              </Index>
+              </For>
             </ol>
 
             <div class="flex flex-col gap-2 sm:flex-row">

@@ -1,28 +1,49 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
+# Dependabot version updates
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# PlatformIO libraries are not supported by Dependabot; they are handled by
+# .github/workflows/dependabot.yml (peterus/platformio_dependabot).
 
 version: 2
 updates:
-  # Enable version updates for npm
+  # Frontend (pnpm)
   - package-ecosystem: "npm"
-    # Look for `package.json` and `lock` files in the `frontend` directory
-    directory: "frontend/"
-    # Check the npm registry for updates every day (weekdays)
+    directory: "/frontend"
     schedule:
-      interval: "daily"
-      
-  # Enable version updates for Python
+      interval: "weekly"
+    # Wait longer than pnpm's minimumReleaseAge (1 day by default), so bumps
+    # need no new minimumReleaseAgeExclude entries in pnpm-workspace.yaml.
+    cooldown:
+      default-days: 3
+    groups:
+      # One PR for all minor/patch bumps; majors stay separate PRs.
+      frontend:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Python tooling (pyproject.toml / poetry.lock)
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
+    groups:
+      python:
+        patterns:
+          - "*"
 
-  # Enable version updates for GitHub Actions
+  # GitHub Actions
   - package-ecosystem: "github-actions"
-    # Workflow files stored in the default location of `.github/workflows`
-    # You don't need to specify `/.github/workflows` for `directory`. You can use `directory: "/"`.
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
+    groups:
+      actions:
+        patterns:
+          - "*"

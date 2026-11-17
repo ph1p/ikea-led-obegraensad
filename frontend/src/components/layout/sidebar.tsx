@@ -1,4 +1,5 @@
-import { type Component, createSignal, For, type JSX, Show } from "solid-js";
+import type { JSX } from "@solidjs/web";
+import { type Component, createSignal, For, Show } from "solid-js";
 
 import { useStore } from "../../contexts/store";
 import { ToggleScheduleButton } from "../../scheduler";

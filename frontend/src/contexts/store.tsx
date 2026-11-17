@@ -1,7 +1,7 @@
 import { createEventSignal } from "@solid-primitives/event-listener";
-import { createReconnectingWS, createWSState } from "@solid-primitives/websocket";
-import { batch, createContext, createEffect, type JSX, untrack, useContext } from "solid-js";
-import { createStore } from "solid-js/store";
+import { makeReconnectingWS, createWSState } from "@solid-primitives/websocket";
+import type { JSX } from "@solidjs/web";
+import { createContext, createEffect, createStore, untrack, useContext } from "solid-js";
 
 import {
   type BrightnessSchedule,
@@ -12,7 +12,7 @@ import {
 } from "../types";
 import { ToastProvider } from "./toast";
 
-const ws = createReconnectingWS(
+const ws = makeReconnectingWS(
   `${
     import.meta.env.PROD
       ? `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/`
@@ -69,22 +69,29 @@ const [mainStore, setStore] = createStore<Store>({
   livePreview: readLivePreview(),
 });
 
+const set =
+  <K extends keyof Store>(key: K) =>
+  (value: Store[K]) =>
+    setStore((s) => {
+      s[key] = value;
+    });
+
 const actions: StoreActions = {
-  setIsActiveScheduler: (isActive) => setStore("isActiveScheduler", isActive),
-  setRotation: (rotation) => setStore("rotation", rotation),
-  setPlugins: (plugins) => setStore("plugins", plugins),
-  setPlugin: (plugin) => setStore("plugin", plugin),
-  setBaseBrightness: (brightness) => setStore("baseBrightness", brightness),
-  setBrightness: (brightness) => setStore("brightness", brightness),
-  setBrightnessSchedule: (schedule) => setStore("brightnessSchedule", schedule),
-  setArtnetUniverse: (artnetUniverse) => setStore("artnetUniverse", artnetUniverse),
-  setGOLDelay: (GOLDelay) => setStore("GOLDelay", GOLDelay),
-  setIndexMatrix: (indexMatrix) => setStore("indexMatrix", indexMatrix),
-  setLeds: (leds) => setStore("leds", leds),
-  setSystemStatus: (systemStatus: SYSTEM_STATUS) => setStore("systemStatus", systemStatus),
-  setSchedule: (items: ScheduleItem[]) => setStore("schedule", items),
+  setIsActiveScheduler: set("isActiveScheduler"),
+  setRotation: set("rotation"),
+  setPlugins: set("plugins"),
+  setPlugin: set("plugin"),
+  setBaseBrightness: set("baseBrightness"),
+  setBrightness: set("brightness"),
+  setBrightnessSchedule: set("brightnessSchedule"),
+  setArtnetUniverse: set("artnetUniverse"),
+  setGOLDelay: set("GOLDelay"),
+  setIndexMatrix: set("indexMatrix"),
+  setLeds: set("leds"),
+  setSystemStatus: set("systemStatus"),
+  setSchedule: set("schedule"),
   setLivePreview: (enabled) => {
-    setStore("livePreview", enabled);
+    set("livePreview")(enabled);
     try {
       localStorage.setItem(LIVE_PREVIEW_STORAGE_KEY, String(enabled));
     } catch {
@@ -122,11 +129,11 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
   const messageEvent = createEventSignal<{ message: MessageEvent }>(ws, "message");
   const errorEvent = createEventSignal<{ error: Event }>(ws, "error");
 
-  createEffect(() => {
-    const state = wsState();
-
+  createEffect(wsState, (state) => {
     if (state >= 0 && state < connectionStatus.length) {
-      setStore("connectionStatus", connectionStatus[state]);
+      setStore((s) => {
+        s.connectionStatus = connectionStatus[state];
+      });
     }
 
     if (state === WebSocket.CLOSED || state === WebSocket.CLOSING) {
@@ -134,22 +141,21 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
     }
   });
 
-  createEffect(() => {
-    const error = errorEvent();
+  createEffect(errorEvent, (error) => {
     if (error) {
       console.error("WebSocket error occurred:", error);
     }
   });
 
-  createEffect(() => {
+  createEffect(messageEvent, (event) => {
     try {
-      const data = messageEvent()?.data;
+      const data = event?.data;
       if (data instanceof ArrayBuffer) {
         if (data.byteLength === 256) {
           const frame = new Uint8Array(data);
           // the device can resend an identical frame, skip it so nothing redraws
-          const leds = untrack(() => mainStore.leds);
-          if (!frame.every((value, i) => value === leds[i])) {
+          const unchanged = untrack(() => frame.every((value, i) => value === mainStore.leds[i]));
+          if (!unchanged) {
             actions.setLeds(Array.from(frame));
           }
         }
@@ -163,57 +169,60 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
       }
 
       switch (json.event) {
-        case "info":
-          batch(() => {
-            if (
-              isValidNumber(json.status) &&
-              json.status >= 0 &&
-              json.status < Object.values(SYSTEM_STATUS).length
-            ) {
-              actions.setSystemStatus(Object.values(SYSTEM_STATUS)[json.status]);
-            }
+        case "info": {
+          if (
+            isValidNumber(json.status) &&
+            json.status >= 0 &&
+            json.status < Object.values(SYSTEM_STATUS).length
+          ) {
+            actions.setSystemStatus(Object.values(SYSTEM_STATUS)[json.status]);
+          }
 
-            if (isValidNumber(json.rotation)) {
-              actions.setRotation(json.rotation);
-            }
+          if (isValidNumber(json.rotation)) {
+            actions.setRotation(json.rotation);
+          }
 
-            if (isValidNumber(json.baseBrightness)) {
-              actions.setBaseBrightness(json.baseBrightness);
-            }
+          if (isValidNumber(json.baseBrightness)) {
+            actions.setBaseBrightness(json.baseBrightness);
+          }
 
-            if (isValidNumber(json.brightness)) {
-              actions.setBrightness(json.brightness);
-            }
+          if (isValidNumber(json.brightness)) {
+            actions.setBrightness(json.brightness);
+          }
 
-            if (isBrightnessSchedule(json.brightnessSchedule)) {
-              actions.setBrightnessSchedule(json.brightnessSchedule);
-            }
+          if (isBrightnessSchedule(json.brightnessSchedule)) {
+            actions.setBrightnessSchedule(json.brightnessSchedule);
+          }
 
-            if (isValidBoolean(json.scheduleActive)) {
-              actions.setIsActiveScheduler(json.scheduleActive);
-            }
+          if (isValidBoolean(json.scheduleActive)) {
+            actions.setIsActiveScheduler(json.scheduleActive);
+          }
 
-            if (isValidArray(json.schedule)) {
-              actions.setSchedule(json.schedule as ScheduleItem[]);
-            }
+          if (isValidArray(json.schedule)) {
+            actions.setSchedule(json.schedule as ScheduleItem[]);
+          }
 
-            if (!mainStore.plugins.length && isValidArray(json.plugins)) {
-              actions.setPlugins(json.plugins);
-            }
+          if (!untrack(() => mainStore.plugins.length) && isValidArray(json.plugins)) {
+            actions.setPlugins(json.plugins);
+          }
 
-            if (isValidNumber(json.plugin)) {
-              actions.setPlugin(json.plugin);
-            }
+          // store reads lag behind writes until the next flush, so the
+          // plugin just received is used instead of reading it back
+          const plugin = isValidNumber(json.plugin) ? json.plugin : untrack(() => mainStore.plugin);
 
-            if (mainStore.plugin === 1) {
-              actions.setIndexMatrix([...new Array(256)].map((_, i) => i));
-            }
+          if (isValidNumber(json.plugin)) {
+            actions.setPlugin(json.plugin);
+          }
 
-            if (isValidArray(json.data)) {
-              actions.setLeds(json.data as number[]);
-            }
-          });
+          if (plugin === 1) {
+            actions.setIndexMatrix([...new Array(256)].map((_, i) => i));
+          }
+
+          if (isValidArray(json.data)) {
+            actions.setLeds(json.data as number[]);
+          }
           break;
+        }
       }
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
@@ -222,7 +231,7 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
 
   return (
     <ToastProvider>
-      <StoreContext.Provider value={store}>{props?.children}</StoreContext.Provider>
+      <StoreContext value={store}>{props?.children}</StoreContext>
     </ToastProvider>
   );
 };

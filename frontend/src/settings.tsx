@@ -1,4 +1,5 @@
-import { type Component, createSignal, For, type JSX, onMount, Show } from "solid-js";
+import type { JSX } from "@solidjs/web";
+import { type Component, createSignal, For, onSettled, Show } from "solid-js";
 
 import { Layout } from "./components/layout/layout";
 import { useToast } from "./contexts/toast";
@@ -147,7 +148,9 @@ const Settings: Component = () => {
     await loadInfo();
   };
 
-  onMount(loadAll);
+  onSettled(() => {
+    void loadAll();
+  });
 
   const handleSave = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -304,7 +307,7 @@ const Settings: Component = () => {
                       placeholder="e.g. CET-1CEST,M3.5.0,M10.5.0/3"
                       value={config().tzInfo}
                       onInput={(e) => update("tzInfo", e.currentTarget.value)}
-                      aria-invalid={tzMissing()}
+                      aria-invalid={tzMissing() ? "true" : "false"}
                       class={`input font-mono ${tzMissing() ? "border-danger/60" : ""}`}
                     />
                   </Field>
@@ -321,7 +324,7 @@ const Settings: Component = () => {
                     placeholder="e.g. pool.ntp.org"
                     value={config().ntpServer}
                     onInput={(e) => update("ntpServer", e.currentTarget.value)}
-                    aria-invalid={ntpMissing()}
+                    aria-invalid={ntpMissing() ? "true" : "false"}
                     class={`input ${ntpMissing() ? "border-danger/60" : ""}`}
                   />
                 </Field>
