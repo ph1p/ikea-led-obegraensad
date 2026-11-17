@@ -1,13 +1,5 @@
 import type { Component } from "solid-js";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  createUniqueId,
-  onCleanup,
-  onMount,
-  Show,
-} from "solid-js";
+import { createEffect, createMemo, createSignal, createUniqueId, onSettled, Show } from "solid-js";
 
 import { Button } from "./components/button";
 import { Layout } from "./components/layout/layout";
@@ -38,11 +30,11 @@ export const Creator: Component = () => {
   const { toast } = useToast();
   const isAnimationPluginActive = createMemo<boolean>(
     () => store?.plugins.find((p) => p.name.includes("Animation"))?.id === store?.plugin,
-    true,
   );
 
   const frameDurationId = createUniqueId();
   const [screenSignals, setScreenSignals] = createSignal<FrameSignals>([]);
+  const frames = createMemo(() => screenSignals().map(([screen]) => screen()));
   const [animationDelayMs, setAnimationDelayMs] = createSignal(DEFAULT_FRAME_DELAY_MS);
   const [focusedFrameIndex, setFocusedFrameIndex] = createSignal(0);
 
@@ -72,12 +64,14 @@ export const Creator: Component = () => {
   };
 
   const handleAddScreen = () => {
+    // reads lag behind writes until the next flush, so the index of the new
+    // frame is taken before it is appended
+    const newIndex = screenSignals().length;
     setScreenSignals((signals): FrameSignals => {
       const lastScreen = signals.length > 0 ? signals[signals.length - 1][0]() : undefined;
       const newSignal = createNewScreen(lastScreen ? [...lastScreen] : undefined);
       return [...signals, newSignal];
     });
-    const newIndex = screenSignals().length - 1;
     focusFrame(setFocusedFrameIndex, scrollToFrame, newIndex);
   };
 
@@ -100,13 +94,9 @@ export const Creator: Component = () => {
   };
 
   const handleEmptyMatrix = (index: number) => {
-    setScreenSignals((signals) => {
-      if (index !== -1) {
-        const [_, setScreen] = signals[index];
-        setScreen(new Array(256).fill(0));
-      }
-      return signals;
-    });
+    if (index === -1) return;
+    const setScreen = screenSignals()[index]?.[1];
+    setScreen?.(new Array(256).fill(0));
   };
 
   const handleDuplicateFrame = (index: number) => {
@@ -152,7 +142,7 @@ export const Creator: Component = () => {
 
   const handleUploadData = () => {
     if (isAnimationPluginActive()) {
-      const screens = screenSignals().map(([screen]) => screen());
+      const screens = frames();
 
       actions.send(
         JSON.stringify({
@@ -170,10 +160,9 @@ export const Creator: Component = () => {
   };
 
   const handleExportJSON = () => {
-    const screens = screenSignals().map(([screen]) => screen());
     const data = {
       version: 1,
-      frames: screens,
+      frames: frames(),
     };
 
     const element = document.createElement("a");
@@ -286,7 +275,7 @@ export const Creator: Component = () => {
     },
   );
 
-  onMount(() => {
+  onSettled(() => {
     const loaded = loadFromLocalStorage();
     if (loaded) {
       setScreenSignals(loaded.frames);
@@ -295,62 +284,62 @@ export const Creator: Component = () => {
       }
     }
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (screenSignals().length > 0) {
         const currentState = screenSignals().map(([screen]) => [...screen()]);
         saveToHistory(currentState);
       }
     }, INITIAL_HISTORY_SAVE_DELAY_MS);
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   });
 
-  createEffect(() => {
-    const signals = screenSignals();
+  createEffect(
+    () => ({
+      loaded: hasLoadedFromStorage(),
+      frames: frames(),
+    }),
+    ({ loaded, frames }) => {
+      if (!loaded || frames.length === 0) return;
 
-    for (const [screen] of signals) {
-      screen();
-    }
-
-    if (hasLoadedFromStorage() && signals.length > 0) {
       const timeoutId = setTimeout(() => {
         if (!isUndoRedoing()) {
-          const currentState = signals.map(([screen]) => [...screen()]);
-          saveToHistory(currentState);
+          saveToHistory(frames.map((frame) => [...frame]));
         }
       }, HISTORY_DEBOUNCE_MS);
 
-      onCleanup(() => clearTimeout(timeoutId));
-    }
-  });
+      return () => clearTimeout(timeoutId);
+    },
+  );
 
-  createEffect(() => {
-    const signals = screenSignals();
-    const focused = focusedFrameIndex();
+  createEffect(
+    () => [screenSignals().length, focusedFrameIndex()] as const,
+    ([length, focused]) => {
+      if (length === 0) {
+        if (focused !== 0) setFocusedFrameIndex(0);
+      } else if (focused >= length) {
+        setFocusedFrameIndex(length - 1);
+      } else if (focused < 0) {
+        setFocusedFrameIndex(0);
+      }
+    },
+  );
 
-    if (signals.length === 0) {
-      setFocusedFrameIndex(0);
-    } else if (focused >= signals.length) {
-      setFocusedFrameIndex(signals.length - 1);
-    } else if (focused < 0) {
-      setFocusedFrameIndex(0);
-    }
-  });
-
-  createEffect(() => {
-    const signals = screenSignals();
-    const delay = animationDelayMs();
-
-    if (!hasLoadedFromStorage()) return;
-
-    const frames = signals.map(([screen]) => screen());
-    saveToLocalStorage(frames, delay);
-  });
-
-  createEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    onCleanup(() => {
-      window.removeEventListener("keydown", handleKeyDown);
-    });
-  });
+  createEffect(
+    () => ({
+      loaded: hasLoadedFromStorage(),
+      frames: frames(),
+      delay: animationDelayMs(),
+    }),
+    ({ loaded, frames, delay }) => {
+      if (loaded) saveToLocalStorage(frames, delay);
+    },
+  );
 
   return (
     <Layout

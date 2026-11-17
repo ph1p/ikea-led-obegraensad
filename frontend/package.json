@@ -15,29 +15,29 @@
   "dependencies": {
     "@radix-ui/react-separator": "^1.2.0",
     "@radix-ui/react-slot": "^1.5.0",
-    "@solid-primitives/event-listener": "^2.4.6",
-    "@solid-primitives/intersection-observer": "^2.2.5",
-    "@solid-primitives/timer": "^1.4.4",
-    "@solid-primitives/websocket": "^1.4.0",
+    "@solid-primitives/event-listener": "^3.0.0",
+    "@solid-primitives/intersection-observer": "^3.0.0",
+    "@solid-primitives/websocket": "^2.0.0",
+    "@solidjs/web": "^2.0.0",
     "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/vite": "^4.3.5",
-    "solid-js": "^1.9.18",
+    "solid-js": "^2.0.0",
     "tailwind-merge": "^3.7.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@gfx/zopfli": "^1.0.15",
-    "@types/node": "^26.6.4",
+    "@solidjs/vite-plugin": "^3.0.0",
+    "@types/node": "^26.6.6",
     "@types/offscreencanvas": "^2019.7.3",
-    "autoprefixer": "^10.6.1",
-    "oxfmt": "^0.78.0",
-    "oxlint": "^1.92.0",
-    "postcss": "^8.5.32",
-    "tailwindcss": "^4.3.3",
+    "autoprefixer": "^10.6.2",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
-    "vite": "^8.3.2",
-    "vite-plugin-singlefile": "^2.3.3",
-    "vite-plugin-solid": "^2.11.14"
+    "vite": "^8.3.8",
+    "vite-plugin-singlefile": "^2.3.4"
   },
-  "packageManager": "pnpm@12.8.1"
+  "packageManager": "pnpm@12.21.0"
 }

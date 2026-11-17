@@ -1,26 +1,17 @@
-import { createSignal, Match, onCleanup, onMount, Switch } from "solid-js";
-import { render } from "solid-js/web";
+import { render } from "@solidjs/web";
+import { Match, Switch } from "solid-js";
 import "./index.css";
 
 import { App } from "./app";
 import { StoreProvider } from "./contexts/store";
 import { Creator } from "./creator";
+import { useHash } from "./hooks/useHash";
 import Scheduler from "./scheduler";
 import Settings from "./settings";
 
 const Router = () => {
-  const [hash, setHash] = createSignal(window.location.hash);
+  const hash = useHash();
   const location = () => hash().replace(/^#/, "") || "/";
-
-  const onChange = () => setHash(window.location.hash);
-
-  onMount(() => {
-    window.addEventListener("hashchange", onChange, false);
-  });
-
-  onCleanup(() => {
-    window.removeEventListener("hashchange", onChange, false);
-  });
 
   return (
     <div class="h-full">

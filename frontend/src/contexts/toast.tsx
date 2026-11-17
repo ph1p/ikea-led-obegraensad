@@ -36,12 +36,12 @@ const ToastContext = createContext<IToastContext>({
 
 export const ToastProvider: ParentComponent = (props) => {
   return (
-    <ToastContext.Provider value={{ toast }}>
+    <ToastContext value={{ toast }}>
       <Show when={!!toastNotification()}>
         <Toast text={toastNotification()?.text} />
       </Show>
       {props.children}
-    </ToastContext.Provider>
+    </ToastContext>
   );
 };
 

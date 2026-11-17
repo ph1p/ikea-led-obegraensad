@@ -1,5 +1,5 @@
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer";
-import { type Component, createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import { type Component, createEffect, createSignal, onSettled } from "solid-js";
 
 interface Props {
   disabled?: boolean;
@@ -12,7 +12,9 @@ interface Props {
 
 export const LedMatrix: Component<Props> = (props) => {
   let canvasRef: HTMLCanvasElement | undefined;
-  let containerRef: HTMLDivElement | undefined;
+  const [container, setContainer] = createSignal<HTMLDivElement | undefined>(undefined, {
+    ownedWrite: true,
+  });
   const [isDrawing, setIsDrawing] = createSignal(false);
   let currentDrawValue = 255;
 
@@ -22,8 +24,7 @@ export const LedMatrix: Component<Props> = (props) => {
     BACKGROUND: "#050506",
   };
 
-  const useVisibilityObserver = createVisibilityObserver({ threshold: 0.9 });
-  const visible = useVisibilityObserver(() => containerRef);
+  const visible = createVisibilityObserver(container, { threshold: 0.9, initialValue: false });
 
   const LOGICAL_SIZE = 400;
   const CELL_SIZE = LOGICAL_SIZE / MATRIX_SIZE;
@@ -160,64 +161,74 @@ export const LedMatrix: Component<Props> = (props) => {
     setIsDrawing(false);
   };
 
-  onMount(() => {
-    if (!canvasRef) return;
+  onSettled(() => {
+    if (canvasRef) {
+      dpr = window.devicePixelRatio || 1;
+      canvasRef.width = LOGICAL_SIZE * dpr;
+      canvasRef.height = LOGICAL_SIZE * dpr;
 
-    dpr = window.devicePixelRatio || 1;
-    canvasRef.width = LOGICAL_SIZE * dpr;
-    canvasRef.height = LOGICAL_SIZE * dpr;
-
-    ctx = canvasRef.getContext("2d");
-    ctx?.scale(dpr, dpr);
-    drawMatrix();
-  });
-
-  onCleanup(() => cancelAnimationFrame(pendingDraw));
-
-  createEffect(() => {
-    if (!canvasRef) return;
-    if (props.disabled) {
-      setIsDrawing(false);
-      return;
+      ctx = canvasRef.getContext("2d");
+      ctx?.scale(dpr, dpr);
+      drawMatrix();
     }
 
-    canvasRef.addEventListener("pointerdown", handlePointerDown);
-    canvasRef.addEventListener("pointermove", handlePointerMove);
-    canvasRef.addEventListener("pointerup", handlePointerUp);
-    canvasRef.addEventListener("pointerleave", handlePointerUp);
-
-    onCleanup(() => {
-      canvasRef?.removeEventListener("pointerdown", handlePointerDown);
-      canvasRef?.removeEventListener("pointermove", handlePointerMove);
-      canvasRef?.removeEventListener("pointerup", handlePointerUp);
-      canvasRef?.removeEventListener("pointerleave", handlePointerUp);
-    });
+    return () => cancelAnimationFrame(pendingDraw);
   });
+
+  createEffect(
+    () => props.disabled,
+    (disabled) => {
+      const canvas = canvasRef;
+      if (!canvas) return;
+      if (disabled) {
+        setIsDrawing(false);
+        return;
+      }
+
+      canvas.addEventListener("pointerdown", handlePointerDown);
+      canvas.addEventListener("pointermove", handlePointerMove);
+      canvas.addEventListener("pointerup", handlePointerUp);
+      canvas.addEventListener("pointerleave", handlePointerUp);
+
+      return () => {
+        canvas.removeEventListener("pointerdown", handlePointerDown);
+        canvas.removeEventListener("pointermove", handlePointerMove);
+        canvas.removeEventListener("pointerup", handlePointerUp);
+        canvas.removeEventListener("pointerleave", handlePointerUp);
+      };
+    },
+  );
 
   // the live preview can push frames faster than the display refreshes, so
   // the effect only snapshots the intensities and one draw runs per frame
-  createEffect(() => {
-    const data = props.data;
-    const indexData = props.indexData;
-    if (!data.length || !indexData.length) return;
+  createEffect(
+    () => {
+      const data = props.data;
+      const indexData = props.indexData;
+      if (!data.length || !indexData.length) return null;
 
-    const scale = props.brightness / 255;
-    // clamped array rounds and clamps on write
-    const next = new Uint8ClampedArray(MATRIX_SIZE * MATRIX_SIZE);
-    for (let i = 0; i < next.length; i++) {
-      next[i] = data[indexData[i]] * scale;
-    }
-    frame = next;
+      const scale = props.brightness / 255;
+      // clamped array rounds and clamps on write
+      const next = new Uint8ClampedArray(MATRIX_SIZE * MATRIX_SIZE);
+      for (let i = 0; i < next.length; i++) {
+        next[i] = data[indexData[i]] * scale;
+      }
+      return next;
+    },
+    (next) => {
+      if (!next) return;
+      frame = next;
 
-    if (!pendingDraw) {
-      pendingDraw = requestAnimationFrame(drawMatrix);
-    }
-  });
+      if (!pendingDraw) {
+        pendingDraw = requestAnimationFrame(drawMatrix);
+      }
+    },
+  );
 
   return (
     <div class="mx-auto w-[min(100%,700px,(100dvh-16rem)*9/13)] rounded-3xl bg-[#050506] p-3 shadow-2xl shadow-black/40 ring-1 ring-line max-lg:w-[min(100%,55dvh*9/13)] sm:p-4">
       <div
-        ref={containerRef}
+        ref={setContainer}
         class={`
           relative
           transition-all duration-300

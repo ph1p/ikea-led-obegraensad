@@ -1,6 +1,8 @@
-import { type Component, createSignal, For, type JSX, onCleanup, onMount, Show } from "solid-js";
+import type { JSX } from "@solidjs/web";
+import { type Component, For, Show } from "solid-js";
 
 import { useStore } from "../../contexts/store";
+import { useHash } from "../../hooks/useHash";
 import { ScreenInfo } from "../screen-info";
 
 interface NavItem {
@@ -34,11 +36,7 @@ export const Layout: Component<{
   ref?: HTMLElement;
 }> = (props) => {
   const [store] = useStore();
-  const [hash, setHash] = createSignal(window.location.hash || "#/");
-
-  const onHashChange = () => setHash(window.location.hash || "#/");
-  onMount(() => window.addEventListener("hashchange", onHashChange));
-  onCleanup(() => window.removeEventListener("hashchange", onHashChange));
+  const hash = useHash();
 
   const navItems: NavItem[] = [
     { href: "#/", label: "Display", icon: "fa-table-cells" },
@@ -54,7 +52,7 @@ export const Layout: Component<{
   ];
 
   const visibleNavItems = () => navItems.filter((item) => item.visible?.() ?? true);
-  const isActive = (item: NavItem) => item.href === hash();
+  const isActive = (item: NavItem) => item.href === (hash() || "#/");
 
   return (
     <div class="h-full flex flex-col">
