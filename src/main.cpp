@@ -385,7 +385,7 @@ void setup()
                           NULL,
                           1,
                           &buttonTaskHandle,
-                          1);
+                          ARDUINO_RUNNING_CORE);
   baseSetup();
   // the timer interrupt is bound to the core it is created on, keep it on
   // core 1 so WiFi interrupts on core 0 do not delay it and jitter the PWM
