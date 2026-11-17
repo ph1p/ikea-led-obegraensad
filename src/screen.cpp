@@ -145,7 +145,7 @@ void Screen_::loadFromStorage()
   storage.begin("led-wall", true);
 
   clear();
-  storage.getBytes("data", renderBuffer_, ROWS * COLS);
+  getStoredBytes(storage, "data", renderBuffer_, ROWS * COLS);
 
   setBaseBrightness(storage.getUInt("brightness", MAX_BRIGHTNESS));
   setDisplayedBrightness(getBaseBrightness());

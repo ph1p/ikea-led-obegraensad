@@ -1,4 +1,5 @@
 #include "config.h"
+#include "storage.h"
 #include <ArduinoJson.h>
 
 Config config;
@@ -76,9 +77,9 @@ void Config::load()
   
   try {
     // Load with fallback to defaults
-    weatherLocation = preferences.getString("weatherLoc", String(WEATHER_LOCATION));
-    ntpServer = preferences.getString("ntpServer", String(NTP_SERVER));
-    tzInfo = preferences.getString("tzInfo", String(TZ_INFO));
+    weatherLocation = getStoredString(preferences, "weatherLoc", WEATHER_LOCATION);
+    ntpServer = getStoredString(preferences, "ntpServer", NTP_SERVER);
+    tzInfo = getStoredString(preferences, "tzInfo", TZ_INFO);
     autoStartSchedule = preferences.getBool("autoSchedule", false);
     
     Serial.println("[Config] Configuration loaded from storage");
