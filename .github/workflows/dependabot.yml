@@ -6,6 +6,10 @@ on:
     # Runs every day at 00:00
     - cron: '0 0 * * *'
 
+permissions:
+  contents: write # push the update branches
+  pull-requests: write # open the pull requests
+
 jobs:
   dependabot:
     runs-on: ubuntu-latest
@@ -14,6 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - name: run PlatformIO Dependabot
-        uses: ph1p/platformio_dependabot@v1
+        uses: peterus/platformio_dependabot@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
