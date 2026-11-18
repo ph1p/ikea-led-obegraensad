@@ -1,0 +1,239 @@
+---
+title: HTTP API
+description: REST endpoints of the firmware.
+---
+
+# HTTP API
+
+The web server runs on port 80 and is part of builds with `ENABLE_SERVER`. All endpoints are under
+`/api`. Replace `<device-ip>` with the address of your device.
+
+There is no authentication. Only use the device in a network you trust.
+
+## Conventions
+
+- Parameters are query parameters unless an endpoint expects a body.
+- CORS allows every origin (`Access-Control-Allow-Origin: *`).
+- Most write endpoints answer with:
+
+```json
+{ "status": "success", "message": "Plugin set successfully" }
+```
+
+- Errors use an HTTP status code `400`, `404`, `422` or `500` and this body:
+
+```json
+{ "error": true, "message": "Could not set plugin to id 99" }
+```
+
+## Overview
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/api/info` | Device state, plugins and schedule. |
+| `GET` | `/api/data` | Current frame as 256 bytes. |
+| `PATCH` | `/api/plugin` | Set the active plugin. |
+| `PATCH` | `/api/brightness` | Set the base brightness. |
+| `PATCH` | `/api/power` | Turn the display on or off. |
+| `PUT` | `/api/brightness-schedule` | Configure scheduled brightness. |
+| `GET` | `/api/message` | Show a message. |
+| `GET` | `/api/removemessage` | Remove a message. |
+| `POST` | `/api/schedule` | Set and start the plugin schedule. |
+| `GET` | `/api/schedule/start` | Start the plugin schedule. |
+| `GET` | `/api/schedule/stop` | Stop the plugin schedule. |
+| `GET` | `/api/schedule/clear` | Delete the plugin schedule. |
+| `GET` | `/api/config` | Read the configuration. |
+| `POST` | `/api/config` | Change the configuration. |
+| `POST` | `/api/config/reset` | Reset the configuration. |
+| `GET` | `/api/storage/clear` | Erase all stored data. |
+
+## Device info
+
+`GET /api/info`
+
+```bash
+curl "http://<device-ip>/api/info"
+```
+
+```json
+{
+  "rows": 16,
+  "cols": 16,
+  "status": 0,
+  "plugin": 34,
+  "rotation": 0,
+  "power": true,
+  "baseBrightness": 255,
+  "brightness": 255,
+  "brightnessSchedule": {
+    "enabled": false,
+    "startTime": "22:00",
+    "endTime": "07:00",
+    "brightness": 20,
+    "active": false
+  },
+  "mqttConnected": true,
+  "scheduleActive": false,
+  "rssi": -58,
+  "uptime": 3600,
+  "freeHeap": 180000,
+  "ipAddress": "192.168.1.50",
+  "macAddress": "AA:BB:CC:A1:B2:C3",
+  "resetReason": "poweron",
+  "schedule": [{ "pluginId": 34, "duration": 60 }],
+  "plugins": [{ "id": 1, "name": "Draw" }]
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `status` | `0` normal, `2` firmware update, `3` loading. `1` (binary stream) is reserved and not used. |
+| `plugin` | ID of the active plugin, `-1` if none. |
+| `rotation` | `0`–`3`, in steps of 90° clockwise. |
+| `power` | `false` while the display is turned off. |
+| `baseBrightness` | Saved brightness, `0`–`255`. |
+| `brightness` | Brightness shown right now. Differs from `baseBrightness` while scheduled brightness is active. |
+| `brightnessSchedule` | See [Brightness](/usage/brightness#scheduled-brightness). `active` is `true` inside the window. |
+| `mqttConnected` | Only in builds with `ENABLE_MQTT`. |
+| `scheduleActive` | `true` while the plugin schedule runs. |
+| `schedule` | Plugin schedule, `duration` in seconds. |
+| `uptime` | Seconds since boot. |
+| `resetReason` | On ESP32: `poweron`, `external`, `software`, `panic`, `int_wdt`, `task_wdt`, `wdt`, `deepsleep`, `brownout`, `sdio` or `unknown`. On ESP8266 the text of the SDK. |
+| `plugins` | All plugins with ID and name. |
+
+## Current frame
+
+`GET /api/data` returns the frame buffer as `application/octet-stream`: 256 bytes, one brightness
+value (`0`–`255`) per pixel, row by row.
+
+```bash
+curl -s "http://<device-ip>/api/data" | xxd | head
+```
+
+## Set the active plugin
+
+`PATCH /api/plugin?id=<id>`
+
+```bash
+curl -X PATCH "http://<device-ip>/api/plugin?id=34"
+```
+
+An unknown ID returns `422` with `Could not set plugin to id <id>`. See [Plugins](/usage/plugins)
+for the IDs, or read them from `GET /api/info`.
+
+## Set brightness
+
+`PATCH /api/brightness?value=<0-255>`
+
+```bash
+curl -X PATCH "http://<device-ip>/api/brightness?value=100"
+```
+
+Values outside `0`–`255` return `422`. A missing `value` counts as `0`. The value is saved on ESP32.
+
+## Power
+
+`PATCH /api/power?state=<on|off|toggle>`
+
+```bash
+curl -X PATCH "http://<device-ip>/api/power?state=off"
+```
+
+The response message is `Display on` or `Display off`. Any other `state` returns `422` with
+`state must be on, off or toggle`. See [Brightness and power](/usage/brightness#power).
+
+## Brightness schedule
+
+`PUT /api/brightness-schedule` with a JSON body. All four
+[fields](/usage/brightness#scheduled-brightness) are required.
+
+```bash
+curl -X PUT "http://<device-ip>/api/brightness-schedule" \
+  -H "Content-Type: application/json" \
+  -d '{"enabled":true,"startTime":"22:00","endTime":"07:00","brightness":20}'
+```
+
+On success the response contains the new state:
+
+```json
+{
+  "baseBrightness": 255,
+  "brightness": 20,
+  "brightnessSchedule": {
+    "enabled": true,
+    "startTime": "22:00",
+    "endTime": "07:00",
+    "brightness": 20,
+    "active": true
+  }
+}
+```
+
+| Status | Message |
+| --- | --- |
+| `400` | `Invalid JSON payload` |
+| `422` | `Invalid scheduled brightness configuration` |
+| `422` | `Start and end times must differ` |
+
+## Messages
+
+`GET /api/message` with the query parameters from [Messages](/usage/messages#parameters).
+`graph` is a comma-separated list, for example `1,4,9,4`.
+
+```bash
+curl "http://<device-ip>/api/message?text=Hello&repeat=2&id=1"
+```
+
+`GET /api/removemessage?id=<id>` removes a message.
+
+| Status | Message |
+| --- | --- |
+| `422` | `maxy must be >= miny and the range must fit an int` |
+| `422` | `graph must be a comma-separated list of integers` |
+
+See [Messages](/usage/messages) for how messages are shown.
+
+## Plugin schedule
+
+`POST /api/schedule` with the form field `schedule`, a JSON array of `pluginId` and `duration` in
+seconds. The schedule starts immediately.
+
+```bash
+curl -X POST "http://<device-ip>/api/schedule" \
+  --data-urlencode 'schedule=[{"pluginId":34,"duration":60},{"pluginId":37,"duration":30}]'
+```
+
+An invalid schedule returns `400` with `Schedule cannot be set`.
+
+| Endpoint | Success | Error |
+| --- | --- | --- |
+| `GET /api/schedule/start` | `Schedule started` | `404 No schedule found` |
+| `GET /api/schedule/stop` | `Schedule stopped` | `404 No schedule found` |
+| `GET /api/schedule/clear` | `Schedule cleared` | |
+
+See [Plugin scheduler](/usage/scheduler).
+
+## Configuration
+
+`GET /api/config`, `POST /api/config` and `POST /api/config/reset`. See
+[Configuration](/reference/configuration).
+
+## Clear storage
+
+`GET /api/storage/clear` erases the saved display state: brightness, rotation, default plugin,
+plugin schedule, scheduled brightness and the saved drawing. The
+[configuration](/reference/configuration) and the Wi-Fi credentials are not affected. Use
+`POST /api/config/reset` for the configuration.
+
+```bash
+curl "http://<device-ip>/api/storage/clear"
+```
+
+:::warning
+Known issue: on builds without `ENABLE_STORAGE` (ESP8266) this endpoint does not send a response,
+so clients wait until their timeout.
+:::
+
+## Firmware update
+
+`/update` serves the OTA update page. See [OTA updates](/getting-started/ota).

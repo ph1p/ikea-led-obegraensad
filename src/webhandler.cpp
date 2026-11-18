@@ -2,6 +2,7 @@
 #include "brightness_schedule.h"
 #include "config.h"
 #include "messages.h"
+#include "mqtt.h"
 #include "scheduler.h"
 #include "websocket.h"
 #include "PluginManager.h"
@@ -26,6 +27,10 @@ static void applyConfigChanges()
   ntpServer = config.getNtpServer();
   tzInfo = config.getTzInfo();
   configTzTime(tzInfo.c_str(), ntpServer.c_str());
+
+#ifdef ENABLE_MQTT
+  mqttReconfigure();
+#endif
 
   for (Plugin *plugin : pluginManager.getAllPlugins())
   {
@@ -202,6 +207,31 @@ void handleSetBrightness(AsyncWebServerRequest *request)
   sendJsonSuccess(request, "Brightness set successfully");
 }
 
+void handleSetPower(AsyncWebServerRequest *request)
+{
+  const String state = request->arg("state");
+  if (state.equalsIgnoreCase("on"))
+  {
+    Screen.setPower(true);
+  }
+  else if (state.equalsIgnoreCase("off"))
+  {
+    Screen.setPower(false);
+  }
+  else if (state.equalsIgnoreCase("toggle"))
+  {
+    Screen.setPower(!Screen.isPowered());
+  }
+  else
+  {
+    sendJsonError(request, 422, "state must be on, off or toggle");
+    return;
+  }
+
+  sendInfo();
+  sendJsonSuccess(request, Screen.isPowered() ? "Display on" : "Display off");
+}
+
 void handleSetBrightnessScheduleBody(AsyncWebServerRequest *request,
                                      uint8_t *data,
                                      size_t len,
@@ -309,9 +339,13 @@ void handleGetInfo(AsyncWebServerRequest *request)
   Plugin *activePlugin = pluginManager.getActivePlugin();
   jsonDocument["plugin"] = activePlugin ? activePlugin->getId() : -1;
   jsonDocument["rotation"] = Screen.currentRotation;
+  jsonDocument["power"] = Screen.isPowered();
   jsonDocument["baseBrightness"] = Screen.getBaseBrightness();
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
   ScheduledBrightness.writeToJson(jsonDocument["brightnessSchedule"].to<JsonObject>());
+#ifdef ENABLE_MQTT
+  jsonDocument["mqttConnected"] = mqttIsConnected();
+#endif
   jsonDocument["scheduleActive"] = Scheduler.isActive;
   jsonDocument["rssi"] = WiFi.RSSI();
   jsonDocument["uptime"] = millis() / 1000;

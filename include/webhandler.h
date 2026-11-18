@@ -17,6 +17,7 @@ void handleMessageRemove(AsyncWebServerRequest *request);
 void handleGetInfo(AsyncWebServerRequest *request);
 void handleSetPlugin(AsyncWebServerRequest *request);
 void handleSetBrightness(AsyncWebServerRequest *request);
+void handleSetPower(AsyncWebServerRequest *request);
 void handleSetBrightnessScheduleBody(AsyncWebServerRequest *request,
                                      uint8_t *data,
                                      size_t len,

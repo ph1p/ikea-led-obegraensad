@@ -67,6 +67,7 @@ const [mainStore, setStore] = createStore<Store>({
   connectionStatus: connectionStatus[0],
   schedule: [],
   livePreview: readLivePreview(),
+  power: true,
 });
 
 const set =
@@ -90,6 +91,7 @@ const actions: StoreActions = {
   setLeds: set("leds"),
   setSystemStatus: set("systemStatus"),
   setSchedule: set("schedule"),
+  setPower: set("power"),
   setLivePreview: (enabled) => {
     set("livePreview")(enabled);
     try {
@@ -192,6 +194,10 @@ export const StoreProvider = (props?: { value?: Store; children?: JSX.Element })
 
           if (isBrightnessSchedule(json.brightnessSchedule)) {
             actions.setBrightnessSchedule(json.brightnessSchedule);
+          }
+
+          if (isValidBoolean(json.power)) {
+            actions.setPower(json.power);
           }
 
           if (isValidBoolean(json.scheduleActive)) {

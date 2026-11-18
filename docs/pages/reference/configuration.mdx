@@ -1,0 +1,108 @@
+---
+title: Configuration
+description: Runtime settings, their defaults and the configuration API.
+---
+
+# Configuration
+
+Some settings can be changed at runtime without flashing the firmware. Change them in the Web GUI
+under **Settings**, or with the API below. On ESP32 they are saved and survive a reboot.
+
+:::warning
+On ESP8266 the configuration is not saved. See [ESP8266 limitations](/getting-started/hardware#esp8266-limitations).
+:::
+
+For build-time options such as pins and feature flags, see
+[Flashing](/getting-started/flashing).
+
+## Fields
+
+### General
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `weatherLocation` | `Hamburg` | City or coordinates for the Weather plugin. The weather comes from [wttr.in](https://wttr.in/). |
+| `ntpServer` | `de.pool.ntp.org` | NTP server for the clock. |
+| `tzInfo` | `CET-1CEST,M3.5.0,M10.5.0/3` | [POSIX time zone](https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv). The Web GUI has presets. |
+| `autoStartSchedule` | `false` | Start the [plugin schedule](/usage/scheduler) after boot. |
+
+Strings must have 1 to 99 characters.
+
+### MQTT
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `mqttEnabled` | `false` | Connect to the broker. |
+| `mqttHost` | | Broker host name or IP. Less than 100 characters. |
+| `mqttPort` | `1883` | `1`–`65535`. |
+| `mqttUser` | | Less than 100 characters. |
+| `mqttPassword` | | Write-only. Less than 100 characters. Leave it out to keep the stored password. |
+| `mqttTopic` | `obegraensad/<mac>` | Base topic. An empty string resets it to the default. |
+| `mqttDiscovery` | `true` | Publish Home Assistant discovery. |
+| `mqttDiscoveryPrefix` | `homeassistant` | An empty string resets it to the default. |
+
+`mqttTopic` and `mqttDiscoveryPrefix` must not contain `#`, `+` or spaces, must not start or end
+with `/` and must be shorter than 100 characters.
+
+See [MQTT](/integrations/mqtt) and [Home Assistant](/integrations/home-assistant).
+
+## Validation
+
+Fields with an invalid value are ignored. The other fields of the same request are still saved,
+and the response is still a success. Read the configuration again to check the result.
+
+## Read
+
+`GET /api/config`
+
+```bash
+curl "http://<device-ip>/api/config"
+```
+
+```json
+{
+  "weatherLocation": "Hamburg",
+  "ntpServer": "de.pool.ntp.org",
+  "tzInfo": "CET-1CEST,M3.5.0,M10.5.0/3",
+  "autoStartSchedule": false,
+  "mqttEnabled": true,
+  "mqttHost": "192.168.1.10",
+  "mqttPort": 1883,
+  "mqttUser": "obegraensad",
+  "mqttPasswordSet": true,
+  "mqttTopic": "obegraensad/a1b2c3",
+  "mqttDiscovery": true,
+  "mqttDiscoveryPrefix": "homeassistant"
+}
+```
+
+The password is never returned. `mqttPasswordSet` tells you if one is stored.
+
+## Change
+
+`POST /api/config` with a JSON body. Send only the fields you want to change.
+
+```bash
+curl -X POST "http://<device-ip>/api/config" \
+  -H "Content-Type: application/json" \
+  -d '{"weatherLocation":"Berlin","tzInfo":"CET-1CEST,M3.5.0,M10.5.0/3"}'
+```
+
+After saving, the device applies the new time zone and NTP server, reconnects MQTT and refreshes
+the weather. A reboot is not needed.
+
+| Status | Message |
+| --- | --- |
+| `200` | `Configuration saved successfully` |
+| `400` | `No JSON body provided` |
+| `400` | `Invalid JSON format` |
+
+## Reset
+
+`POST /api/config/reset` restores all defaults, including the MQTT settings, and applies them.
+
+```bash
+curl -X POST "http://<device-ip>/api/config/reset"
+```
+
+In the Web GUI, use **Settings → Reset to defaults**.

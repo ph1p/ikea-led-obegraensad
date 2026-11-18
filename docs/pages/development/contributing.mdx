@@ -1,0 +1,54 @@
+---
+title: Contributing
+description: How to report issues and submit changes.
+---
+
+# Contributing
+
+Contributions are welcome: bug reports, new plugins, fixes and documentation.
+
+## Report an issue
+
+Check the [issue tracker](https://github.com/ph1p/ikea-led-obegraensad/issues) first. If your issue
+is new, open one with as many details as possible: board, firmware version, steps to reproduce and
+the serial log.
+
+## Submit a change
+
+1. Fork the repository and clone your fork.
+2. Create a branch with a descriptive name.
+3. Make your changes and test them on a device.
+4. Commit with [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), for example
+   `feat(plugins): add rain plugin` or `fix(mqtt): keep password on save`.
+5. Push the branch and open a pull request. Explain what you changed and why.
+
+## Code style
+
+Match the style of the surrounding code. The repository uses [pre-commit](https://pre-commit.com/)
+hooks for formatting:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+The hooks run clang-format for C and C++, ruff for Python, and checks for YAML, TOML and
+whitespace. For the frontend, run `pnpm lint` and `pnpm format` in `frontend/`.
+
+## Documentation
+
+If you add or change a feature, update these docs in `docs/pages/`. Run the docs locally:
+
+```bash
+cd docs
+pnpm install
+pnpm dev
+```
+
+Every page has an **Edit this page on GitHub** link at the bottom.
+
+## Code of Conduct
+
+This project follows a
+[Code of Conduct](https://github.com/ph1p/ikea-led-obegraensad/blob/main/CODE_OF_CONDUCT.md).
+Please follow it in all project spaces.

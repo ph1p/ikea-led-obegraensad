@@ -1,0 +1,173 @@
+---
+title: Writing a plugin
+description: Create your own animation or app for the display.
+---
+
+# Writing a plugin
+
+A plugin is a C++ class that draws on the 16 × 16 display. This guide builds a simple rain
+animation, based on the `RainPlugin` that ships with the firmware.
+
+## The Plugin interface
+
+Every plugin derives from `Plugin` in `include/PluginManager.h`:
+
+```cpp
+class Plugin
+{
+public:
+  virtual void setup() = 0;              // called when the plugin becomes active
+  virtual void loop();                   // called continuously while active
+  virtual void teardown();               // called before another plugin starts
+  virtual void websocketHook(JsonDocument &request); // WebSocket events
+  virtual const char *getName() const = 0;
+};
+```
+
+Only `setup()` and `getName()` are required. The plugin manager sets the ID.
+
+## Create the plugin
+
+:::steps
+
+### Header
+
+Create `include/plugins/MyRainPlugin.h`:
+
+```cpp
+#pragma once
+
+#include "PluginManager.h"
+#include "timing.h"
+
+class MyRainPlugin : public Plugin
+{
+private:
+  NonBlockingDelay timer;
+  uint8_t dropX = 0;
+  uint8_t dropY = 0;
+
+public:
+  void setup() override;
+  void loop() override;
+  const char *getName() const override;
+};
+```
+
+### Implementation
+
+Create `src/plugins/MyRainPlugin.cpp`:
+
+```cpp
+#include "plugins/MyRainPlugin.h"
+
+void MyRainPlugin::setup()
+{
+  Screen.clear();
+  dropX = random(16);
+  dropY = 0;
+}
+
+void MyRainPlugin::loop()
+{
+  // run every 96 ms without blocking
+  if (!timer.isReady(96))
+    return;
+
+  Screen.clear();
+  Screen.setPixel(dropX, dropY, 1, 255);
+
+  dropY++;
+  if (dropY >= ROWS)
+  {
+    dropY = 0;
+    dropX = random(COLS);
+  }
+}
+
+const char *MyRainPlugin::getName() const
+{
+  return "My Rain";
+}
+```
+
+### Register it
+
+In `src/main.cpp`, include the header and add the plugin in `baseSetup()`:
+
+```cpp
+#include "plugins/MyRainPlugin.h"
+
+// in baseSetup(), after the other plugins
+pluginManager.addPlugin(new MyRainPlugin());
+```
+
+If the plugin needs Wi-Fi, NTP or the WebSocket, add it inside the `#ifdef ENABLE_SERVER` block.
+
+### Build and flash
+
+Build and upload as described in [Flashing](/getting-started/flashing). The new plugin appears in
+the Web GUI and in the button cycle.
+
+:::
+
+:::warning
+Plugin IDs are assigned in the order of `addPlugin()` calls, starting at `1`. Adding a plugin in
+the middle of the list changes the IDs of all plugins after it. This breaks saved schedules,
+automations and API calls that use IDs. Add new plugins at the end to keep IDs stable.
+:::
+
+## Drawing
+
+The global `Screen` object draws into a frame buffer. Coordinates go from `0` to `15`, with `0, 0`
+in the top left corner.
+
+| Method | Description |
+| --- | --- |
+| `clear()` | Turn all pixels off. |
+| `setPixel(x, y, value, brightness)` | `value` `1` on, `0` off. `brightness` `0`–`255`, default `255`. |
+| `setPixelAtIndex(index, value, brightness)` | Same, with an index `0`–`255`. |
+| `getBufferIndex(index)` | Read the brightness of a pixel. |
+| `drawLine(...)`, `drawRectangle(...)` | Lines and rectangles. |
+| `drawCharacter(...)`, `drawNumbers(...)`, `drawBigNumbers(...)` | Text and numbers. |
+| `drawBitmap(...)` | Draw a bitmap. |
+| `setRenderBuffer(buffer)` | Replace the whole frame with 256 values. |
+| `persist()`, `loadFromStorage()` | Save and load a frame (ESP32). |
+
+The panel shows 64 gray levels. The brightness values are scaled by the base brightness.
+
+## Timing
+
+Do not use `delay()` in `loop()`. It blocks the button, the web server and other tasks. Use
+`NonBlockingDelay` from `timing.h` like in the example above.
+
+## WebSocket events
+
+Override `websocketHook()` to receive WebSocket events while your plugin is active:
+
+```cpp
+void MyRainPlugin::websocketHook(JsonDocument &request)
+{
+  const char *event = request["event"];
+  if (!strcmp(event, "myrain-speed"))
+  {
+    speed = request["speed"].as<uint16_t>();
+  }
+}
+```
+
+The `event` field is always a string, so `strcmp` is safe. Use event names that do not clash with
+the [built-in events](/reference/websocket#client-events).
+
+:::info
+On ESP32 the display runs in its own task. Plugin switches and WebSocket hooks are queued and
+applied by that task, so `setup()`, `loop()`, `teardown()` and `websocketHook()` never run at the
+same time.
+:::
+
+## Tips
+
+- Look at the existing plugins in `include/plugins/` and `src/plugins/` for examples. `RainPlugin`,
+  `GameOfLifePlugin` and `ClockPlugin` are good starting points.
+- Free memory you allocate in `setup()` in `teardown()`.
+- Keep `loop()` short. Return early when there is nothing to do.

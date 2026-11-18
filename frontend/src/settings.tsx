@@ -31,6 +31,15 @@ interface Config {
   ntpServer: string;
   tzInfo: string;
   autoStartSchedule: boolean;
+  mqttEnabled: boolean;
+  mqttHost: string;
+  mqttPort: number;
+  mqttUser: string;
+  // only sent when typed, the device never returns the stored password
+  mqttPassword: string;
+  mqttTopic: string;
+  mqttDiscovery: boolean;
+  mqttDiscoveryPrefix: string;
 }
 
 interface DeviceInfo {
@@ -40,6 +49,7 @@ interface DeviceInfo {
   uptime: number;
   freeHeap: number;
   resetReason: string;
+  mqttConnected?: boolean;
 }
 
 const EMPTY_CONFIG: Config = {
@@ -47,7 +57,19 @@ const EMPTY_CONFIG: Config = {
   ntpServer: "",
   tzInfo: "",
   autoStartSchedule: false,
+  mqttEnabled: false,
+  mqttHost: "",
+  mqttPort: 1883,
+  mqttUser: "",
+  mqttPassword: "",
+  mqttTopic: "",
+  mqttDiscovery: true,
+  mqttDiscoveryPrefix: "homeassistant",
 };
+
+// same rules as the firmware: no wildcards, spaces or leading/trailing slash
+const isValidTopic = (topic: string) =>
+  topic === "" || (!/[#+\s]/.test(topic) && !topic.startsWith("/") && !topic.endsWith("/"));
 
 const formatUptime = (seconds: number) => {
   const days = Math.floor(seconds / 86400);
@@ -94,6 +116,7 @@ const Settings: Component = () => {
   const [info, setInfo] = createSignal<DeviceInfo | null>(null);
   const [isLoading, setIsLoading] = createSignal(true);
   const [isSaving, setIsSaving] = createSignal(false);
+  const [mqttPasswordSet, setMqttPasswordSet] = createSignal(false);
 
   const update = <K extends keyof Config>(key: K, value: Config[K]) =>
     setConfig((current) => ({ ...current, [key]: value }));
@@ -101,6 +124,18 @@ const Settings: Component = () => {
   const isDirty = () => JSON.stringify(config()) !== JSON.stringify(savedConfig());
   const ntpMissing = () => config().ntpServer.trim() === "";
   const tzMissing = () => config().tzInfo.trim() === "";
+  const mqttHostMissing = () => config().mqttEnabled && config().mqttHost.trim() === "";
+  const mqttPortInvalid = () =>
+    !Number.isInteger(config().mqttPort) || config().mqttPort < 1 || config().mqttPort > 65535;
+  const mqttTopicInvalid = () => !isValidTopic(config().mqttTopic.trim());
+  const mqttPrefixInvalid = () => !isValidTopic(config().mqttDiscoveryPrefix.trim());
+  const hasErrors = () =>
+    ntpMissing() ||
+    tzMissing() ||
+    mqttHostMissing() ||
+    mqttPortInvalid() ||
+    mqttTopicInvalid() ||
+    mqttPrefixInvalid();
   const timezoneSelection = () =>
     customTimezone() || !TIMEZONE_PRESETS.some((preset) => preset.value === config().tzInfo)
       ? CUSTOM_TIMEZONE
@@ -130,7 +165,16 @@ const Settings: Component = () => {
         ntpServer: data.ntpServer ?? "",
         tzInfo: data.tzInfo ?? "",
         autoStartSchedule: data.autoStartSchedule ?? false,
+        mqttEnabled: data.mqttEnabled ?? false,
+        mqttHost: data.mqttHost ?? "",
+        mqttPort: data.mqttPort ?? 1883,
+        mqttUser: data.mqttUser ?? "",
+        mqttPassword: "",
+        mqttTopic: data.mqttTopic ?? "",
+        mqttDiscovery: data.mqttDiscovery ?? true,
+        mqttDiscoveryPrefix: data.mqttDiscoveryPrefix ?? "homeassistant",
       };
+      setMqttPasswordSet(data.mqttPasswordSet ?? false);
       setConfig(loaded);
       setSavedConfig(loaded);
       setCustomTimezone(false);
@@ -154,16 +198,28 @@ const Settings: Component = () => {
 
   const handleSave = async (event: SubmitEvent) => {
     event.preventDefault();
-    if (!isDirty() || ntpMissing() || tzMissing()) {
+    if (!isDirty() || hasErrors()) {
       return;
     }
 
+    const current = config();
     const trimmed: Config = {
-      weatherLocation: config().weatherLocation.trim(),
-      ntpServer: config().ntpServer.trim(),
-      tzInfo: config().tzInfo.trim(),
-      autoStartSchedule: config().autoStartSchedule,
+      weatherLocation: current.weatherLocation.trim(),
+      ntpServer: current.ntpServer.trim(),
+      tzInfo: current.tzInfo.trim(),
+      autoStartSchedule: current.autoStartSchedule,
+      mqttEnabled: current.mqttEnabled,
+      mqttHost: current.mqttHost.trim(),
+      mqttPort: current.mqttPort,
+      mqttUser: current.mqttUser.trim(),
+      mqttPassword: current.mqttPassword,
+      mqttTopic: current.mqttTopic.trim(),
+      mqttDiscovery: current.mqttDiscovery,
+      mqttDiscoveryPrefix: current.mqttDiscoveryPrefix.trim(),
     };
+    // an absent password keeps the stored one
+    const { mqttPassword, ...rest } = trimmed;
+    const payload = mqttPassword === "" ? rest : trimmed;
 
     setIsSaving(true);
     try {
@@ -172,13 +228,17 @@ const Settings: Component = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(trimmed),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        setConfig(trimmed);
-        setSavedConfig(trimmed);
+        const saved = { ...trimmed, mqttPassword: "" };
+        if (mqttPassword !== "") setMqttPasswordSet(true);
+        setConfig(saved);
+        setSavedConfig(saved);
         toast("Settings saved", 2000);
+        // give the client a moment to (re)connect before showing its status
+        setTimeout(() => void loadInfo(), 3000);
       } else {
         toast("Failed to save settings", 2000);
       }
@@ -229,6 +289,9 @@ const Settings: Component = () => {
       { label: "Uptime", value: formatUptime(device.uptime) },
       { label: "Free memory", value: `${Math.round(device.freeHeap / 1024)} KB` },
       { label: "Last reset", value: device.resetReason },
+      ...(device.mqttConnected === undefined
+        ? []
+        : [{ label: "MQTT", value: device.mqttConnected ? "Connected" : "Not connected" }]),
     ];
   };
 
@@ -346,6 +409,153 @@ const Settings: Component = () => {
                 </label>
               </Section>
 
+              <Section title="MQTT / Home Assistant" icon="fa-house-signal">
+                <label
+                  class="flex cursor-pointer items-center justify-between gap-4"
+                  for="mqtt-enabled"
+                >
+                  <span>
+                    <span class="block text-sm font-medium">Connect to an MQTT broker</span>
+                    <span class="block text-xs text-muted">
+                      Home Assistant finds the lamp on its own when discovery is on.
+                    </span>
+                  </span>
+                  <input
+                    id="mqtt-enabled"
+                    type="checkbox"
+                    checked={config().mqttEnabled}
+                    onChange={(e) => update("mqttEnabled", e.currentTarget.checked)}
+                    class="switch"
+                  />
+                </label>
+
+                <Show when={config().mqttEnabled}>
+                  <Show when={info()?.mqttConnected !== undefined && !isDirty()}>
+                    <p class="flex items-center gap-2 text-xs text-muted">
+                      <span
+                        class={`size-1.5 rounded-full ${info()?.mqttConnected ? "bg-emerald-400" : "bg-danger"}`}
+                      />
+                      {info()?.mqttConnected ? "Connected to broker" : "Not connected"}
+                    </p>
+                  </Show>
+
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_8rem]">
+                    <Field
+                      label="Broker host"
+                      for="mqtt-host"
+                      hint={mqttHostMissing() ? "Required while MQTT is on." : undefined}
+                    >
+                      <input
+                        id="mqtt-host"
+                        type="text"
+                        placeholder="e.g. 192.168.1.10 or homeassistant.local"
+                        value={config().mqttHost}
+                        onInput={(e) => update("mqttHost", e.currentTarget.value)}
+                        aria-invalid={mqttHostMissing() ? "true" : "false"}
+                        class={`input ${mqttHostMissing() ? "border-danger/60" : ""}`}
+                      />
+                    </Field>
+                    <Field label="Port" for="mqtt-port">
+                      <input
+                        id="mqtt-port"
+                        type="number"
+                        min="1"
+                        max="65535"
+                        value={config().mqttPort}
+                        onInput={(e) => update("mqttPort", e.currentTarget.valueAsNumber)}
+                        aria-invalid={mqttPortInvalid() ? "true" : "false"}
+                        class={`input ${mqttPortInvalid() ? "border-danger/60" : ""}`}
+                      />
+                    </Field>
+                  </div>
+
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="Username" for="mqtt-user">
+                      <input
+                        id="mqtt-user"
+                        type="text"
+                        autocomplete="off"
+                        placeholder="optional"
+                        value={config().mqttUser}
+                        onInput={(e) => update("mqttUser", e.currentTarget.value)}
+                        class="input"
+                      />
+                    </Field>
+                    <Field
+                      label="Password"
+                      for="mqtt-password"
+                      hint={mqttPasswordSet() ? "Stored. Leave empty to keep it." : undefined}
+                    >
+                      <input
+                        id="mqtt-password"
+                        type="password"
+                        autocomplete="new-password"
+                        placeholder={mqttPasswordSet() ? "••••••••" : "optional"}
+                        value={config().mqttPassword}
+                        onInput={(e) => update("mqttPassword", e.currentTarget.value)}
+                        class="input"
+                      />
+                    </Field>
+                  </div>
+
+                  <Field
+                    label="Base topic"
+                    for="mqtt-topic"
+                    hint={
+                      mqttTopicInvalid()
+                        ? "No #, + or spaces, and no leading or trailing slash."
+                        : "State and commands live below this topic. Empty uses the default."
+                    }
+                  >
+                    <input
+                      id="mqtt-topic"
+                      type="text"
+                      placeholder="obegraensad/<mac>"
+                      value={config().mqttTopic}
+                      onInput={(e) => update("mqttTopic", e.currentTarget.value)}
+                      aria-invalid={mqttTopicInvalid() ? "true" : "false"}
+                      class={`input font-mono ${mqttTopicInvalid() ? "border-danger/60" : ""}`}
+                    />
+                  </Field>
+
+                  <label
+                    class="flex cursor-pointer items-center justify-between gap-4"
+                    for="mqtt-discovery"
+                  >
+                    <span class="text-sm font-medium">Home Assistant discovery</span>
+                    <input
+                      id="mqtt-discovery"
+                      type="checkbox"
+                      checked={config().mqttDiscovery}
+                      onChange={(e) => update("mqttDiscovery", e.currentTarget.checked)}
+                      class="switch"
+                    />
+                  </label>
+
+                  <Show when={config().mqttDiscovery}>
+                    <Field
+                      label="Discovery prefix"
+                      for="mqtt-prefix"
+                      hint={
+                        mqttPrefixInvalid()
+                          ? "No #, + or spaces, and no leading or trailing slash."
+                          : "Only change this if you changed it in Home Assistant."
+                      }
+                    >
+                      <input
+                        id="mqtt-prefix"
+                        type="text"
+                        placeholder="homeassistant"
+                        value={config().mqttDiscoveryPrefix}
+                        onInput={(e) => update("mqttDiscoveryPrefix", e.currentTarget.value)}
+                        aria-invalid={mqttPrefixInvalid() ? "true" : "false"}
+                        class={`input font-mono ${mqttPrefixInvalid() ? "border-danger/60" : ""}`}
+                      />
+                    </Field>
+                  </Show>
+                </Show>
+              </Section>
+
               <div class="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
@@ -361,7 +571,7 @@ const Settings: Component = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={!isDirty() || isSaving() || ntpMissing() || tzMissing()}
+                  disabled={!isDirty() || isSaving() || hasErrors()}
                   class="btn btn-accent flex-1"
                 >
                   <i class="fa-solid fa-floppy-disk" />

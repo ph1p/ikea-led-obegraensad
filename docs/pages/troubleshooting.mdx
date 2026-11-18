@@ -1,0 +1,95 @@
+---
+title: Troubleshooting
+description: Fixes for common hardware, network and integration problems.
+---
+
+# Troubleshooting
+
+## Serial log
+
+Most problems are easier to find with the serial log. Connect the board over USB and open the
+monitor at 115200 baud:
+
+```bash
+pio device monitor -b 115200
+```
+
+## Display
+
+### The display flickers or shows random pixels
+
+- Check all solder joints and wires between the board and the panel, especially `CLK`, `DI`,
+  `LATCH` and `EN`.
+- Check that `GND` of the board is connected to `GND` of the panel.
+- Use a stable 5 V power supply with enough current.
+- Check that the pins in `include/constants.h` match your wiring.
+
+### The board reboots in a loop
+
+The panel can draw more current than the USB port or the board regulator delivers. Power the
+board and the panel from a separate 5 V supply, or from one supply that is strong enough for both.
+Lower the brightness to test whether power is the cause.
+
+### The display stays dark
+
+- Check the power state: the display can be off while the device runs. Press the button or call
+  `PATCH /api/power?state=on`.
+- Check the brightness. A [scheduled brightness](/usage/brightness#scheduled-brightness) of `0`
+  turns the display dark during its window.
+
+## Network
+
+### The lamp does not connect to Wi-Fi
+
+On ESP32, if the lamp has no stored network, it opens an access point called `IKEA`. Connect to
+it and choose your network in the portal. On ESP8266, check the credentials in
+`include/secrets.h`. See [Wi-Fi setup](/getting-started/wifi).
+
+- The ESP32 and ESP8266 only support 2.4 GHz networks.
+- Move the lamp closer to the router for the first setup.
+
+### I cannot find the IP address
+
+- Open `http://ikea-led.local/`. This needs mDNS on your network.
+- Check the client list of your router.
+- If MQTT is set up, the IP address is part of the state and the **IP address** sensor in Home
+  Assistant.
+
+### The Web GUI does not load
+
+- Check that your computer is on the same network as the lamp.
+- Open `http://<device-ip>/` with `http`, not `https`.
+- Reload the page after a firmware update. The browser can cache the old GUI.
+
+## Time and messages
+
+### The clock shows the wrong time
+
+Set the time zone and NTP server in [Configuration](/reference/configuration). The lamp needs
+internet access to reach the NTP server.
+
+### Messages do not appear
+
+Messages need valid NTP time. Check the clock first. See [Messages](/usage/messages).
+
+## Integrations
+
+### MQTT or Home Assistant does not connect
+
+See [Home Assistant troubleshooting](/integrations/home-assistant#troubleshooting) for connection
+states, topics and discovery problems.
+
+### DDP or Art-Net shows nothing
+
+- Select the **DDP** or **Art-Net** plugin first. The lamp only listens while that plugin is
+  active.
+- DDP needs an ESP32. See [DDP](/integrations/ddp) and [Art-Net](/integrations/artnet).
+
+## Settings are lost after a reboot
+
+ESP8266 builds do not save settings. See [ESP8266 limitations](/getting-started/hardware#esp8266-limitations).
+
+## Still stuck?
+
+Search the [issue tracker](https://github.com/ph1p/ikea-led-obegraensad/issues) or open a new
+issue with your board, firmware version and the serial log.

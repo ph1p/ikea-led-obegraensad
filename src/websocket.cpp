@@ -58,6 +58,7 @@ void sendInfo()
   jsonDocument["persist-plugin"] = pluginManager.getPersistedPluginId();
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
+  jsonDocument["power"] = Screen.isPowered();
   jsonDocument["baseBrightness"] = Screen.getBaseBrightness();
   jsonDocument["brightness"] = Screen.getCurrentBrightness();
   JsonObject brightnessSchedule = jsonDocument["brightnessSchedule"].to<JsonObject>();
@@ -222,6 +223,11 @@ void onWsEvent(AsyncWebSocket *server,
             uint8_t brightness = wsRequest["brightness"].as<uint8_t>();
             Screen.setBaseBrightness(brightness, true);
             ScheduledBrightness.update();
+            sendInfo();
+          }
+          else if (!strcmp(event, "power"))
+          {
+            Screen.setPower(wsRequest["power"] | !Screen.isPowered());
             sendInfo();
           }
           else if (!strcmp(event, "brightness-schedule"))

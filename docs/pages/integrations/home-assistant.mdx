@@ -1,0 +1,386 @@
+---
+title: Home Assistant
+description: Control the lamp from Home Assistant with MQTT discovery.
+---
+
+# Home Assistant
+
+The firmware has a built-in MQTT client with
+[Home Assistant MQTT discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery).
+When it connects to the same broker as Home Assistant, the lamp appears as a device called
+**OBEGRÄNSAD LED** with a light, a plugin selector, a message field and more. You do not need a
+custom integration or YAML configuration.
+
+:::info
+MQTT needs the `ENABLE_MQTT` [build option](/getting-started/flashing), which is on by default.
+On ESP8266 the MQTT settings are lost after every reboot ([ESP8266 limitations](/getting-started/hardware#esp8266-limitations)), so use an
+ESP32 for Home Assistant.
+:::
+
+## Prerequisites
+
+- Home Assistant with an MQTT broker. The easiest choice is the official **Mosquitto broker**
+  add-on.
+- The **MQTT** integration in Home Assistant, connected to that broker.
+- The lamp connected to your network and reachable from the broker.
+
+## Setup
+
+:::steps
+
+### Install the Mosquitto broker
+
+In Home Assistant, open **Settings → Add-ons → Add-on Store**, search for **Mosquitto broker**,
+install it and click **Start**. Enable **Start on boot**.
+
+### Add the MQTT integration
+
+Open **Settings → Devices & services**. Home Assistant usually discovers the broker and offers the
+**MQTT** integration. Click **Configure** and confirm. If it is not discovered, click
+**Add integration**, search for **MQTT** and enter the broker address.
+
+### Create a user for the lamp
+
+The Mosquitto add-on accepts Home Assistant users. Open **Settings → People → Users**, click
+**Add user** and create a user such as `obegraensad` with a strong password. The user does not need
+administrator rights.
+
+:::tip
+If **Users** is not visible, enable **Advanced mode** in your user profile first.
+:::
+
+### Configure MQTT on the lamp
+
+Open the lamp's Web GUI, go to **Settings → MQTT / Home Assistant** and fill in:
+
+| Field | Value |
+| --- | --- |
+| Connect to an MQTT broker | on |
+| Broker host | IP address or host name of Home Assistant, for example `192.168.1.10` or `homeassistant.local` |
+| Port | `1883` |
+| Username | the user you created |
+| Password | the password of that user |
+| Base topic | leave empty to use `obegraensad/<last 6 hex digits of the MAC>` |
+| Home Assistant discovery | on |
+| Discovery prefix | `homeassistant` |
+
+Click **Save settings**. After a few seconds the section shows **Connected to broker**.
+
+### Find the device
+
+Open **Settings → Devices & services → MQTT → Devices**. The lamp is listed as
+**OBEGRÄNSAD LED**. Add its entities to a dashboard or use them in automations.
+
+:::
+
+:::note
+A host name like `homeassistant.local` needs mDNS on your network. If the lamp cannot connect, use
+the IP address of the broker.
+:::
+
+## Entities
+
+All entities belong to the device **OBEGRÄNSAD LED**. The entity IDs below are the defaults that
+the lamp suggests. Home Assistant can change them, for example by adding `_2` when you have two
+lamps. Check the device page for the actual IDs.
+
+| Entity | Entity ID | Discovery component / object | Description |
+| --- | --- | --- | --- |
+| Display (light) | `light.obegraensad_display` | `light` / `display` | Power and brightness (0–255). Turning it off blanks the display, the plugin keeps running. |
+| Plugin (select) | `select.obegraensad_plugin` | `select` / `plugin` | Active plugin, by name. Selecting one stops the plugin schedule. |
+| Next plugin (button) | `button.obegraensad_next_plugin` | `button` / `next_plugin` | Switch to the next plugin. Stops the plugin schedule. |
+| Plugin schedule (switch) | `switch.obegraensad_plugin_schedule` | `switch` / `plugin_schedule` | Start or stop the [plugin schedule](/usage/scheduler). Turning it on does nothing if no schedule is stored. |
+| Scheduled brightness (switch) | `switch.obegraensad_scheduled_brightness` | `switch` / `scheduled_brightness` | Enable or disable [scheduled brightness](/usage/brightness#scheduled-brightness). Configuration entity. |
+| Rotation (select) | `select.obegraensad_rotation` | `select` / `rotation` | `0`, `90`, `180` or `270`. Configuration entity. |
+| Message (text) | `text.obegraensad_message` | `text` / `message` | Text to scroll across the display, up to 255 characters. |
+| WiFi signal (sensor) | `sensor.obegraensad_wifi_signal` | `sensor` / `wifi_signal` | Signal strength in dBm. Diagnostic entity. |
+| IP address (sensor) | `sensor.obegraensad_ip_address` | `sensor` / `ip_address` | Current IP address. Diagnostic entity. |
+
+The device page also links to the lamp's Web GUI.
+
+The lamp marks all entities as unavailable when it goes offline. The state is published when it
+changes and every 60 seconds.
+
+## Automations
+
+### Dim at sunset
+
+```yaml
+automation:
+  - alias: "LED wall: dim at sunset"
+    triggers:
+      - trigger: sun
+        event: sunset
+        offset: "00:15:00"
+    actions:
+      - action: light.turn_on
+        target:
+          entity_id: light.obegraensad_display
+        data:
+          brightness: 40
+
+  - alias: "LED wall: full brightness at sunrise"
+    triggers:
+      - trigger: sun
+        event: sunrise
+    actions:
+      - action: light.turn_on
+        target:
+          entity_id: light.obegraensad_display
+        data:
+          brightness: 255
+```
+
+:::tip
+For a fixed time window, you can also use the lamp's own
+[scheduled brightness](/usage/brightness#scheduled-brightness). It works without Home Assistant and
+can be switched with `switch.obegraensad_scheduled_brightness`.
+:::
+
+### Off at night
+
+```yaml
+automation:
+  - alias: "LED wall: off at night"
+    triggers:
+      - trigger: time
+        at: "23:00:00"
+    actions:
+      - action: light.turn_off
+        target:
+          entity_id: light.obegraensad_display
+
+  - alias: "LED wall: on in the morning"
+    triggers:
+      - trigger: time
+        at: "07:00:00"
+    actions:
+      - action: light.turn_on
+        target:
+          entity_id: light.obegraensad_display
+      - action: select.select_option
+        target:
+          entity_id: select.obegraensad_plugin
+        data:
+          option: Weather
+```
+
+### Washing machine finished
+
+This example uses a smart plug that measures the power of the washing machine
+(`sensor.washing_machine_power`). When the power stays below 5 W for two minutes, the lamp shows a
+message.
+
+The simple version uses the **Message** entity:
+
+```yaml
+automation:
+  - alias: "LED wall: washing machine done"
+    triggers:
+      - trigger: numeric_state
+        entity_id: sensor.washing_machine_power
+        below: 5
+        for: "00:02:00"
+    actions:
+      - action: text.set_value
+        target:
+          entity_id: text.obegraensad_message
+        data:
+          value: "Washing done!"
+```
+
+To repeat the message, replace it later, or add a graph, publish JSON to the message topic
+directly. Replace `obegraensad/a1b2c3` with your base topic:
+
+```yaml
+automation:
+  - alias: "LED wall: washing machine done (with graph)"
+    triggers:
+      - trigger: numeric_state
+        entity_id: sensor.washing_machine_power
+        below: 5
+        for: "00:02:00"
+    actions:
+      - action: mqtt.publish
+        data:
+          topic: obegraensad/a1b2c3/message/set
+          payload: >-
+            {"text": "Washing done!", "repeat": 2, "id": 1, "delay": 50,
+             "graph": [1, 5, 9, 12, 8, 3], "miny": 0, "maxy": 15}
+
+  - alias: "LED wall: remove washing message when the door opens"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.washing_machine_door
+        to: "on"
+    actions:
+      - action: mqtt.publish
+        data:
+          topic: obegraensad/a1b2c3/message/remove
+          payload: "1"
+```
+
+You can build the graph from sensor history with a template, for example the last values of a
+statistics sensor. The values are scaled between `miny` and `maxy`. See [Messages](/usage/messages)
+for all fields.
+
+### Show a plugin when someone comes home
+
+```yaml
+automation:
+  - alias: "LED wall: welcome"
+    triggers:
+      - trigger: state
+        entity_id: person.alex
+        to: home
+    actions:
+      - action: light.turn_on
+        target:
+          entity_id: light.obegraensad_display
+      - action: select.select_option
+        target:
+          entity_id: select.obegraensad_plugin
+        data:
+          option: Firework
+      - delay: "00:00:30"
+      - action: select.select_option
+        target:
+          entity_id: select.obegraensad_plugin
+        data:
+          option: Clock
+```
+
+## Dashboard card
+
+```yaml
+type: vertical-stack
+cards:
+  - type: tile
+    entity: light.obegraensad_display
+    name: LED wall
+    features:
+      - type: light-brightness
+  - type: entities
+    entities:
+      - entity: select.obegraensad_plugin
+      - entity: button.obegraensad_next_plugin
+      - entity: switch.obegraensad_plugin_schedule
+      - entity: switch.obegraensad_scheduled_brightness
+      - entity: select.obegraensad_rotation
+      - entity: text.obegraensad_message
+```
+
+## Troubleshooting
+
+### Check the connection
+
+The **Settings** page of the Web GUI shows **Connected to broker** or **Not connected**.
+`GET /api/info` returns the same as `mqttConnected`.
+
+The serial log (115200 baud) shows the connection attempts:
+
+```text
+[MQTT] connecting to 192.168.1.10:1883
+[MQTT] connection failed, state 5
+```
+
+| State | Meaning |
+| --- | --- |
+| `-4` | Timeout, the broker did not answer. |
+| `-2` | Network connection failed. Check host and port. |
+| `4` | Bad username or password. |
+| `5` | Not authorized. Check the user in the Mosquitto add-on. |
+
+Failed attempts are retried with a growing wait, see [MQTT connection](/integrations/mqtt#connection).
+Saving the settings reconnects immediately.
+
+### Watch the topics
+
+Subscribe to all topics of the lamp with `mosquitto_sub`. In Home Assistant you can also use
+**Settings → Devices & services → MQTT → Configure → Listen to a topic**.
+
+```bash
+mosquitto_sub -h <broker> -u <user> -P <password> -v -t 'obegraensad/#'
+```
+
+You should see:
+
+```text
+obegraensad/a1b2c3/status online
+obegraensad/a1b2c3/state {"state":"ON","brightness":255,...}
+```
+
+The full payload is described under [MQTT state](/integrations/mqtt#state).
+
+To check the discovery messages:
+
+```bash
+mosquitto_sub -h <broker> -u <user> -P <password> -v -t 'homeassistant/+/obegraensad_+/+/config'
+```
+
+### Entities do not appear
+
+- Make sure **Home Assistant discovery** is on and the **Discovery prefix** matches the prefix in
+  the MQTT integration (default `homeassistant`).
+- The lamp publishes the discovery messages again whenever Home Assistant restarts, so a restart
+  of Home Assistant is a good first test.
+- The plugin selector contains the names of all plugins. If the serial log shows
+  `[MQTT] discovery for plugin too large (... bytes)`, too many plugins are compiled in. Remove some plugins
+  from `src/main.cpp`.
+
+### Entities are unavailable
+
+The lamp is offline or lost the connection to the broker. The broker publishes `offline` to
+`<base>/status` for the lamp.
+
+### Old entities remain after a change
+
+If you disable discovery or change the base topic or discovery prefix while the lamp is
+connected, it removes its old entities. If the lamp was offline at that time, delete the old
+device in **Settings → Devices & services → MQTT → Devices**.
+
+## Alternatives
+
+### HACS integration
+
+[ikea-led-obegraensad-Home-Assistant-Integration](https://github.com/HennieLP/ikea-led-obegraensad-Home-Assistant-Integration)
+is a community integration that talks to the HTTP API. Install it through
+[HACS](https://hacs.xyz/) if you do not want to run an MQTT broker.
+
+### REST commands
+
+You can also call the [HTTP API](/reference/http-api) with
+[`rest_command`](https://www.home-assistant.io/integrations/rest_command/). Replace
+`192.168.1.50` with the address of your lamp.
+
+```yaml
+rest_command:
+  obegraensad_brightness:
+    url: "http://192.168.1.50/api/brightness?value={{ value }}"
+    method: patch
+  obegraensad_plugin:
+    url: "http://192.168.1.50/api/plugin?id={{ id }}"
+    method: patch
+  obegraensad_power:
+    url: "http://192.168.1.50/api/power?state={{ state }}"
+    method: patch
+  obegraensad_message:
+    url: "http://192.168.1.50/api/message?text={{ text | urlencode }}&repeat={{ repeat | default(0) }}"
+    method: get
+```
+
+Call them from automations or scripts:
+
+```yaml
+actions:
+  - action: rest_command.obegraensad_brightness
+    data:
+      value: 80
+  - action: rest_command.obegraensad_message
+    data:
+      text: "Dinner is ready"
+      repeat: 1
+```
+
+REST commands do not report state back to Home Assistant. Use MQTT if you want entities that
+reflect the current state of the lamp.

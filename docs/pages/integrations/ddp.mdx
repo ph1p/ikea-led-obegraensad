@@ -1,0 +1,60 @@
+---
+title: DDP
+description: Stream frames to the display with the Distributed Display Protocol.
+---
+
+# DDP
+
+The **DDP** plugin (ID `39`) receives frames with the
+[Distributed Display Protocol](http://www.3waylabs.com/ddp/) over UDP. Tools like
+[WLED](https://kno.wled.ge/), [xLights](https://xlights.org/) and
+[LedFx](https://www.ledfx.app/) can send DDP, and so can your own scripts.
+
+## Activate the plugin
+
+Choose **DDP** in the Web GUI, or call:
+
+```bash
+curl -X PATCH "http://<device-ip>/api/plugin?id=39"
+```
+
+The plugin listens on UDP port `4048` while it is active.
+
+## Packet format
+
+| Bytes | Content |
+| --- | --- |
+| `0`–`9` | DDP header. The firmware skips it and does not check it. |
+| `10`… | RGB triplets, one per pixel, row by row from the top left. |
+
+- Each pixel's brightness is the average of its R, G and B values.
+- Averages of `4` or lower are drawn as off.
+- A packet with exactly one RGB triplet fills the whole display with that brightness.
+- Up to 256 pixels are read. A short packet only updates the first pixels.
+
+A full frame is 10 + 256 × 3 = 778 bytes.
+
+## Example
+
+```python
+import socket
+
+IP = "192.168.1.50"
+
+header = bytes([0x41, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+pixels = bytearray()
+for y in range(16):
+    for x in range(16):
+        value = 255 if (x + y) % 2 == 0 else 0  # checkerboard
+        pixels += bytes([value, value, value])
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.sendto(header + pixels, (IP, 4048))
+```
+
+The repository also has a [command-line tool and a demo](/integrations/python) for DDP.
+
+:::note
+DDP needs the AsyncUDP library, which is part of the ESP32 core. On ESP8266 the plugin does
+nothing.
+:::

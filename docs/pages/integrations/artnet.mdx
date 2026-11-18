@@ -1,0 +1,32 @@
+---
+title: Art-Net
+description: Control the display as a DMX universe over Art-Net.
+---
+
+# Art-Net
+
+The **ArtNet** plugin receives [Art-Net](https://art-net.org.uk/) DMX frames over UDP. Use it with
+lighting software like [QLC+](https://www.qlcplus.org/), Resolume or MadMapper.
+
+## Setup
+
+1. Activate the **ArtNet** plugin in the Web GUI or with
+   [`PATCH /api/plugin`](/reference/http-api#set-the-active-plugin).
+2. Set the universe in the sidebar under **ArtNet Universe**. The default is `1`.
+3. Send Art-Net to the device IP on UDP port `6454`.
+
+## Mapping
+
+- The display uses 256 channels of one universe.
+- Channel 1 is the top left pixel. The channels go row by row.
+- The channel value is the pixel brightness. Values of `4` or lower are drawn as off.
+- Frames for universe `0` are always accepted, in addition to the selected universe.
+
+## Change the universe
+
+The universe is not saved. After a reboot it is `1` again. You can also set it over the WebSocket
+while the plugin is active:
+
+```json
+{ "event": "artnet", "universe": 2 }
+```

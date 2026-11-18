@@ -1,0 +1,95 @@
+---
+title: Hardware
+description: What you need and how to wire a microcontroller to the OBEGRÄNSAD LED panels.
+---
+
+# Hardware
+
+The OBEGRÄNSAD lamp contains four LED panels with 64 LEDs each (16×16 in total) and a small
+controller board. The firmware replaces that controller with an ESP32 or ESP8266 that talks to the
+panels directly.
+
+## What you need
+
+- An IKEA OBEGRÄNSAD LED wall lamp
+- A supported microcontroller board (see the table below)
+- A soldering iron and some thin wire
+- A drill or a flat screwdriver to open the case
+- A USB cable for the first flash
+
+## Supported boards
+
+| Board | PlatformIO environment |
+| --- | --- |
+| ESP32 dev board (default) | `esp32dev` |
+| ESP32-C3 | `esp32c3` |
+| Seeed Xiao ESP32-S3 | `esp32s3` |
+| Wemos D1 mini32 | `ESP32-wemos` |
+| NodeMCU v2 (ESP8266) | `nodemcuv2` |
+| Wemos D1 mini (ESP8266) | `d1_mini` |
+| Wemos D1 mini pro (ESP8266, OTA build) | `d1_mini_pro-ota` |
+
+TTGO LoRa32 and Lolin D32 (Pro) boards also work with the ESP32 pinout.
+
+### ESP8266 limitations
+
+ESP8266 boards work, but prefer an ESP32 if you can choose:
+
+- ESP8266 builds have no `ENABLE_STORAGE`. Configuration, MQTT settings, brightness, brightness
+  schedule, plugin schedule and the startup plugin are kept in RAM only and are lost after a
+  reboot. Change the defaults in `include/constants.h` instead.
+- Wi-Fi credentials come from `include/secrets.h`. There is no Wi-Fi portal.
+- [DDP](/integrations/ddp) does not work.
+- Less memory for plugins and messages.
+
+## Opening the lamp
+
+The back cover is held by rivets. Pry them open carefully with a flat screwdriver or drill them
+out. Inside you find the four LED panels. The lowest panel has the connector with six pins and the
+original controller board.
+
+![The four LED panels inside the lamp, numbered from the bottom](/ikea-led-obegraensad/images/panels.jpg)
+
+Each panel has 64 LEDs in four fields. Only panel 1, the lowest one, matters for the mod.
+
+Remove the original microcontroller from the board, or cut the traces to it, so that it does not
+drive the same lines as your ESP.
+
+![Panel 1: the six input pads at the top, the original controller U1 at the bottom](/ikea-led-obegraensad/images/connector.jpg)
+
+## Wiring
+
+Connect the six panel inputs and the button to the microcontroller. The default pins come from
+`include/constants.h`:
+
+| Panel / lamp | ESP32 | ESP32-C3 | ESP32-S3 (Xiao) | ESP8266 |
+| --- | --- | --- | --- | --- |
+| GND | GND | GND | GND | GND |
+| VCC (5 V) | VIN / 5V | 5V | 5V | VIN |
+| EN | GPIO 26 | GPIO 3 | GPIO 5 | GPIO 16 (D0) |
+| IN (data) | GPIO 27 | GPIO 4 | GPIO 9 | GPIO 13 (D7) |
+| CLK | GPIO 14 | GPIO 5 | GPIO 7 | GPIO 14 (D5) |
+| CLA (latch) | GPIO 12 | GPIO 6 | GPIO 6 | GPIO 0 (D3) |
+| Button | GPIO 16 | GPIO 7 | GPIO 4 | GPIO 2 (D4) |
+
+![Close-up of the input pads: VCC, CLA, CLK, DI (IN), EN, GND](/ikea-led-obegraensad/images/wiring.jpg)
+
+![ESP32 dev board pinout (image by Otto Winter)](/ikea-led-obegraensad/images/board.jpg)
+
+The button's other leg goes to GND. If your pins differ, change `PIN_ENABLE`, `PIN_DATA`,
+`PIN_CLOCK`, `PIN_LATCH` and `PIN_BUTTON` in `include/constants.h` before you build.
+
+:::tip
+An alternative way to wire the original button is described in
+[issue #79](https://github.com/ph1p/ikea-led-obegraensad/issues/79).
+:::
+
+## Power
+
+The lamp's own 5 V supply can power the panels and the ESP. If the display flickers or the ESP
+reboots in a loop, power the matrix and the microcontroller from separate 5 V sources with a common
+ground. See [Troubleshooting](/troubleshooting).
+
+## Next step
+
+Continue with [Flashing](/getting-started/flashing).

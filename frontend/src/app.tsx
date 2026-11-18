@@ -33,7 +33,8 @@ export const App: Component = () => {
       | "artnet"
       | "brightness"
       | "brightness-schedule"
-      | "goldelay",
+      | "goldelay"
+      | "power",
     data?: Record<string, string | number | boolean> | { data: number[] },
   ) =>
     actions.send(
@@ -165,26 +166,38 @@ export const App: Component = () => {
           {store.isActiveScheduler ? "Scheduler running" : (activePlugin()?.name ?? "—")}
         </span>
       </div>
-      <Show when={canConfigure()}>
-        <div class="segmented" role="group" aria-label="View">
-          <button
-            type="button"
-            aria-pressed={activeTab() === "configuration" ? "true" : "false"}
-            onClick={() => setActiveTab("configuration")}
-          >
-            <i class="fa-solid fa-pen mr-1.5 text-xs" />
-            Draw
-          </button>
-          <button
-            type="button"
-            aria-pressed={activeTab() === "preview" ? "true" : "false"}
-            onClick={() => setActiveTab("preview")}
-          >
-            <i class="fa-solid fa-eye mr-1.5 text-xs" />
-            Live
-          </button>
-        </div>
-      </Show>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => wsMessage("power", { power: !store.power })}
+          aria-pressed={store.power ? "true" : "false"}
+          title={store.power ? "Turn display off" : "Turn display on"}
+          class={`btn btn-icon ${store.power ? "" : "btn-accent"}`}
+        >
+          <i class="fa-solid fa-power-off" />
+          <span class="sr-only">{store.power ? "Turn display off" : "Turn display on"}</span>
+        </button>
+        <Show when={canConfigure()}>
+          <div class="segmented" role="group" aria-label="View">
+            <button
+              type="button"
+              aria-pressed={activeTab() === "configuration" ? "true" : "false"}
+              onClick={() => setActiveTab("configuration")}
+            >
+              <i class="fa-solid fa-pen mr-1.5 text-xs" />
+              Draw
+            </button>
+            <button
+              type="button"
+              aria-pressed={activeTab() === "preview" ? "true" : "false"}
+              onClick={() => setActiveTab("preview")}
+            >
+              <i class="fa-solid fa-eye mr-1.5 text-xs" />
+              Live
+            </button>
+          </div>
+        </Show>
+      </div>
     </div>
   );
 

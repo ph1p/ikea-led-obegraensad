@@ -1,0 +1,65 @@
+---
+title: Messages
+description: Scroll text and small graphs across the display.
+---
+
+# Messages
+
+Messages scroll text, and optionally a small bar graph, across the display. They interrupt the
+active plugin, which continues when the message is done.
+
+## How messages are shown
+
+- Messages are queued on the device. Each one is shown once per minute, so the device needs
+  network time (NTP).
+- While messages are queued, a small blinking pixel in the top left corner tells you that more is
+  coming.
+- `repeat` controls how often a message comes back. It is shown once more than the value you set:
+  `repeat=0` shows it once, `repeat=2` three times. `repeat=-1` repeats it until you remove it.
+- A message with an `id` replaces an earlier message with the same `id`. Use this to update a value
+  instead of queueing it again.
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `text` | string | | Text to scroll. |
+| `repeat` | int | `0` | Extra repetitions, `-1` for infinite. |
+| `id` | int | `0` | Identifier for replacing and removing. |
+| `delay` | int | `50` | Scroll delay in ms. Values ≤ 0 become `50`. |
+| `graph` | int[] | | Values for a bar graph shown after the text. |
+| `miny` | int | `0` | Lower bound of the graph. |
+| `maxy` | int | `15` | Upper bound of the graph. Must be ≥ `miny`. Over HTTP, `0` also means `15`. |
+
+## Over HTTP
+
+```bash
+# simple text
+curl "http://<device-ip>/api/message?text=Hello"
+
+# text with a graph, repeated 5 more times, with id 1
+curl "http://<device-ip>/api/message?text=CO2&graph=4,6,8,12,9,7&miny=0&maxy=15&repeat=5&id=1"
+
+# remove message 1
+curl "http://<device-ip>/api/removemessage?id=1"
+```
+
+`graph` is a comma separated list. Invalid values or `maxy` lower than `miny` return
+`422 Unprocessable Entity`.
+
+## Over MQTT
+
+Publish plain text or a JSON object to `<base>/message/set`:
+
+```bash
+mosquitto_pub -h <broker> -t obegraensad/a1b2c3/message/set -m "Hello"
+
+mosquitto_pub -h <broker> -t obegraensad/a1b2c3/message/set \
+  -m '{"text":"Hi","repeat":2,"id":1,"delay":50,"graph":[1,5,9],"miny":0,"maxy":15}'
+
+mosquitto_pub -h <broker> -t obegraensad/a1b2c3/message/remove -m "1"
+```
+
+In Home Assistant, the **Message** text entity sends plain text. See
+[Home Assistant automations](/integrations/home-assistant#washing-machine-finished) for an example
+with a graph.

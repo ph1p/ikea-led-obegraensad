@@ -1,0 +1,105 @@
+---
+title: Plugins
+description: Every built-in plugin and how to switch between them.
+---
+
+# Plugins
+
+A plugin owns the display while it is active. Only one plugin runs at a time. You can switch
+plugins with the button, the [Web GUI](/usage/web-gui), the [HTTP API](/reference/http-api#set-the-active-plugin),
+the [WebSocket](/reference/websocket) or [MQTT](/integrations/mqtt).
+
+## Plugin IDs
+
+IDs are assigned in the order in which the plugins are registered in `src/main.cpp`, starting
+at 1. The table below shows the IDs of the default build.
+
+:::warning
+IDs change when plugins are added, removed or disabled. Scripts and automations should read the
+current list from [`GET /api/info`](/reference/http-api#device-info) or use the plugin name, which
+the MQTT `plugin/set` topic also accepts.
+:::
+
+| ID | Name | Type |
+| --- | --- | --- |
+| 1 | Draw | Interactive canvas |
+| 2 | Breakout | Game (auto-play) |
+| 3 | Snake | Game (auto-play) |
+| 4 | GameOfLife | Simulation |
+| 5 | Stars | Animation |
+| 6 | Lines | Animation |
+| 7 | Circle | Animation |
+| 8 | Rain | Animation |
+| 9 | Matrix Rain | Animation |
+| 10 | Firework | Animation |
+| 11 | Blobs | Animation |
+| 12 | Spiral | Animation |
+| 13 | Wave | Animation |
+| 14 | Checkerboard | Animation |
+| 15 | Radar | Animation |
+| 16 | Bubbles | Animation |
+| 17 | Comet | Animation |
+| 18 | Fireflies | Animation |
+| 19 | Meteor Shower | Animation |
+| 20 | Scanlines | Animation |
+| 21 | Sparkle Field | Animation |
+| 22 | Wave Bars | Animation |
+| 23 | BigPong | Game (auto-play) |
+| 24 | Auto Walker | Animation |
+| 25 | Bouncing Ball | Animation |
+| 26 | Face | Animation |
+| 27 | Falling Sand | Simulation |
+| 28 | Flappy Bird | Game (auto-play) |
+| 29 | Space Invaders | Game (auto-play) |
+| 30 | Spotlight | Animation |
+| 31 | Tetris | Game (auto-play) |
+| 32 | Tron | Game (auto-play) |
+| 33 | Big Clock | Clock |
+| 34 | Clock | Clock |
+| 35 | PongClock | Clock |
+| 36 | Ticking Clock | Clock |
+| 37 | Weather | Network |
+| 38 | Animation | Custom animation |
+| 39 | DDP | Network stream |
+| 40 | ArtNet | Network stream |
+| 41 | SmokeClock | Clock |
+| 42 | FractalClock | Clock |
+
+Plugins 33 to 42 need `ENABLE_SERVER`. Clocks need network time (NTP), and the Weather plugin
+needs internet access.
+
+## Notable plugins
+
+### Clocks
+
+**Clock**, **Big Clock**, **Ticking Clock**, **PongClock**, **SmokeClock** and **FractalClock** show
+the local time. Set your time zone in **Settings → Time**, otherwise the time is off by your UTC
+offset.
+
+### Weather
+
+Shows the temperature and a weather icon from [wttr.in](https://wttr.in/). Set the location in
+**Settings → Weather**.
+
+### Draw
+
+A canvas that you paint from the Web GUI or the WebSocket API. The drawing can be saved to storage.
+
+### Animation
+
+Plays frames that you create in the **Animation Creator** of the Web GUI or upload through the
+[WebSocket](/reference/websocket#animation-plugin).
+
+### DDP and ArtNet
+
+Receive frames from the network. See [DDP](/integrations/ddp) and [Art-Net](/integrations/artnet).
+
+## Startup plugin
+
+The plugin that was active when you saved it as the startup plugin (**persist-plugin** in the
+Web GUI) is activated at boot and on a long button press. Alternatively the
+[plugin schedule](/usage/scheduler) can start on boot.
+
+## Your own plugin
+
+See [Writing a plugin](/development/writing-a-plugin).

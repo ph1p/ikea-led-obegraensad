@@ -1,0 +1,54 @@
+---
+title: Python scripts
+description: DDP command-line tool and the metaballs demo.
+---
+
+# Python scripts
+
+The repository root contains two Python scripts that send [DDP](/integrations/ddp) frames. Activate
+the **DDP** plugin on the device before you run them.
+
+## Setup
+
+The scripts use [Poetry](https://python-poetry.org/docs/#installation). In the repository root:
+
+```bash
+poetry install
+```
+
+Run the scripts with `poetry run python <script>`, or activate the virtual environment first.
+
+## ddp.py
+
+A command-line tool to clear, fill or set single pixels.
+
+```bash
+# turn all pixels off
+poetry run python ddp.py clear --ip 192.168.1.50
+
+# fill the display with brightness 128
+poetry run python ddp.py fill 128 --ip 192.168.1.50
+
+# set single pixels: X Y BRIGHTNESS, repeat -p as needed
+poetry run python ddp.py pixels --ip 192.168.1.50 -p 0 0 255 -p 15 15 128
+```
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `--ip` | `192.168.178.50` | IP address of the device. |
+| `--port` | `4048` | UDP port. |
+| `-v`, `--verbose` | | Verbose logging. |
+| `-d`, `--debug` | | Debug logging. |
+
+The older flags `--clear`, `--fill` and `-p` without a subcommand still work, but are deprecated.
+
+## blobs.py
+
+An animated metaballs demo that streams about 40 frames per second. Set the `IP` constant at the
+top of the file to your device, then run:
+
+```bash
+poetry run python blobs.py
+```
+
+Stop it with `Ctrl+C`.

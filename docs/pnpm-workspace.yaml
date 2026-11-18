@@ -1,0 +1,4 @@
+allowBuilds:
+  esbuild: true
+  es5-ext: false
+  vue-demi: false

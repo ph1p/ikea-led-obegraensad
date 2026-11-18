@@ -1,0 +1,88 @@
+---
+title: OBEGRÄNSAD LED
+description: Open firmware for the IKEA OBEGRÄNSAD LED wall lamp.
+layout: minimal
+---
+
+import { HomePage, Cards, Card } from 'vocs'
+
+<HomePage.Root>
+  <HomePage.Tagline>OBEGRÄNSAD LED</HomePage.Tagline>
+  <HomePage.Description>
+    Replace the controller of the IKEA OBEGRÄNSAD wall lamp with an ESP32 or ESP8266 and get a
+    Wi-Fi connected 16×16 pixel matrix: 40+ plugins, a web interface, a REST and WebSocket API,
+    MQTT with Home Assistant discovery, DDP and Art-Net.
+  </HomePage.Description>
+  <HomePage.Buttons>
+    <HomePage.Button href="/getting-started/hardware" variant="accent">Get started</HomePage.Button>
+    <HomePage.Button href="/integrations/home-assistant">Home Assistant</HomePage.Button>
+    <HomePage.Button href="https://github.com/ph1p/ikea-led-obegraensad">GitHub</HomePage.Button>
+  </HomePage.Buttons>
+</HomePage.Root>
+
+<div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+  <img
+    src="/ikea-led-obegraensad/images/demo.gif"
+    alt="Drawing on the lamp from the Web GUI"
+    width="320"
+    style={{ borderRadius: '12px' }}
+  />
+</div>
+
+## Features
+
+<Cards>
+  <Card
+    icon="cpu"
+    title="ESP32 and ESP8266"
+    description="Runs on ESP32, ESP32-C3, ESP32-S3, NodeMCU, Wemos D1 mini and more. Flash once, update over the air afterwards."
+    to="/getting-started/hardware"
+  />
+  <Card
+    icon="layout-grid"
+    title="40+ plugins"
+    description="Clocks, weather, games, animations, a drawing canvas and generative effects. Switch by button, web, API or MQTT."
+    to="/usage/plugins"
+  />
+  <Card
+    icon="monitor-smartphone"
+    title="Web GUI"
+    description="Draw pixel art, build animations, schedule plugins and change settings from any browser on your network."
+    to="/usage/web-gui"
+  />
+  <Card
+    icon="house"
+    title="Home Assistant"
+    description="MQTT discovery creates a light, plugin select, message text and more. No custom integration required."
+    to="/integrations/home-assistant"
+  />
+  <Card
+    icon="clock"
+    title="Schedules"
+    description="Rotate through plugins on a timer and dim the display automatically at night."
+    to="/usage/scheduler"
+  />
+  <Card
+    icon="message-square-text"
+    title="Messages and graphs"
+    description="Scroll text and small bar graphs across the display from any script or automation."
+    to="/usage/messages"
+  />
+  <Card
+    icon="radio-tower"
+    title="DDP and Art-Net"
+    description="Stream frames from xLights, LedFx, WLED tools or your own scripts in real time."
+    to="/integrations/ddp"
+  />
+  <Card
+    icon="code"
+    title="Open API"
+    description="Every feature is available over HTTP and WebSocket. Write your own plugins in C++."
+    to="/reference/http-api"
+  />
+</Cards>
+
+:::warning
+Opening the lamp voids its warranty, and you work on mains-powered hardware at your own risk.
+Always unplug the lamp before you open it.
+:::

@@ -16,6 +16,9 @@ private:
 
   uint8_t brightness_ = MAX_BRIGHTNESS;
   uint8_t baseBrightness_ = MAX_BRIGHTNESS;
+  // off only blanks the output, plugins keep running and brightness_ keeps the
+  // value the schedule wants, so turning on restores it unchanged
+  volatile bool power_ = true;
   // plugins draw into renderBuffer_. present() turns a changed buffer into one
   // bit plane per PWM tick (shift register order, brightness applied) in the
   // back half of planes_; the timer swaps halves at the start of a PWM cycle,
@@ -66,6 +69,10 @@ public:
   uint8_t getBaseBrightness() const;
   void setBaseBrightness(uint8_t brightness, bool shouldStore = false);
   void setDisplayedBrightness(uint8_t brightness);
+
+  // not persisted, the lamp always boots switched on
+  bool isPowered() const;
+  void setPower(bool on);
 
   void setRenderBuffer(const uint8_t *renderBuffer, bool grays = false);
   uint8_t *getRenderBuffer();

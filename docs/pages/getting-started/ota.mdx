@@ -1,0 +1,63 @@
+---
+title: OTA updates
+description: Update the firmware over Wi-Fi.
+---
+
+# OTA updates
+
+After the first USB flash, you can update the firmware over Wi-Fi with
+[ElegantOTA](https://github.com/ayushsharma82/ElegantOTA).
+
+## From the browser
+
+:::steps
+
+### Build the firmware
+
+```bash
+pio run -e esp32dev
+```
+
+The binary is written to `.pio/build/esp32dev/firmware.bin`. Release builds are also attached to
+each [GitHub release](https://github.com/ph1p/ikea-led-obegraensad/releases).
+
+### Open the update page
+
+Open `http://<device-ip>/update` and log in with `OTA_USERNAME` and `OTA_PASSWORD` from
+`include/secrets.h`.
+
+### Upload the binary
+
+Select `firmware.bin` and start the upload. The display shows **U** while the update runs and
+**R** before the device restarts.
+
+:::
+
+:::warning
+Change the default OTA credentials in `include/secrets.h` before you flash. Anyone on your network
+who knows them can install firmware on the lamp.
+:::
+
+## From PlatformIO
+
+PlatformIO can upload over OTA with the bundled `upload.py` script. Install its dependencies once:
+
+```bash
+pip install requests_toolbelt tqdm
+```
+
+Then add these lines to your environment in `platformio.ini`:
+
+```ini
+extra_scripts = upload.py
+upload_protocol = custom
+custom_upload_url = http://<device-ip>/update
+custom_username = admin
+custom_password = your-ota-password
+```
+
+Run the normal upload command:
+
+```bash
+pio run -e esp32dev -t upload
+```

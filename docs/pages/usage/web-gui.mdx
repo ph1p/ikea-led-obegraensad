@@ -1,0 +1,66 @@
+---
+title: Web GUI
+description: Control the lamp from your browser.
+---
+
+# Web GUI
+
+The firmware serves a web interface on port 80. Open `http://ikea-led.local/` or the device's IP
+address in any browser on the same network. The interface talks to the device over a
+[WebSocket](/reference/websocket) and updates live.
+
+## Pages
+
+| Page | What it does |
+| --- | --- |
+| **Display** | Live preview of the matrix, plugin selection, rotation, brightness, night mode and plugin-specific options. Draw directly on the matrix when the **Draw** plugin is active. |
+| **Animation Creator** | Draw frames, set the frame delay and upload the animation to the **Animation** plugin. |
+| **Scheduler** | Build a [plugin schedule](/usage/scheduler) that rotates through plugins. |
+| **Settings** | Weather location, NTP server, time zone, startup behaviour and [MQTT / Home Assistant](/integrations/home-assistant). |
+| **Firmware Update** | Opens the [OTA update](/getting-started/ota) page at `/update`. |
+
+## Display page
+
+The sidebar on the **Display** page contains:
+
+- **Display Mode**: choose the active plugin. Picking a plugin stops a running schedule.
+- **Rotation**: rotate the image by 0°, 90°, 180° or 270°.
+- **Brightness**: the base brightness from 0 to 255.
+- **Night Mode**: [scheduled brightness](/usage/brightness) for a time window.
+- Plugin options, for example the **ArtNet Universe** or the **Time Step Delay** of Game of Life.
+
+The power button in the header turns the display off and on. The active plugin keeps running in the
+background while the display is dark. See [Power](/usage/brightness#power).
+
+## Drawing
+
+Select the **Draw** plugin to paint on the matrix with the mouse or a finger. You can clear the
+screen, save the drawing to the device's storage and load it again. The saved drawing survives a
+reboot on ESP32.
+
+## Settings page
+
+| Section | Fields |
+| --- | --- |
+| Weather | Location used by the **Weather** plugin, for example `Hamburg`. |
+| Time | NTP server and POSIX time zone. Pick a preset or paste a string from [posix_tz_db](https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv). |
+| Startup | **Start plugin schedule on boot**. |
+| MQTT / Home Assistant | Broker host, port, username, password, base topic and discovery. See [Home Assistant](/integrations/home-assistant). |
+
+Click **Save settings** to apply the changes. NTP and time zone changes apply immediately.
+**Reset to defaults** restores the values from `include/constants.h`.
+
+:::note
+On ESP8266 the settings are lost after a reboot. See [ESP8266 limitations](/getting-started/hardware#esp8266-limitations).
+:::
+
+## Physical button
+
+| Action | Effect |
+| --- | --- |
+| Short press | Next plugin. Stops a running schedule. |
+| Long press (1 s) | Load the plugin that was saved as the startup plugin. |
+| Press while the display is off | Turn the display back on. |
+| Hold for 5 s while plugging in | [Reset Wi-Fi credentials](/getting-started/wifi#resetting-wi-fi-credentials). |
+
+When you switch plugins, the display shows the plugin's ID for a moment.

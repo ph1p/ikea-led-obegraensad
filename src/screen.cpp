@@ -54,6 +54,16 @@ uint8_t Screen_::getCurrentBrightness() const
   return brightness_;
 }
 
+bool Screen_::isPowered() const
+{
+  return power_;
+}
+
+void Screen_::setPower(bool on)
+{
+  power_ = on;
+}
+
 uint8_t Screen_::getBaseBrightness() const
 {
   return baseBrightness_;
@@ -287,7 +297,7 @@ void Screen_::present()
   const bool updating = currentStatus == UPDATE;
   // the update screen is drawn unrotated and without grays
   const uint8_t rotation = updating ? 0 : currentRotation;
-  const uint8_t brightness = brightness_;
+  const uint8_t brightness = power_ ? brightness_ : 0;
   const int16_t key = (updating << 10) | (rotation << 8) | brightness;
 
   if (key == presentedKey_ && memcmp(renderBuffer_, presentedBuffer_, TOTAL_PIXELS) == 0)

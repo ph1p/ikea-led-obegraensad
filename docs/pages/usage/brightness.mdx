@@ -1,0 +1,62 @@
+---
+title: Brightness and power
+description: Base brightness, scheduled night brightness and turning the display off.
+---
+
+# Brightness and power
+
+## Base brightness
+
+The base brightness goes from `0` to `255` and is saved on ESP32. Change it in the Web GUI, with
+[`PATCH /api/brightness?value=`](/reference/http-api#set-brightness), the `brightness` WebSocket
+event or the Home Assistant light.
+
+## Scheduled brightness
+
+Scheduled brightness (**Night Mode** in the Web GUI) replaces the base brightness with a fixed
+value during a daily time window. Outside the window the base brightness applies again.
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `enabled` | `false` | Turns the schedule on. |
+| `startTime` | `22:00` | Start of the window, `HH:MM`, local time. |
+| `endTime` | `07:00` | End of the window, `HH:MM`. Can be earlier than `startTime` to span midnight. |
+| `brightness` | `20` | Brightness inside the window, `0` to `255`. |
+
+`startTime` and `endTime` must differ. The window needs valid NTP time. Before the clock is synced,
+the base brightness is used.
+
+Set it over HTTP:
+
+```bash
+curl -X PUT "http://<device-ip>/api/brightness-schedule" \
+  -H "Content-Type: application/json" \
+  -d '{"enabled":true,"startTime":"22:30","endTime":"06:30","brightness":15}'
+```
+
+`GET /api/info` reports `brightnessSchedule.active` while the window applies, and `brightness`
+shows the brightness that is displayed right now.
+
+:::tip
+Changing the base brightness while the window is active saves the new value, but the display keeps
+the scheduled brightness until the window ends.
+:::
+
+## Power
+
+You can turn the display off without stopping the device. The active plugin keeps running in the
+background, so clocks and streams continue where they are when you turn the display back on.
+
+- Web GUI: the power button in the header
+- HTTP: `PATCH /api/power?state=on|off|toggle`
+- WebSocket: `{"event":"power","power":false}`
+- MQTT: `{"state":"OFF"}` on `<base>/light/set`, or the Home Assistant light
+- Button: a press while the display is off turns it back on
+
+```bash
+curl -X PATCH "http://<device-ip>/api/power?state=toggle"
+```
+
+:::note
+The power state is not saved. After a reboot the display is always on.
+:::

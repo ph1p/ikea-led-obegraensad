@@ -70,6 +70,7 @@
 
 #include "asyncwebserver.h"
 #include "messages.h"
+#include "mqtt.h"
 #include "ota.h"
 #include "screen.h"
 #include "secrets.h"
@@ -210,7 +211,13 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
   switch (pattern)
   {
   case BfButton::SINGLE_PRESS:
-    if (currentStatus != LOADING)
+    // a press only wakes a display that was switched off remotely
+    if (!Screen.isPowered())
+    {
+      Screen.setPower(true);
+      sendInfo();
+    }
+    else if (currentStatus != LOADING)
     {
       Scheduler.clearSchedule();
       pluginManager.activateNextPlugin();
@@ -218,7 +225,12 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
     break;
 
   case BfButton::LONG_PRESS:
-    if (currentStatus != LOADING)
+    if (!Screen.isPowered())
+    {
+      Screen.setPower(true);
+      sendInfo();
+    }
+    else if (currentStatus != LOADING)
     {
       pluginManager.activatePersistedPlugin();
     }
@@ -274,6 +286,9 @@ void baseSetup()
   initOTA(server);
   initWebsocketServer(server);
   initWebServer();
+#endif
+#ifdef ENABLE_MQTT
+  initMqtt();
 #endif
 
   pluginManager.addPlugin(new DrawPlugin());
@@ -465,6 +480,10 @@ void loop()
     lastLiveFrameMillis = currentMillis;
     sendLiveFrame();
   }
+
+#ifdef ENABLE_MQTT
+  mqttLoop();
+#endif
 
   static NonBlockingDelay cleanupTimer;
   if (cleanupTimer.isReady(1000))

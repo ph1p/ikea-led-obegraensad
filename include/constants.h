@@ -49,6 +49,12 @@
 #endif
 
 #ifdef ENABLE_SERVER
+// MQTT client with Home Assistant discovery, the broker is set in the Web GUI
+// (Settings → MQTT / Home Assistant). Remove to save flash and RAM.
+#define ENABLE_MQTT
+#endif
+
+#ifdef ENABLE_SERVER
 // https://github.com/nayarsystems/posix_tz_db/blob/master/zones.json
 #define NTP_SERVER "de.pool.ntp.org"
 #define TZ_INFO "CET-1CEST,M3.5.0,M10.5.0/3"

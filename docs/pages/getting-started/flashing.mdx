@@ -1,0 +1,81 @@
+---
+title: Flashing
+description: Build and upload the firmware with PlatformIO.
+---
+
+# Flashing
+
+The firmware is a [PlatformIO](https://platformio.org/) project. The Web GUI is already compiled
+into `src/webgui.cpp`, so you do not need Node.js to flash the device.
+
+:::steps
+
+### Install the tools
+
+Install [Visual Studio Code](https://code.visualstudio.com/) and the
+[PlatformIO IDE extension](https://platformio.org/install/ide?install=vscode), or install the
+PlatformIO CLI with `pip install platformio`.
+
+### Clone the repository
+
+```bash
+git clone https://github.com/ph1p/ikea-led-obegraensad.git
+cd ikea-led-obegraensad
+```
+
+### Edit `include/secrets.h`
+
+Set your own values:
+
+```cpp
+#pragma once
+
+#define WIFI_HOSTNAME "ikea-led"
+
+// only used on ESP8266, ESP32 boards use the Wi-Fi portal instead
+#define WIFI_SSID "your-network"
+#define WIFI_PASSWORD "your-password"
+
+// credentials for the OTA update page at /update
+#define OTA_USERNAME "admin"
+#define OTA_PASSWORD "choose-a-password"
+```
+
+`WIFI_HOSTNAME` is also the mDNS name, so the device is reachable at `http://ikea-led.local/`.
+
+### Check `include/constants.h`
+
+Adjust the pins if your wiring differs, and set the default weather location, NTP server and time
+zone. These defaults can be changed later in the Web GUI. See
+[Configuration](/reference/configuration).
+
+### Select the environment and upload
+
+Connect the board over USB. In VS Code, open the PlatformIO sidebar, pick your environment (for
+example `esp32dev`) and run **Upload**. On the command line:
+
+```bash
+pio run -e esp32dev -t upload
+pio device monitor -b 115200
+```
+
+:::
+
+The available environments are listed on the [Hardware](/getting-started/hardware#supported-boards)
+page. `esp32dev` is the default.
+
+## Optional features
+
+Features are switched on and off with defines in `include/constants.h`:
+
+| Define | Effect |
+| --- | --- |
+| `ENABLE_SERVER` | Web server, Web GUI, API, network plugins (clock, weather, DDP, Art-Net). |
+| `ENABLE_STORAGE` | Persist brightness, plugin, schedule and settings. Not available on ESP8266. |
+| `ENABLE_MQTT` | MQTT client with Home Assistant discovery. On by default, requires `ENABLE_SERVER`. |
+
+Remove `ENABLE_MQTT` to save flash and RAM if you do not use MQTT.
+
+## Next step
+
+Continue with [Wi-Fi setup](/getting-started/wifi).

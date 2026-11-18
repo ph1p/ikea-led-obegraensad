@@ -1,0 +1,71 @@
+---
+title: Wi-Fi setup
+description: Connect the lamp to your network with the Wi-Fi portal.
+---
+
+# Wi-Fi setup
+
+## ESP32: Wi-Fi portal
+
+ESP32 boards use [WiFiManager](https://github.com/tzapu/WiFiManager). You do not need to put
+credentials in the source code.
+
+:::steps
+
+### Power on the lamp
+
+On the first boot, the device cannot connect to a network and opens its own access point named
+**`IKEA`**.
+
+### Connect to the `IKEA` network
+
+Use your phone or laptop. A captive portal opens. If it does not, open `http://192.168.4.1/`.
+
+### Choose your network
+
+Select your Wi-Fi network, enter the password and save. The device reboots and joins your network.
+
+### Open the Web GUI
+
+Open `http://ikea-led.local/` or the IP address that your router assigned to the device.
+
+:::
+
+The device tries to connect for 10 seconds, up to 10 times. The portal stays open for 180 seconds
+and the device then reboots and tries again.
+
+:::note
+On ESP32, the firmware uses the DNS servers `8.8.8.8` and `8.8.4.4` instead of the ones from your
+router. Change `DNS_OVERRIDE_1` and `DNS_OVERRIDE_2` in `include/constants.h` if you need local DNS.
+:::
+
+## Resetting Wi-Fi credentials
+
+Hold the button while you plug in the lamp, and keep it pressed for 5 seconds
+(`WIFI_RESET_HOLD_MS`). The stored Wi-Fi credentials are deleted and the portal opens again.
+Release the button earlier to cancel. Other settings are kept.
+
+## ESP8266: credentials in `secrets.h`
+
+ESP8266 boards connect with `WIFI_SSID` and `WIFI_PASSWORD` from `include/secrets.h`. To change the
+network, edit the file and flash again.
+
+## Static IP address
+
+By default the device uses DHCP. To use a static address, uncomment the block in
+`include/constants.h` and set your values:
+
+```cpp
+#define IP_ADDRESS "192.168.1.50"
+#define SUBNET "255.255.255.0"
+#define DNS1 "1.1.1.1"
+#define DNS2 "8.8.8.8"
+#define GWY "192.168.1.1"
+```
+
+Define all of them. If `IP_ADDRESS`, `GWY`, `SUBNET` or `DNS1` is missing, the device falls back to
+DHCP.
+
+:::tip
+A DHCP reservation in your router is usually easier and has the same effect.
+:::

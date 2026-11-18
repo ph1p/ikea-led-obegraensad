@@ -1,0 +1,119 @@
+---
+title: WebSocket
+description: Real-time events between the Web GUI and the device.
+---
+
+# WebSocket
+
+The Web GUI talks to the device over a WebSocket at `ws://<device-ip>/ws`. You can use the same
+connection in your own tools, for example to drive the **Draw** plugin or to mirror the display.
+
+Messages from the client are JSON objects with an `event` field. Messages without `event` are
+ignored.
+
+```js
+const ws = new WebSocket('ws://192.168.1.50/ws')
+ws.onopen = () => ws.send(JSON.stringify({ event: 'plugin', plugin: 34 }))
+ws.onmessage = (message) => {
+  if (typeof message.data === 'string') console.log(JSON.parse(message.data))
+}
+```
+
+## Server messages
+
+### info
+
+The device sends an `info` event when a client connects and after every change of plugin,
+brightness, rotation, power or schedule. It has the display fields of
+[`GET /api/info`](/reference/http-api#device-info) (`status`, `plugin`, `rotation`, `power`,
+brightness, schedule and `plugins`). It does not include `rows`, `cols`, `mqttConnected` or the
+system fields like `rssi` and `uptime`. Extra fields:
+
+| Field | Description |
+| --- | --- |
+| `event` | `info` |
+| `data` | Current frame, 256 brightness values. |
+| `persist-plugin` | ID of the plugin that starts after boot. |
+
+### Live frames
+
+Every connected client receives each new frame as a binary message of 256 bytes, one brightness
+value per pixel, row by row. Send `live-preview` with `enabled: false` to stop them.
+
+## Client events
+
+| Event | Fields | Description |
+| --- | --- | --- |
+| `info` | | Request an `info` event. |
+| `plugin` | `plugin`: ID | Activate a plugin. Stops the plugin schedule, the stored schedule is kept. |
+| `persist-plugin` | | Start the active plugin after boot. |
+| `rotate` | `direction`: `left` or `right` | Rotate by 90°. |
+| `brightness` | `brightness`: `0`–`255` | Set the base brightness. |
+| `brightness-schedule` | `enabled`, `startTime`, `endTime`, `brightness` | Configure [scheduled brightness](/usage/brightness#scheduled-brightness). |
+| `power` | `power`: `true` or `false` | Turn the display on or off. Without `power` it toggles. |
+| `live-preview` | `enabled`: `true` or `false` | Turn the binary live frames on or off for this client. |
+
+```json
+{ "event": "rotate", "direction": "right" }
+{ "event": "power", "power": false }
+```
+
+:::warning
+`plugin` clears the stored plugin schedule. Use the [HTTP API](/reference/http-api#plugin-schedule)
+or MQTT if you only want to stop it.
+:::
+
+## Plugin events
+
+These events are handled by the active plugin. They are ignored when another plugin runs.
+
+### Draw plugin
+
+| Event | Fields | Description |
+| --- | --- | --- |
+| `led` | `index`: `0`–`255`, `status`: `0` or `1` | Set one pixel. |
+| `screen` | `data`: 256 values | Draw a full frame. |
+| `clear` | | Clear the display. |
+| `persist` | | Save the drawing. |
+| `load` | | Load the saved drawing. |
+
+```json
+{ "event": "led", "index": 17, "status": 1 }
+```
+
+### Animation plugin
+
+The **Animation** plugin plays frames from the Animation Creator. Each frame is an array of 32
+integers. Each integer holds 8 pixels as bits, so a frame covers all 256 pixels. Up to 128 frames
+are kept in memory.
+
+| Event | Fields | Description |
+| --- | --- | --- |
+| `upload` | `screens`: count, `data`: array of frames, `frameDelay` | Replace all frames. |
+| `resetFrames` | `frameDelay` | Delete all frames. |
+| `addFrame` | `data`: one frame | Append a frame. |
+| `configAnimation` | `frameDelay` | Change the delay between frames. |
+| `animationStatus` | | The device answers with `animationStatus`, `screens` and `frameDelay`. |
+
+`frameDelay` is in milliseconds and is limited to `10`–`10000`.
+
+### Game of Life plugin
+
+```json
+{ "event": "goldelay", "delay": 200 }
+```
+
+Sets the delay between generations in milliseconds.
+
+### ArtNet plugin
+
+```json
+{ "event": "artnet", "universe": 2 }
+```
+
+Sets the Art-Net universe. See [Art-Net](/integrations/artnet).
+
+## Binary input
+
+Binary messages are not supported as input. To push full frames, use the Draw `screen` event or
+[DDP](/integrations/ddp).

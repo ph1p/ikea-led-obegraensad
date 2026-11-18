@@ -1,0 +1,96 @@
+---
+title: Frontend
+description: Develop the Web GUI and embed it into the firmware.
+---
+
+# Frontend
+
+The Web GUI lives in `frontend/`. It is built with [SolidJS](https://www.solidjs.com/),
+[Vite](https://vite.dev/) and [Tailwind CSS](https://tailwindcss.com/). The build is compressed and
+embedded into the firmware as `src/webgui.cpp`, so the device serves it without a file system.
+
+## Requirements
+
+- Node.js (current LTS)
+- [pnpm](https://pnpm.io/). The version is pinned in `frontend/package.json` (`packageManager`), so
+  `corepack enable` picks the right one.
+
+## Develop against a device
+
+:::steps
+
+### Install dependencies
+
+```bash
+cd frontend
+pnpm install
+```
+
+### Point the dev server at your device
+
+Set the device address in `frontend/.env`:
+
+```bash
+VITE_BASE_URL=http://192.168.1.50/
+VITE_WS_URL=ws://192.168.1.50/
+```
+
+### Start the dev server
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Changes reload in the browser, and all API
+and WebSocket calls go to the device.
+
+:::
+
+:::note
+Do not commit your device address in `frontend/.env`.
+:::
+
+## Build into the firmware
+
+```bash
+cd frontend
+pnpm build
+```
+
+`pnpm build` runs `vite build` and then `compress.mjs`. The script gzips the output and writes it
+as a byte array to `src/webgui.cpp`. Flash the firmware afterwards to see the new GUI on the
+device. Commit `src/webgui.cpp` together with your frontend changes.
+
+### Build with Docker
+
+If you do not want to install Node.js, build with Docker from the repository root:
+
+```bash
+docker compose run node
+```
+
+The container installs the dependencies and runs `pnpm run build`.
+
+## Scripts
+
+| Script | Description |
+| --- | --- |
+| `pnpm dev` | Dev server on port 3000. |
+| `pnpm build` | Production build and `src/webgui.cpp`. |
+| `pnpm serve` | Preview the production build. |
+| `pnpm lint` | Lint with oxlint. `pnpm lint:fix` fixes what it can. |
+| `pnpm format` | Format with oxfmt. `pnpm format:check` only checks. |
+
+## Structure
+
+| Path | Content |
+| --- | --- |
+| `src/app.tsx` | Display page with the LED matrix and sidebar. |
+| `src/creator.tsx`, `src/creator/` | Animation Creator. |
+| `src/scheduler.tsx` | Plugin scheduler. |
+| `src/settings.tsx` | Settings page. |
+| `src/contexts/store.tsx` | WebSocket connection and shared state. |
+| `src/types.ts` | Types of the device messages. |
+
+The GUI uses the [WebSocket](/reference/websocket) for live state and the
+[HTTP API](/reference/http-api) for the scheduler and settings.

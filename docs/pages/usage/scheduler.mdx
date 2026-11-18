@@ -1,0 +1,55 @@
+---
+title: Plugin scheduler
+description: Rotate through plugins on a timer.
+---
+
+# Plugin scheduler
+
+The scheduler switches between plugins in a loop. Each entry has a plugin and a duration in seconds.
+When the last entry ends, the schedule starts again with the first.
+
+## In the Web GUI
+
+Open **Scheduler**, add entries, choose a plugin and a duration for each, and save. The schedule
+starts immediately. Use the controls on the page to stop, start or clear it.
+
+To start the schedule automatically after a reboot, enable **Settings → Startup → Start plugin
+schedule on boot**.
+
+## What stops the schedule
+
+Any manual plugin change stops a running schedule:
+
+- a short press on the button,
+- choosing a plugin in the Web GUI,
+- the `plugin` WebSocket event or `PATCH /api/plugin`,
+- the MQTT `plugin/set` and `next/set` topics.
+
+Start it again with `GET /api/schedule/start`, the **Plugin schedule** switch in Home Assistant, or
+the Web GUI.
+
+## Over HTTP
+
+Set a schedule. The form field `schedule` contains a JSON array:
+
+```bash
+curl -X POST "http://<device-ip>/api/schedule" \
+  --data-urlencode 'schedule=[{"pluginId":34,"duration":60},{"pluginId":37,"duration":30},{"pluginId":8,"duration":20}]'
+```
+
+Control it:
+
+```bash
+curl "http://<device-ip>/api/schedule/stop"
+curl "http://<device-ip>/api/schedule/start"
+curl "http://<device-ip>/api/schedule/clear"
+```
+
+The current schedule and its state are part of [`GET /api/info`](/reference/http-api#device-info)
+as `schedule` and `scheduleActive`. See the [HTTP API](/reference/http-api#plugin-schedule) for all
+responses.
+
+:::note
+The schedule and its running state are restored after a reboot, except on
+[ESP8266](/getting-started/hardware#esp8266-limitations).
+:::

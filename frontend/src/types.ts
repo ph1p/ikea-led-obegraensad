@@ -34,6 +34,7 @@ export interface StoreActions {
   setArtnetUniverse: (artnetUniverse: number) => void;
   setGOLDelay: (GOLDelay: number) => void;
   setLivePreview: (enabled: boolean) => void;
+  setPower: (power: boolean) => void;
   send: (message: string | ArrayBuffer) => void;
 }
 
@@ -54,6 +55,7 @@ export interface Store {
   connectionStatus?: string;
   schedule: ScheduleItem[];
   livePreview: boolean;
+  power: boolean;
 }
 
 export interface IToastContext {

@@ -1,0 +1,114 @@
+---
+title: MQTT
+description: MQTT topics, payloads and connection behaviour.
+---
+
+# MQTT
+
+The lamp can connect to any MQTT broker. You can use it with
+[Home Assistant](/integrations/home-assistant), Node-RED, openHAB or your own scripts. This page
+describes the topics. For Home Assistant setup, see the [Home Assistant](/integrations/home-assistant)
+page.
+
+## Enable MQTT
+
+MQTT needs the `ENABLE_MQTT` [build option](/getting-started/flashing), which is on by default.
+The client is [PubSubClient](https://github.com/knolleary/pubsubclient).
+
+Configure the broker in the Web GUI under **Settings → MQTT / Home Assistant**, or with
+`POST /api/config`. The fields and their limits are listed under
+[Configuration → MQTT](/reference/configuration#mqtt). TLS is not supported.
+
+`<base>` is the base topic (`mqttTopic`). The default is `obegraensad/<mac>`, where `<mac>` is the
+last 6 hex digits of the MAC address, for example `obegraensad/a1b2c3`.
+
+## Connection
+
+- Client ID: `obegraensad-<mac>`
+- Last will: `offline` on `<base>/status`, retained, QoS 1. After connecting, the lamp publishes
+  `online` there.
+- If the connection fails, the lamp retries after 5 seconds, then doubles the wait up to
+  60 seconds.
+- Saving the MQTT settings reconnects immediately with the new values.
+
+## State
+
+`<base>/state` is retained JSON. The lamp publishes it when something changes and at least every
+60 seconds.
+
+```json
+{
+  "state": "ON",
+  "brightness": 255,
+  "color_mode": "brightness",
+  "plugin": "Clock",
+  "pluginId": 34,
+  "schedule": "OFF",
+  "nightSchedule": "ON",
+  "rotation": "0",
+  "rssi": -58,
+  "ip": "192.168.1.50"
+}
+```
+
+| Key | Description |
+| --- | --- |
+| `state` | `ON` or `OFF`, the display power. |
+| `brightness` | Base brightness, `0`–`255`. While [scheduled brightness](/usage/brightness#scheduled-brightness) is active, the display can show a different value. |
+| `color_mode` | Always `brightness`, used by the Home Assistant light. |
+| `plugin`, `pluginId` | Active plugin. |
+| `schedule` | `ON` while the plugin schedule runs. |
+| `nightSchedule` | `ON` if scheduled brightness is enabled. |
+| `rotation` | `0`, `90`, `180` or `270`. |
+| `rssi` | Wi-Fi signal in dBm. |
+| `ip` | IP address. |
+
+## Commands
+
+| Topic | Payload | Effect |
+| --- | --- | --- |
+| `<base>/light/set` | `{"state":"ON","brightness":120}`, or `ON` / `OFF` | Power and brightness. Both keys are optional. `brightness` `0` turns the display off. |
+| `<base>/plugin/set` | Plugin name or ID, for example `Clock` or `34` | Activate a plugin. Names are case-insensitive. Stops a running schedule. The stored schedule is kept. |
+| `<base>/next/set` | anything | Next plugin. Stops a running schedule. The stored schedule is kept. |
+| `<base>/schedule/set` | `ON` / `OFF` | Start or stop the plugin schedule. `ON` needs a stored schedule. |
+| `<base>/night/set` | `ON` / `OFF` | Enable or disable scheduled brightness. |
+| `<base>/rotation/set` | `0`, `90`, `180`, `270` | Rotate the display. |
+| `<base>/message/set` | Text or JSON | Show a [message](/usage/messages#over-mqtt). |
+| `<base>/message/remove` | Message ID | Remove a message. |
+
+Examples with `mosquitto_pub`:
+
+```bash
+B=obegraensad/a1b2c3
+mosquitto_pub -h <broker> -t $B/light/set -m '{"state":"ON","brightness":120}'
+mosquitto_pub -h <broker> -t $B/plugin/set -m 'Weather'
+mosquitto_pub -h <broker> -t $B/next/set -m ''
+mosquitto_pub -h <broker> -t $B/rotation/set -m '180'
+mosquitto_pub -h <broker> -t $B/message/set -m 'Hello from MQTT'
+```
+
+Payloads up to about 2 KB are accepted. Unknown topics and invalid payloads are ignored. Invalid
+payloads are logged on the serial console.
+
+## Home Assistant discovery
+
+When `mqttDiscovery` is on, the lamp publishes retained configuration messages to
+
+```text
+<prefix>/<component>/obegraensad_<mac>/<object>/config
+```
+
+`<object>` is the object ID from the [entity table](/integrations/home-assistant#entities), for
+example `homeassistant/light/obegraensad_a1b2c3/display/config`.
+
+The lamp subscribes to `<prefix>/status` and publishes the configuration again when Home Assistant
+sends `online`. When you disable discovery or change the base topic or prefix, the lamp clears its
+old configuration topics, and Home Assistant removes the entities.
+
+See [Home Assistant](/integrations/home-assistant) for setup and examples.
+
+## Security
+
+MQTT runs without TLS. Use a broker on your local network and give the lamp its own user with
+access to its topics only. The password is never returned by the API. `GET /api/config` only shows
+`mqttPasswordSet`.
