@@ -53,7 +53,8 @@ void sendInfo()
   }
 
   jsonDocument["status"] = currentStatus;
-  jsonDocument["plugin"] = pluginManager.getActivePlugin()->getId();
+  Plugin *activePlugin = pluginManager.getActivePlugin();
+  jsonDocument["plugin"] = activePlugin ? activePlugin->getId() : -1;
   jsonDocument["persist-plugin"] = pluginManager.getPersistedPluginId();
   jsonDocument["event"] = "info";
   jsonDocument["rotation"] = Screen.currentRotation;
@@ -64,7 +65,7 @@ void sendInfo()
   jsonDocument["scheduleActive"] = Scheduler.isActive;
 
   JsonArray scheduleArray = jsonDocument["schedule"].to<JsonArray>();
-  for (const auto &item : Scheduler.schedule)
+  for (const auto &item : Scheduler.getSchedule())
   {
     JsonObject scheduleItem = scheduleArray.add<JsonObject>();
     scheduleItem["pluginId"] = item.pluginId;
@@ -184,11 +185,7 @@ void onWsEvent(AsyncWebSocket *server,
             return;
           }
 
-          Plugin *activePlugin = pluginManager.getActivePlugin();
-          if (activePlugin)
-          {
-            activePlugin->websocketHook(wsRequest);
-          }
+          pluginManager.dispatchWebsocketHook(wsRequest);
 
           const char *event = wsRequest["event"];
 
@@ -197,8 +194,9 @@ void onWsEvent(AsyncWebSocket *server,
             int pluginId = wsRequest["plugin"];
 
             Scheduler.clearSchedule();
+            // no sendInfo() here: on ESP32 the switch is only queued, so it
+            // would broadcast the old plugin; the switch itself sends info
             pluginManager.setActivePluginById(pluginId);
-            sendInfo();
           }
           else if (!strcmp(event, "persist-plugin"))
           {
