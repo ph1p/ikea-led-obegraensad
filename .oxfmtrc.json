@@ -11,5 +11,15 @@
   "arrowParens": "always",
   "bracketSameLine": false,
   "bracketSpacing": true,
-  "ignorePatterns": [".claude/**", "dist/**", "pnpm-lock.yaml"]
+  "ignorePatterns": [
+    "**/.claude/**",
+    "**/dist/**",
+    "**/pnpm-lock.yaml",
+    "lib/**",
+    "**/*.md",
+    "**/*.mdx",
+    "**/*.toml",
+    ".pre-commit-config.yaml",
+    ".clang-format"
+  ]
 }

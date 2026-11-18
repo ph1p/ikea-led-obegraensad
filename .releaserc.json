@@ -1,0 +1,18 @@
+{
+  "branches": ["main"],
+  "tagFormat": "v${version}",
+  "plugins": [
+    ["@semantic-release/commit-analyzer", { "preset": "conventionalcommits" }],
+    ["@semantic-release/release-notes-generator", { "preset": "conventionalcommits" }],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [{ "path": "builds/*.bin" }],
+        "releaseBodyTemplate": "<%= nextRelease.notes %>\n\n## Installation\n\nFlash the binary for your board. See [Flashing](https://ph1p.github.io/ikea-led-obegraensad/getting-started/flashing) and [OTA updates](https://ph1p.github.io/ikea-led-obegraensad/getting-started/ota).\n\n## Default configuration\n\n- **Hostname:** ikea-led\n- **OTA username:** admin\n- **OTA password:** ikea-led-wall\n- **Wi-Fi SSID:** WifiForIkeaLamp (ESP8266 only)\n- **Wi-Fi password:** WifiPasswordForIkeaLamp (ESP8266 only)\n\nESP32 boards open an access point if they cannot connect to Wi-Fi.\n",
+        "successComment": false,
+        "failComment": false,
+        "releasedLabels": false
+      }
+    ]
+  ]
+}

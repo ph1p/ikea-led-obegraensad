@@ -1,0 +1,18 @@
+{
+  "name": "ikea-led-obegraensad",
+  "private": true,
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "conventional-changelog-conventionalcommits": "^10.4.1",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
+    "semantic-release": "^26.0.1"
+  },
+  "packageManager": "pnpm@12.21.0"
+}

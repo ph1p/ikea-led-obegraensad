@@ -24,6 +24,21 @@ updates:
           - "minor"
           - "patch"
 
+  # Root tooling: oxlint, oxfmt, semantic-release (pnpm)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 3
+    groups:
+      tooling:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
   # Python tooling (pyproject.toml / poetry.lock)
   - package-ecosystem: "pip"
     directory: "/"

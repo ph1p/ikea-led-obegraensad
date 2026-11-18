@@ -6,11 +6,7 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build && node compress.mjs",
-    "serve": "vite preview",
-    "format": "oxfmt",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "format:check": "oxfmt --check"
+    "serve": "vite preview"
   },
   "dependencies": {
     "@radix-ui/react-separator": "^1.2.0",
@@ -31,8 +27,6 @@
     "@types/node": "^26.6.6",
     "@types/offscreencanvas": "^2019.7.3",
     "autoprefixer": "^10.6.2",
-    "oxfmt": "^0.79.0",
-    "oxlint": "^1.94.0",
     "postcss": "^8.5.33",
     "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",

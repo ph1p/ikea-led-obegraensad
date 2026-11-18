@@ -2,7 +2,6 @@
   "name": "obegraensad-docs",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.21.0",
   "scripts": {
     "dev": "vocs dev",
     "build": "vocs build",
@@ -14,5 +13,6 @@
     "vite": "^8.3.8",
     "vocs": "2.13.0",
     "waku": "1.0.0-rc.5"
-  }
+  },
+  "packageManager": "pnpm@12.21.0"
 }

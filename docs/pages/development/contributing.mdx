@@ -33,7 +33,16 @@ pre-commit install
 ```
 
 The hooks run clang-format for C and C++, ruff for Python, and checks for YAML, TOML and
-whitespace. For the frontend, run `pnpm lint` and `pnpm format` in `frontend/`.
+whitespace.
+
+JavaScript, TypeScript, JSON and YAML are linted with oxlint and formatted with oxfmt from the
+repository root:
+
+```bash
+pnpm install
+pnpm lint          # pnpm lint:fix fixes what it can
+pnpm format        # pnpm format:check only checks
+```
 
 ## Documentation
 

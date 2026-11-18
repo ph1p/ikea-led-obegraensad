@@ -19,5 +19,5 @@
     "unicorn/no-new-array": "off",
     "unicorn/no-useless-spread": "off"
   },
-  "ignorePatterns": ["dist/**"]
+  "ignorePatterns": ["**/dist/**", "lib/**"]
 }
