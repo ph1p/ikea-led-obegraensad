@@ -14,23 +14,23 @@
     "@solid-primitives/event-listener": "^3.0.0",
     "@solid-primitives/intersection-observer": "^3.0.0",
     "@solid-primitives/websocket": "^2.0.0",
-    "@solidjs/web": "^2.0.3",
+    "@solidjs/web": "^2.0.4",
     "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/vite": "^4.3.5",
-    "solid-js": "^2.0.3",
+    "solid-js": "^2.0.4",
     "tailwind-merge": "^3.7.1",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@gfx/zopfli": "^1.0.15",
     "@solidjs/vite-plugin": "^3.0.1",
-    "@types/node": "^26.6.6",
+    "@types/node": "^26.6.11",
     "@types/offscreencanvas": "^2019.7.3",
     "autoprefixer": "^10.7.0",
-    "postcss": "^8.5.33",
+    "postcss": "^8.5.34",
     "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
-    "vite": "^8.3.8",
+    "vite": "^8.4.0",
     "vite-plugin-singlefile": "^2.3.4"
   },
   "packageManager": "pnpm@12.23.0"
