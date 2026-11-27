@@ -10,7 +10,7 @@
   "dependencies": {
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "vite": "^8.3.8",
+    "vite": "^8.4.0",
     "vocs": "2.14.1",
     "waku": "1.0.0-rc.5"
   },
